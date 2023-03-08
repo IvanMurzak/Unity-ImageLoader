@@ -37,12 +37,24 @@ namespace Extensions.Unity.ImageLoader
             return diskTaskFactory.StartNew(() => LoadDisk(url));
         }
 
+        /// <summary>
+        /// Check if the image is cached on disk
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns true if image is cached on disk</returns>
         public static bool DiskCacheExists(string url) => File.Exists(DiskCachePath(url));
+        /// <summary>
+        /// Clear Disk cache for all urls
+        /// </summary>
         public static void ClearDiskCache()
         {
             if (Directory.Exists(settings.diskSaveLocation))
                 Directory.Delete(settings.diskSaveLocation, true);
         }
+        /// <summary>
+        /// Clear Disk cache for the given url
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
         public static void ClearDiskCache(string url)
         {
             var diskPath = DiskCachePath(url);

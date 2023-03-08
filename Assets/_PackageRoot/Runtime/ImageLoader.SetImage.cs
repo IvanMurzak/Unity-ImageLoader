@@ -7,6 +7,11 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
+        /// <summary>
+        /// Load image from URL and set it to the Image component
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns async task</returns>
         public static async UniTask SetImage(string url, Image image)
         {
             try
@@ -25,17 +30,22 @@ namespace Extensions.Unity.ImageLoader
                     }
                     catch (Exception e)
                     {
-                        if (settings.debugMode <= DebugMode.Exception)
+                        if (settings.debugLevel <= DebugLevel.Exception)
                             Debug.LogException(e); 
                     }
                 });
             }
             catch (Exception e) 
             { 
-                if (settings.debugMode <= DebugMode.Exception)
+                if (settings.debugLevel <= DebugLevel.Exception)
                     Debug.LogException(e); 
             }
         }
+        /// <summary>
+        /// Load image from URL and set it to the Image components
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns async task</returns>
         public static async UniTask SetImage(string url, params Image[] images)
         {
             if (images == null)
@@ -55,7 +65,7 @@ namespace Extensions.Unity.ImageLoader
                     }
                     catch (Exception e) 
                     {
-                        if (settings.debugMode <= DebugMode.Exception)
+                        if (settings.debugLevel <= DebugLevel.Exception)
                             Debug.LogException(e); 
                     }
                 }

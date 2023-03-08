@@ -6,7 +6,7 @@ namespace Extensions.Unity.ImageLoader
     }
     public partial class Settings
     {
-        public DebugMode debugMode = DebugMode.Error;
+        public DebugLevel debugLevel = DebugLevel.Error;
         public bool useMemoryCache = true;
 #if UNITY_WEBGL 
         public bool useDiskCache = false; // default value for WebGL = false
@@ -16,7 +16,7 @@ namespace Extensions.Unity.ImageLoader
         public string diskSaveLocation { get; set; } = UnityEngine.Application.persistentDataPath + "/imageCache";
     }
 
-    public enum DebugMode
+    public enum DebugLevel
     {
         Log         = 0,
         Warning     = 1,
