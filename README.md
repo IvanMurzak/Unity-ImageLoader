@@ -33,7 +33,7 @@ public class ImageLoaderSample : MonoBehaviour
         // Loading sprite from web, cached for quick load next time
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
-        // same loading with auto set to image
+        // Same loading with auto set to image
         await ImageLoader.SetImage(imageURL, image);
     }
 }
@@ -53,7 +53,7 @@ public class ImageLoaderSample : MonoBehaviour
 
     void Start()
     {
-        // same loading with auto set to image
+        // Loading with auto set to image
         ImageLoader.SetImage(imageURL, image1, image2).Forget();
     }
 }
@@ -108,6 +108,7 @@ ImageLoader.ClearDiskCache(url);
 
 - [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
 - Open command line in Unity project folder
+- Run the command
 
 ``` CLI
 openupm add extensions.unity.imageloader
