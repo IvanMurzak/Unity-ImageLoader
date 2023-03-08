@@ -1,0 +1,16 @@
+{
+    "name": "Extensions.Unity.ImageLoader",
+    "rootNamespace": "Extensions.Unity.ImageLoader",
+    "references": [
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,19 @@
+{
+    "name": "Extensions.Unity.ImageLoader.Editor.Tests",
+    "rootNamespace": "Extensions.Unity.ImageLoader.Editor.Tests",
+    "references": [
+        "Extensions.Unity.ImageLoader",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
