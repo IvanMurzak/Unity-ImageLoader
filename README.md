@@ -28,7 +28,7 @@ public class ImageLoaderSample : MonoBehaviour
     [SerializeField] string imageURL;
     [SerializeField] Image image;
 
-    void Start()
+    async void Start()
     {
         // Loading sprite from web, cached for quick load next time
         image.sprite = await ImageLoader.LoadSprite(imageURL);
