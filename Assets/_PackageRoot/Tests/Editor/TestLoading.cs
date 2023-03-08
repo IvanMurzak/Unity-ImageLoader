@@ -19,12 +19,14 @@ namespace Extensions.Unity.ImageLoader.Tests
         public async UniTask LoadSprite(string url)
         {
             var sprite = await ImageLoader.LoadSprite(url);
-            Assert.AreNotEqual(sprite, null);
+            Assert.IsNotNull(sprite);
         }
 
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in ImageURLs) 
                 yield return LoadSprite(imageURL).ToCoroutine();
@@ -32,6 +34,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = false;
+            ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in ImageURLs) 
                 yield return LoadSprite(imageURL).ToCoroutine();
@@ -39,6 +43,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in ImageURLs) 
                 yield return LoadSprite(imageURL).ToCoroutine();
@@ -46,6 +52,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadSpritesNoCache()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = false;
+            ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in ImageURLs) 
                 yield return LoadSprite(imageURL).ToCoroutine();

@@ -1,5 +1,3 @@
-using System;
-using UnityEngine;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
@@ -19,12 +17,13 @@ namespace Extensions.Unity.ImageLoader.Tests
         public async UniTask LoadSprite(string url)
         {
             var sprite = await ImageLoader.LoadSprite(url);
-            Assert.AreNotEqual(sprite, null);
+            Assert.IsNotNull(sprite);
         }
 
-        [UnityTest] public IEnumerator DiskCache()
+        [UnityTest] public IEnumerator DiskCacheEnable()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = true;
 
             foreach (var imageURL in ImageURLs)
             {
@@ -32,9 +31,21 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCache()
+        [UnityTest] public IEnumerator DiskCacheDisable()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = false;
+
+            foreach (var imageURL in ImageURLs)
+            {
+                yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
+            }
+        }
+        [UnityTest] public IEnumerator MemoryCacheEnabled()
+        {
+            ImageLoader.ClearCache();
+            ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in ImageURLs)
             {
@@ -42,9 +53,47 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
             }
         }
+        [UnityTest] public IEnumerator MemoryCacheDisabled()
+        {
+            ImageLoader.ClearCache();
+            ImageLoader.settings.useMemoryCache = false;
+
+            foreach (var imageURL in ImageURLs)
+            {
+                yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
+            }
+        }
         [UnityTest] public IEnumerator ClearDiskCache()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = true;
+
+            foreach (var imageURL in ImageURLs)
+            {
+                yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                ImageLoader.ClearDiskCache(imageURL);
+                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
+            }
+        }
+        [UnityTest] public IEnumerator ClearMemoryCache()
+        {
+            ImageLoader.ClearCache();
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var imageURL in ImageURLs)
+            {
+                yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                ImageLoader.ClearMemoryCache(imageURL);
+                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
+            }
+        }
+        [UnityTest] public IEnumerator ClearDiskCacheAll()
+        {
+            ImageLoader.ClearCache();
+            ImageLoader.settings.useDiskCache = true;
 
             foreach (var imageURL in ImageURLs)
             {
@@ -55,9 +104,10 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
                 Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
         }
-        [UnityTest] public IEnumerator ClearMemoryCache()
+        [UnityTest] public IEnumerator ClearMemoryCacheAll()
         {
             ImageLoader.ClearCache();
+            ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in ImageURLs)
             {

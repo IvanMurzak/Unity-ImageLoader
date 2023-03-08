@@ -43,5 +43,11 @@ namespace Extensions.Unity.ImageLoader
             if (Directory.Exists(settings.diskSaveLocation))
                 Directory.Delete(settings.diskSaveLocation, true);
         }
+        public static void ClearDiskCache(string url)
+        {
+            var diskPath = DiskCachePath(url);
+            if (!File.Exists(diskPath)) return;
+            File.Delete(diskPath);
+        }
     }
 }
