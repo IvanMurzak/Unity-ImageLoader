@@ -1,0 +1,1 @@
+xcopy .\README.md .\Assets\_PackageRoot\README.md /y
