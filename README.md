@@ -28,7 +28,7 @@ public class ImageLoaderSample : MonoBehaviour
     [SerializeField] string imageURL;
     [SerializeField] Image image;
 
-    private async void Start()
+    void Start()
     {
         // Loading sprite from web, cached for quick load next time
         image.sprite = await ImageLoader.LoadSprite(imageURL);
@@ -51,13 +51,10 @@ public class ImageLoaderSample : MonoBehaviour
     [SerializeField] Image image1;
     [SerializeField] Image image2;
 
-    private async void Start()
+    void Start()
     {
-        // Loading sprite from web, cached for quick load next time
-        image.sprite = await ImageLoader.LoadSprite(imageURL);
-
         // same loading with auto set to image
-        await ImageLoader.SetImage(imageURL, image1, image2);
+        ImageLoader.SetImage(imageURL, image1, image2).Forget();
     }
 }
 ```
