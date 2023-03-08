@@ -16,23 +16,26 @@ namespace Extensions.Unity.ImageLoader
         private static Dictionary<string, Sprite> loadedSpritesCache = new Dictionary<string, Sprite>();
 
         private static readonly TaskFactory factory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(1));
-        private static string CachePath(string url) => $"{SaveLocation}/I_{url.GetHashCode()}";
+        private static string DiskCachePath(string url) => $"{SaveLocation}/I_{url.GetHashCode()}";
         private static void Save(string url, byte[] data)
         {
             Directory.CreateDirectory(SaveLocation);
-            Directory.CreateDirectory(Path.GetDirectoryName(CachePath(url)));
-            File.WriteAllBytes(CachePath(url), data);
+            Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
+            File.WriteAllBytes(DiskCachePath(url), data);
         }
         private static byte[] Load(string url)
         {
             Directory.CreateDirectory(SaveLocation);
-            Directory.CreateDirectory(Path.GetDirectoryName(CachePath(url)));
-            if (!File.Exists(CachePath(url))) return null;
-            return File.ReadAllBytes(CachePath(url));
+            Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
+            if (!DiskCacheExists(url)) return null;
+            return File.ReadAllBytes(DiskCachePath(url));
         }
         private static Task SaveAsync(string url, byte[] data) => factory.StartNew(() => Save(url, data));
         private static Task<byte[]> LoadAsync(string url) => factory.StartNew(() => Load(url));
 #endregion
+
+        public static bool MemoryCacheExists(string url) => loadedSpritesCache.ContainsKey(url);
+        public static bool DiskCacheExists(string url) => File.Exists(DiskCachePath(url));
 
         public static string SaveLocation { get; set; } = Application.persistentDataPath + "/imageCache";
 
@@ -42,26 +45,32 @@ namespace Extensions.Unity.ImageLoader
             var temp = SaveLocation + SaveLocation;
         }
 
-        public static void ClearCacheOnDisk() => Directory.Delete(SaveLocation, true);
-        public static void ClearCacheInMemory()
+        public static void ClearDiskCache()
+        {
+            if (Directory.Exists(SaveLocation))
+                Directory.Delete(SaveLocation, true);
+        }
+        public static void ClearMemoryCache()
         {
             foreach (var cache in loadedSpritesCache.Values)
             {
                 if (cache?.texture != null)
-                    UnityEngine.Object.Destroy(cache.texture);
+                    UnityEngine.Object.DestroyImmediate(cache.texture);
             }
             loadedSpritesCache.Clear();
         }
-        public static void ClearCacheAll()
+        public static void ClearCache()
         {
-            ClearCacheOnDisk();
-            ClearCacheInMemory();
+            ClearMemoryCache();
+            ClearDiskCache();
         }
 
-        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f) => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
-        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f) => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), pivot, pixelDensity);
+        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f) 
+            => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
+        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f) 
+            => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), pivot, pixelDensity);
 
-        public static async UniTask<Sprite> LoadSprite(string url, bool ignoreImageNotFoundError = false)
+        public static async UniTask<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -80,7 +89,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 Debug.Log($"ImageLoader: Waiting while another task is loading the sprite url={url}");
                 await UniTask.WaitWhile(() => loadingInProcess.Contains(url));
-                return await LoadSprite(url, ignoreImageNotFoundError);
+                return await LoadSprite(url, textureFormat, ignoreImageNotFoundError);
             }
             loadingInProcess.Add(url);
 
@@ -91,7 +100,7 @@ namespace Extensions.Unity.ImageLoader
                 if (cachedImage != null && cachedImage.Length > 0)
                 {
                     await UniTask.SwitchToMainThread();
-                    var texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
+                    var texture = new Texture2D(2, 2, textureFormat, true);
                     if (texture.LoadImage(cachedImage))
                     {
                         var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
@@ -112,7 +121,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             UnityWebRequest request = null;
-            bool finished = false;
+            var finished = false;
             UniTask.Post(async () =>
             {
                 if (ignoreImageNotFoundError)

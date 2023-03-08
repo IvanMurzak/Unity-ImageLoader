@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestLoading
+    public class TestCache
     {
         static readonly string[] ImageURLs =
         {
@@ -22,33 +22,51 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreNotEqual(sprite, null);
         }
 
-        [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
+        [UnityTest] public IEnumerator DiskCache()
         {
             ImageLoader.ClearCache();
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
+            {
                 yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+            }
         }
-        [UnityTest] public IEnumerator LoadSpritesCacheMemory()
+        [UnityTest] public IEnumerator MemoryCache()
         {
             ImageLoader.ClearCache();
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
+            {
                 yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+            }
         }
-        [UnityTest] public IEnumerator LoadSpritesCacheDisk()
+        [UnityTest] public IEnumerator ClearDiskCache()
         {
             ImageLoader.ClearCache();
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
+            {
                 yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+            }
+            ImageLoader.ClearDiskCache();
+            foreach (var imageURL in ImageURLs)
+                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
         }
-        [UnityTest] public IEnumerator LoadSpritesNoCache()
+        [UnityTest] public IEnumerator ClearMemoryCache()
         {
             ImageLoader.ClearCache();
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
+            {
                 yield return LoadSprite(imageURL).ToCoroutine();
+                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+            }
+            ImageLoader.ClearMemoryCache();
+            foreach (var imageURL in ImageURLs)
+                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
         }
     }
 }
