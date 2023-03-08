@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
@@ -9,31 +7,8 @@ using Cysharp.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public static class ImageLoader
+    public static partial class ImageLoader
     {
-#region Private
-        private static HashSet<string> loadingInProcess = new HashSet<string>();
-        private static Dictionary<string, Sprite> loadedSpritesCache = new Dictionary<string, Sprite>();
-
-        private static readonly TaskFactory factory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(1));
-        private static string DiskCachePath(string url) => $"{SaveLocation}/I_{url.GetHashCode()}";
-        private static void Save(string url, byte[] data)
-        {
-            Directory.CreateDirectory(SaveLocation);
-            Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
-            File.WriteAllBytes(DiskCachePath(url), data);
-        }
-        private static byte[] Load(string url)
-        {
-            Directory.CreateDirectory(SaveLocation);
-            Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
-            if (!DiskCacheExists(url)) return null;
-            return File.ReadAllBytes(DiskCachePath(url));
-        }
-        private static Task SaveAsync(string url, byte[] data) => factory.StartNew(() => Save(url, data));
-        private static Task<byte[]> LoadAsync(string url) => factory.StartNew(() => Load(url));
-#endregion
-
         public static bool MemoryCacheExists(string url) => loadedSpritesCache.ContainsKey(url);
         public static bool DiskCacheExists(string url) => File.Exists(DiskCachePath(url));
 
@@ -74,7 +49,8 @@ namespace Extensions.Unity.ImageLoader
         {
             if (string.IsNullOrEmpty(url))
             {
-                Debug.LogError($"ImageLoader: Empty url. Image could not be loaded!");
+                if (settings.debugMode <= DebugMode.Error)
+                    Debug.LogError($"ImageLoader: Empty url. Image could not be loaded!");
                 return null;
             }
 
@@ -87,13 +63,15 @@ namespace Extensions.Unity.ImageLoader
 
             if (loadingInProcess.Contains(url))
             {
-                Debug.Log($"ImageLoader: Waiting while another task is loading the sprite url={url}");
+                if (settings.debugMode <= DebugMode.Log)
+                    Debug.Log($"ImageLoader: Waiting while another task is loading the sprite url={url}");
                 await UniTask.WaitWhile(() => loadingInProcess.Contains(url));
                 return await LoadSprite(url, textureFormat, ignoreImageNotFoundError);
             }
             loadingInProcess.Add(url);
 
-            Debug.Log($"ImageLoader: Loading new Sprite into memory url={url}");
+            if (settings.debugMode <= DebugMode.Log)
+                Debug.Log($"ImageLoader: Loading new Sprite into memory url={url}");
             try
             {
                 var cachedImage = await LoadAsync(url);
@@ -113,7 +91,8 @@ namespace Extensions.Unity.ImageLoader
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                if (settings.debugMode <= DebugMode.Exception)
+                    Debug.LogException(e);
             }
             finally
             {
@@ -131,7 +110,11 @@ namespace Extensions.Unity.ImageLoader
                         request = UnityWebRequestTexture.GetTexture(url);
                         await request.SendWebRequest();
                     }
-                    catch (Exception e) { Debug.LogException(e); }
+                    catch (Exception e) 
+                    { 
+                        if (settings.debugMode <= DebugMode.Exception)
+                            Debug.LogException(e); 
+                    }
                     finally
                     {
                         finished = true;
@@ -155,7 +138,8 @@ namespace Extensions.Unity.ImageLoader
 
             if (request.isNetworkError || request.isHttpError)
             {
-                Debug.LogError($"ImageLoader: {request.error}: url={url}");
+                if (settings.debugMode <= DebugMode.Error)
+                    Debug.LogError($"ImageLoader: {request.error}: url={url}");
                 return null;
             }
             else
@@ -183,10 +167,18 @@ namespace Extensions.Unity.ImageLoader
                     {
                         image.sprite = sprite;
                     }
-                    catch (Exception e) { Debug.LogException(e); }
+                    catch (Exception e)
+                    {
+                        if (settings.debugMode <= DebugMode.Exception)
+                            Debug.LogException(e); 
+                    }
                 });
             }
-            catch (Exception e) { Debug.LogException(e); }
+            catch (Exception e) 
+            { 
+                if (settings.debugMode <= DebugMode.Exception)
+                    Debug.LogException(e); 
+            }
         }
         public static async UniTask SetImage(string url, params Image[] images)
         {
@@ -205,7 +197,11 @@ namespace Extensions.Unity.ImageLoader
 
                         images[i].sprite = sprite;
                     }
-                    catch (Exception e) { Debug.LogException(e); }
+                    catch (Exception e) 
+                    {
+                        if (settings.debugMode <= DebugMode.Exception)
+                            Debug.LogException(e); 
+                    }
                 }
             });
         }
