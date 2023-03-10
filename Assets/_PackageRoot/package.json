@@ -2,7 +2,7 @@
     "name": "extensions.unity.imageloader",
     "displayName": "Image Loader",
     "author": { "name": "Ivan Murzak", "url": "https://github.com/IvanMurzak" },
-    "version": "2.0.0",
+    "version": "2.0.1",
     "unity": "2019.2",
     "description": "Asynchronous image loading from remote or local destination.",
 	"dependencies": {
