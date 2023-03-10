@@ -132,34 +132,20 @@ namespace Extensions.Unity.ImageLoader
             var finished = false;
             UniTask.Post(async () =>
             {
-                if (ignoreImageNotFoundError)
+                try
                 {
-                    try
-                    {
-                        request = UnityWebRequestTexture.GetTexture(url);
-                        await request.SendWebRequest();
-                    }
-                    catch (Exception e) 
-                    {
+                    request = UnityWebRequestTexture.GetTexture(url);
+                    await request.SendWebRequest();
+                }
+                catch (Exception e) 
+                {
+                    if (!ignoreImageNotFoundError)
                         if (settings.debugLevel <= DebugLevel.Exception)
                             Debug.LogException(e);
-                    }
-                    finally
-                    {
-                        finished = true;
-                    }
                 }
-                else
+                finally
                 {
-                    try
-                    {
-                        request = UnityWebRequestTexture.GetTexture(url);
-                        await request.SendWebRequest();
-                    }
-                    finally
-                    {
-                        finished = true;
-                    }
+                    finished = true;
                 }
             });
             await UniTask.WaitUntil(() => finished);
