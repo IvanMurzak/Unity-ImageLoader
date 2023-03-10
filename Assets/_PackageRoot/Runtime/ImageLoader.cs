@@ -9,7 +9,7 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        internal static HashSet<string> loadingInProcess = new HashSet<string>();
+        private static HashSet<string> loadingInProcess = new HashSet<string>();
         private static void AddLoading(string url) => loadingInProcess.Add(url);
         private static void RemoveLoading(string url) => loadingInProcess.Remove(url);
 
