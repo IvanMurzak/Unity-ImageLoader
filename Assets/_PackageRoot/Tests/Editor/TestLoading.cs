@@ -1,5 +1,3 @@
-using System;
-using UnityEngine;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
@@ -24,7 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
         {
-            ImageLoader.ClearCache();
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -33,7 +31,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
         {
-            ImageLoader.ClearCache();
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -42,7 +40,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
         {
-            ImageLoader.ClearCache();
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
@@ -51,7 +49,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesNoCache()
         {
-            ImageLoader.ClearCache();
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 

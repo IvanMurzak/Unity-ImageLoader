@@ -43,23 +43,42 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns true if image is cached on disk</returns>
         public static bool DiskCacheExists(string url) => File.Exists(DiskCachePath(url));
+
+        /// <summary>
+        /// Check if the image is cached on disk
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns true if image is cached on disk</returns>
+        public static Task<bool> DiskCacheExistsAsync(string url)
+        {
+            var path = DiskCachePath(url);
+            return diskTaskFactory.StartNew(() => File.Exists(path));
+        }
+
         /// <summary>
         /// Clear Disk cache for all urls
         /// </summary>
-        public static void ClearDiskCache()
+        public static Task ClearDiskCache()
         {
-            if (Directory.Exists(settings.diskSaveLocation))
-                Directory.Delete(settings.diskSaveLocation, true);
+            return diskTaskFactory.StartNew(() =>
+            {
+                if (Directory.Exists(settings.diskSaveLocation))
+                    Directory.Delete(settings.diskSaveLocation, true);
+            });
         }
+
         /// <summary>
         /// Clear Disk cache for the given url
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        public static void ClearDiskCache(string url)
+        public static Task ClearDiskCache(string url)
         {
             var diskPath = DiskCachePath(url);
-            if (!File.Exists(diskPath)) return;
-            File.Delete(diskPath);
+            return diskTaskFactory.StartNew(() =>
+            {
+                if (!File.Exists(diskPath)) return;
+                File.Delete(diskPath);
+            });
         }
     }
 }

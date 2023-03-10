@@ -21,12 +21,13 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <param name="sprite">sprite which should be saved</param>
-        public static void SaveToMemoryCache(string url, Sprite sprite)
+        /// <param name="replace">replace existed cached sprite if any</param>
+        public static void SaveToMemoryCache(string url, Sprite sprite, bool replace = false)
         {
             if (!settings.useMemoryCache) return;
-            if (memorySpriteCache.ContainsKey(url))
+            if (!replace && memorySpriteCache.ContainsKey(url))
             {
-                if (settings.debugLevel <= DebugLevel.Error)
+                if (settings.debugLevel <= DebugLevel.Warning)
                     Debug.LogError($"[ImageLoader] Memory cache already contains key: {url}");
                 return;
             }

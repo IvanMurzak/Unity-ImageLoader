@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -12,6 +13,9 @@ namespace Extensions.Unity.ImageLoader
         private static void AddLoading(string url) => loadingInProcess.Add(url);
         private static void RemoveLoading(string url) => loadingInProcess.Remove(url);
 
+        /// <summary>
+        /// Initialization of static variables, should be called from main thread at project start
+        /// </summary>
         public static void Init()
         {
             // need get SaveLocation variable in runtime from thread to setup the default static value into it
@@ -23,13 +27,14 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <returns>Returns true if the url is loading right now</returns>
         public static bool IsLoading(string url) => loadingInProcess.Contains(url);
+
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls
         /// </summary>
-        public static void ClearCache()
+        public static Task ClearCache()
         {
             ClearMemoryCache();
-            ClearDiskCache();
+            return ClearDiskCache();
         }
 
         /// <summary>
@@ -40,6 +45,7 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns sprite</returns>
         public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f) 
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
+
         /// <summary>
         /// Converts Texture2D to Sprite
         /// </summary>
@@ -59,6 +65,7 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns sprite asynchronously </returns>
         public static UniTask<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
             => LoadSprite(url, Vector2.one * 0.5f, textureFormat, ignoreImageNotFoundError);
+
         /// <summary>
         /// Load image from web or local path and return it as Sprite
         /// </summary>
@@ -105,7 +112,7 @@ namespace Extensions.Unity.ImageLoader
                     {
                         var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot);
                         if (sprite != null)
-                            SaveToMemoryCache(url, sprite);
+                            SaveToMemoryCache(url, sprite, replace: true);
 
                         return sprite;
                     }
@@ -133,9 +140,9 @@ namespace Extensions.Unity.ImageLoader
                         await request.SendWebRequest();
                     }
                     catch (Exception e) 
-                    { 
+                    {
                         if (settings.debugLevel <= DebugLevel.Exception)
-                            Debug.LogException(e); 
+                            Debug.LogException(e);
                     }
                     finally
                     {
@@ -168,7 +175,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 await SaveDiskAsync(url, request.downloadHandler.data);
                 var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
-                SaveToMemoryCache(url, sprite);
+                SaveToMemoryCache(url, sprite, replace: true);
                 return sprite;
             }
         }
