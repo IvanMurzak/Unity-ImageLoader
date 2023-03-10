@@ -85,6 +85,18 @@ ImageLoader.SaveToMemoryCache(url, sprite);
 ImageLoader.LoadFromMemoryCache(url);
 ```
 
+## Does Cache contain image
+
+``` C#
+// Check if any cache contains specific image
+ImageLoader.CacheContains(url);
+
+// Check if Memory cache contains specific image
+ImageLoader.MemoryCacheContains(url);
+
+// Check if Memory cache contains specific image
+ImageLoader.DiskCacheContains(url);
+```
 
 ## Clear Cache
 

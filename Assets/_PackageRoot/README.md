@@ -9,6 +9,7 @@ Async image loader with two caching layers for Unity.
 - ✔️ Async loading from **Web** or **Local** `ImageLoader.LoadSprite(imageURL);`
 - ✔️ **Memory** and **Disk** caching - tries to load from memory first, then from disk
 - ✔️ Dedicated thread for disk operations
+- ✔️ Avoids loading same image multiple times simultaneously, task waits for completion the first and just returns loaded image if at least one cache layer activated
 - ✔️ Auto set to Image `ImageLoader.SetImage(imageURL, image);`
 - ✔️ Auto set to SpriteRenderer `ImageLoader.SetSprite(imageURL, spriteRenderer);`
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
@@ -28,12 +29,12 @@ public class ImageLoaderSample : MonoBehaviour
     [SerializeField] string imageURL;
     [SerializeField] Image image;
 
-    private async void Start()
+    async void Start()
     {
         // Loading sprite from web, cached for quick load next time
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
-        // same loading with auto set to image
+        // Same loading with auto set to image
         await ImageLoader.SetImage(imageURL, image);
     }
 }
@@ -51,13 +52,10 @@ public class ImageLoaderSample : MonoBehaviour
     [SerializeField] Image image1;
     [SerializeField] Image image2;
 
-    private async void Start()
+    void Start()
     {
-        // Loading sprite from web, cached for quick load next time
-        image.sprite = await ImageLoader.LoadSprite(imageURL);
-
-        // same loading with auto set to image
-        await ImageLoader.SetImage(imageURL, image1, image2);
+        // Loading with auto set to image
+        ImageLoader.SetImage(imageURL, image1, image2).Forget();
     }
 }
 ```
@@ -87,6 +85,18 @@ ImageLoader.SaveToMemoryCache(url, sprite);
 ImageLoader.LoadFromMemoryCache(url);
 ```
 
+## Does Cache contain image
+
+``` C#
+// Check if any cache contains specific image
+ImageLoader.CacheContains(url);
+
+// Check if Memory cache contains specific image
+ImageLoader.MemoryCacheContains(url);
+
+// Check if Memory cache contains specific image
+ImageLoader.DiskCacheContains(url);
+```
 
 ## Clear Cache
 
@@ -111,6 +121,7 @@ ImageLoader.ClearDiskCache(url);
 
 - [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
 - Open command line in Unity project folder
+- Run the command
 
 ``` CLI
 openupm add extensions.unity.imageloader
