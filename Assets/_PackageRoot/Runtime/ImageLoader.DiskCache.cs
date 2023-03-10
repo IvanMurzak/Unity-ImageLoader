@@ -19,7 +19,7 @@ namespace Extensions.Unity.ImageLoader
             if (!settings.useDiskCache) return null;
             Directory.CreateDirectory(settings.diskSaveLocation);
             Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
-            if (!DiskCacheExists(url)) return null;
+            if (!DiskCacheContains(url)) return null;
             return File.ReadAllBytes(DiskCachePath(url));
         }
         private static Task SaveDiskAsync(string url, byte[] data)
@@ -42,7 +42,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns true if image is cached on disk</returns>
-        public static bool DiskCacheExists(string url) => File.Exists(DiskCachePath(url));
+        public static bool DiskCacheContains(string url) => File.Exists(DiskCachePath(url));
 
         /// <summary>
         /// Check if the image is cached on disk

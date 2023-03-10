@@ -29,9 +29,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator LoadingFromDiskCache()
@@ -43,9 +43,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator DiskCacheEnable()
@@ -56,7 +56,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator DiskCacheDisable()
@@ -67,7 +67,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator MemoryCacheEnabled()
@@ -78,7 +78,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator MemoryCacheDisabled()
@@ -89,7 +89,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator ClearDiskCache()
@@ -100,9 +100,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
                 yield return ImageLoader.ClearDiskCache().AsUniTask().ToCoroutine();
-                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator ClearMemoryCache()
@@ -113,9 +113,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
                 ImageLoader.ClearMemoryCache(imageURL);
-                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
         [UnityTest] public IEnumerator ClearDiskCacheAll()
@@ -126,11 +126,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
             yield return ImageLoader.ClearDiskCache().AsUniTask().ToCoroutine();
             foreach (var imageURL in ImageURLs)
-                Assert.IsFalse(ImageLoader.DiskCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
         }
         [UnityTest] public IEnumerator ClearMemoryCacheAll()
         {
@@ -140,11 +140,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in ImageURLs)
             {
                 yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
             ImageLoader.ClearMemoryCache();
             foreach (var imageURL in ImageURLs)
-                Assert.IsFalse(ImageLoader.MemoryCacheExists(imageURL));
+                Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
         }
     }
 }

@@ -38,6 +38,13 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
+        /// Clear cache from Memory and Disk layers for all urls
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns sprite</returns>
+        public static bool CacheContains(string url) => MemoryCacheContains(url) || DiskCacheContains(url);
+
+        /// <summary>
         /// Converts Texture2D to Sprite
         /// </summary>
         /// <param name="texture">Texture for creation Sprite</param>
@@ -83,7 +90,7 @@ namespace Extensions.Unity.ImageLoader
                 return null;
             }
 
-            if (MemoryCacheExists(url))
+            if (MemoryCacheContains(url))
             {
                 var sprite = LoadFromMemoryCache(url);
                 if (sprite != null)

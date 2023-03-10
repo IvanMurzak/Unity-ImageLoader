@@ -12,7 +12,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns true if Sprite exists in Memory cache</returns>
-        public static bool MemoryCacheExists(string url)
+        public static bool MemoryCacheContains(string url)
         {
             return memorySpriteCache.ContainsKey(url);
         }
