@@ -10,7 +10,7 @@ Async image loader with two caching layers for Unity.
 - ✔️ **Memory** and **Disk** caching - tries to load from memory first, then from disk
 - ✔️ Dedicated thread for disk operations
 - ✔️ Avoids loading same image multiple times simultaneously, task waits for completion the first and just returns loaded image if at least one cache layer activated
-- ✔️ Auto set to Image `ImageLoader.SetImage(imageURL, image);`
+- ✔️ Auto set to Image `ImageLoader.SetSprite(imageURL, image);`
 - ✔️ Auto set to SpriteRenderer `ImageLoader.SetSprite(imageURL, spriteRenderer);`
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
 
@@ -35,7 +35,7 @@ public class ImageLoaderSample : MonoBehaviour
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
         // Same loading with auto set to image
-        await ImageLoader.SetImage(imageURL, image);
+        await ImageLoader.SetSprite(imageURL, image);
     }
 }
 ```
@@ -55,7 +55,7 @@ public class ImageLoaderSample : MonoBehaviour
     void Start()
     {
         // Loading with auto set to image
-        ImageLoader.SetImage(imageURL, image1, image2).Forget();
+        ImageLoader.SetSprite(imageURL, image1, image2).Forget();
     }
 }
 ```
