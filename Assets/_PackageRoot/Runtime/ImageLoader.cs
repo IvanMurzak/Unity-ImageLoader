@@ -104,6 +104,7 @@ namespace Extensions.Unity.ImageLoader
                 await UniTask.WaitWhile(() => IsLoading(url));
                 return await LoadSprite(url, textureFormat, ignoreImageNotFoundError);
             }
+
             AddLoading(url);
 
             if (settings.debugLevel <= DebugLevel.Log)
@@ -121,6 +122,7 @@ namespace Extensions.Unity.ImageLoader
                         if (sprite != null)
                             SaveToMemoryCache(url, sprite, replace: true);
 
+                        RemoveLoading(url);
                         return sprite;
                     }
                 }
@@ -129,10 +131,6 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (settings.debugLevel <= DebugLevel.Exception)
                     Debug.LogException(e);
-            }
-            finally
-            {
-                RemoveLoading(url);
             }
 
             UnityWebRequest request = null;
@@ -156,6 +154,7 @@ namespace Extensions.Unity.ImageLoader
                 }
             });
             await UniTask.WaitUntil(() => finished);
+
             RemoveLoading(url);
 
             if (request.isNetworkError || request.isHttpError)
