@@ -38,17 +38,17 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// Check if the image is cached on disk
+        /// Check if the image is cached at Disk
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns true if image is cached on disk</returns>
+        /// <returns>Returns true if image is cached at Disk</returns>
         public static bool DiskCacheContains(string url) => File.Exists(DiskCachePath(url));
 
         /// <summary>
-        /// Check if the image is cached on disk
+        /// Check if the image is cached at Disk
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns true if image is cached on disk</returns>
+        /// <returns>Returns true if image is cached at Disk</returns>
         public static Task<bool> DiskCacheExistsAsync(string url)
         {
             var path = DiskCachePath(url);

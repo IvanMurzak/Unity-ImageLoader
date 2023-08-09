@@ -8,7 +8,7 @@ namespace Extensions.Unity.ImageLoader
         internal static Dictionary<string, Sprite> memorySpriteCache = new Dictionary<string, Sprite>();
 
         /// <summary>
-        /// Check if the Memory cache contains sprite for the given url
+        /// Check the Memory cache contains sprite for the given url
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns true if Sprite exists in Memory cache</returns>

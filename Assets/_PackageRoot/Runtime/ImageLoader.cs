@@ -38,10 +38,10 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// Clear cache from Memory and Disk layers for all urls
+        /// Checks cache at Memory and at Disk by the url
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns sprite</returns>
+        /// <returns>Returns true if cache exists</returns>
         public static bool CacheContains(string url) => MemoryCacheContains(url) || DiskCacheContains(url);
 
         /// <summary>
