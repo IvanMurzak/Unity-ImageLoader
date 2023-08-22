@@ -16,7 +16,7 @@ Async image loader with two caching layers for Unity.
 
 # Usage
 
-In main thread somewhere at start of the project need to call `ImageLoader.Init();` once to initialize static properties in right thread. It is required to make in main thread. Then you can use `ImageLoader` from any thread and any time.
+In the main thread somewhere at the start of the project need to call `ImageLoader.Init();` once to initialize static properties in the right thread. It is required to make in the main thread. Then you can use `ImageLoader` from any thread and at any time.
 
 ## Sample - Loading Sprite, set to Image
 
@@ -62,7 +62,7 @@ public class ImageLoaderSample : MonoBehaviour
 
 # Cache
 
-Cache system based on the two layers. First layer is **memory cache**, second is **disk cache**. Each layer could be enabled or disabled. Could be used without caching at all. By default both layers are enabled.
+Cache system based on the two layers. The first layer is **memory cache**, second is **disk cache**. Each layer could be enabled or disabled. Could be used without caching at all. By default both layers are enabled.
 
 ## Setup Cache
 
