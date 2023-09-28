@@ -10,8 +10,8 @@ namespace Extensions.Unity.ImageLoader
         private static void ClearMemoryCacheOnEnterPlayMode()
         {
             // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
-            // Sprites created with Sprite.Create gets destroyed when exiting and entering play mode, even if the domain does not get reloaded.
-            // So we need to clear the sprite cache, as otherwise the cache will be filled with keys pointing at destroyed Sprites.
+            // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
+            // filled with destroyed sprites when the user reenters play mode.
             memorySpriteCache.Clear();
         }
 #endif
