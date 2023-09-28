@@ -5,6 +5,8 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
+        internal static Dictionary<string, Sprite> memorySpriteCache = new Dictionary<string, Sprite>();
+
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnEnterPlayMode]
         private static void ClearMemoryCacheOnEnterPlayMode()
@@ -15,8 +17,6 @@ namespace Extensions.Unity.ImageLoader
             memorySpriteCache.Clear();
         }
 #endif
-
-        internal static Dictionary<string, Sprite> memorySpriteCache = new Dictionary<string, Sprite>();
 
         /// <summary>
         /// Check the Memory cache contains sprite for the given url
