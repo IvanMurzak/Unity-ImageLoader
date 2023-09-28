@@ -157,10 +157,20 @@ namespace Extensions.Unity.ImageLoader
 
             RemoveLoading(url);
 
-            if (request.isNetworkError || request.isHttpError)
+#if UNITY_2020_1_OR_NEWER
+            var isError = request.result != UnityWebRequest.Result.Success;
+#else
+            var isError = request.isNetworkError || request.isHttpError;
+#endif
+
+            if (isError)
             {
                 if (settings.debugLevel <= DebugLevel.Error)
+#if UNITY_2020_1_OR_NEWER
+                    Debug.LogError($"[ImageLoader] {request.result} {request.error}: url={url}");
+#else
                     Debug.LogError($"[ImageLoader] {request.error}: url={url}");
+#endif
                 return null;
             }
             else
