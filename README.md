@@ -119,6 +119,10 @@ ImageLoader.ClearDiskCache(url);
 
 # Installation
 
+- Install via git URL
+Requires a version of unity that supports path query parameters for git packages. You can add `https://github.com/IvanMurzak/Unity-ImageLoader.git?path=Assets/_PackageRoot` to Package Manager
+- or add `"extensions.unity.imageloader": "https://github.com/IvanMurzak/Unity-ImageLoader.git?path=Assets/_PackageRoot"` to Packages/manifest.json.
+- If you want to set a target version, then you can specify a version according to the release tags. For example `https://github.com/IvanMurzak/Unity-ImageLoader.git?path=Assets/_PackageRoot#2.0.4`
 - [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
 - Open command line in Unity project folder
 - Run the command
