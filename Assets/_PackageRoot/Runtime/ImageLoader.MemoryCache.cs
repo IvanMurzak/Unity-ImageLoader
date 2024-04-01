@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        internal static Dictionary<string, Sprite> memorySpriteCache = new Dictionary<string, Sprite>();
+        internal static ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnEnterPlayMode]
@@ -60,11 +61,11 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache(string url)
         {
-            var cache = memorySpriteCache.GetValueOrDefault(url);
-            if (cache?.texture != null)
-                UnityEngine.Object.DestroyImmediate(cache.texture);
-
-            memorySpriteCache.Remove(url);
+            if (memorySpriteCache.Remove(url, out var cache))
+            {
+                if (cache?.texture != null)
+                    UnityEngine.Object.DestroyImmediate(cache.texture);
+            }
         }
         /// <summary>
         /// Clear Memory cache for all urls
