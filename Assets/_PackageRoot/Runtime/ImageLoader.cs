@@ -71,7 +71,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
         public static UniTask<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
-            => LoadSprite(url, Vector2.one * 0.5f, textureFormat, ignoreImageNotFoundError);
+            => LoadSprite(url, new Vector2(0.5f, 0.5f), textureFormat, ignoreImageNotFoundError);
 
         /// <summary>
         /// Load image from web or local path and return it as Sprite
@@ -118,7 +118,7 @@ namespace Extensions.Unity.ImageLoader
                     var texture = new Texture2D(2, 2, textureFormat, true);
                     if (texture.LoadImage(cachedImage))
                     {
-                        var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot);
+                        var sprite = ToSprite(texture, pivot);
                         if (sprite != null)
                             SaveToMemoryCache(url, sprite, replace: true);
 
