@@ -40,7 +40,7 @@ namespace Extensions.Unity.ImageLoader
                         return;
                     try
                     {
-                        spriteRenderer.sprite = sprite;
+                        spriteRenderer.sprite = sprite.Value;
                     }
                     catch (Exception e)
                     {
@@ -120,7 +120,7 @@ namespace Extensions.Unity.ImageLoader
                         if (spriteRenderers[i] == null || GameObject.Equals(spriteRenderers[i].gameObject, null))
                             continue;
 
-                        spriteRenderers[i].sprite = sprite;
+                        spriteRenderers[i].sprite = sprite.Value;
                     }
                     catch (Exception e) 
                     {

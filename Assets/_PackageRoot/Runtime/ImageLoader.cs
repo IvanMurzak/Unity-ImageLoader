@@ -70,7 +70,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static UniTask<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static UniTask<Reference<Sprite>> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
             => LoadSprite(url, new Vector2(0.5f, 0.5f), textureFormat, ignoreImageNotFoundError);
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static async UniTask<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static async UniTask<Reference<Sprite>> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -94,7 +94,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 var sprite = LoadFromMemoryCache(url);
                 if (sprite != null)
-                    return sprite;
+                    return new Reference<Sprite>(url, sprite);
             }
 
             if (IsLoading(url))
@@ -123,7 +123,7 @@ namespace Extensions.Unity.ImageLoader
                             SaveToMemoryCache(url, sprite, replace: true);
 
                         RemoveLoading(url);
-                        return sprite;
+                        return new Reference<Sprite>(url, sprite);
                     }
                 }
             }
@@ -178,7 +178,7 @@ namespace Extensions.Unity.ImageLoader
                 await SaveDiskAsync(url, request.downloadHandler.data);
                 var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
                 SaveToMemoryCache(url, sprite, replace: true);
-                return sprite;
+                return new Reference<Sprite>(url, sprite);
             }
         }
     }

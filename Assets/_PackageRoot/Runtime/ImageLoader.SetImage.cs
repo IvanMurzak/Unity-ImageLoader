@@ -41,7 +41,7 @@ namespace Extensions.Unity.ImageLoader
                         return;
                     try
                     {
-                        image.sprite = sprite;
+                        image.sprite = sprite.Value;
                     }
                     catch (Exception e)
                     {
@@ -121,7 +121,7 @@ namespace Extensions.Unity.ImageLoader
                         if (images[i] == null || images[i].IsDestroyed() || GameObject.Equals(images[i].gameObject, null))
                             continue;
 
-                        images[i].sprite = sprite;
+                        images[i].sprite = sprite.Value;
                     }
                     catch (Exception e) 
                     {

@@ -4,22 +4,37 @@ using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public class Reference : IDisposable
+    public class Reference<T> : IDisposable
     {
         private static Dictionary<string, int> referenceCounters = new Dictionary<string, int>();
 
-        private string url;
-        private bool disposed;
-        
-        public Sprite Sprite { get; internal set; }
+        /// <summary>
+        /// True: Keep the texture in memory, you are responsible to release the memory.
+        /// False: Release memory automatically when the Reference.Dispose executed.
+        /// </summary>
+        public bool Keep { get; set; }
+        public string Url { get; }
+        public T Value { get; }
 
-        internal Reference(string url)
+        private bool disposed;
+
+        internal Reference(string url, T value)
         {
-            this.url = url;
+            Url = url;
+            Value = value;
+
             lock (referenceCounters)
             {
                 referenceCounters[url] = referenceCounters.GetValueOrDefault(url, 0) + 1;
+                if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                    Debug.Log($"[ImageLoader] Reference created [{referenceCounters[url]}] URL={url}");
             }
+        }
+
+        public Reference<T> SetKeep(bool value = true)
+        {
+            Keep = value;
+            return this;
         }
         public void Dispose()
         {
@@ -30,17 +45,27 @@ namespace Extensions.Unity.ImageLoader
 
             lock (referenceCounters)
             {
-                if (referenceCounters.GetValueOrDefault(url) <= 0)
+                if (referenceCounters.GetValueOrDefault(Url) <= 0)
                 {
                     if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
-                        UnityEngine.Debug.LogError($"Can't dispose URL={url}");
+                        Debug.LogError($"[ImageLoader] Reference dispose, Can't dispose URL={Url}");
                     return;
                 }
 
-                referenceCounters[url]--;
+                referenceCounters[Url]--;
 
-                if (referenceCounters[url] == 0)
-                    ImageLoader.ClearMemoryCache(url);
+                if (Keep)
+                {
+                    if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                        Debug.Log($"[ImageLoader] Reference dispose of URL={Url} Ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory.");
+                    return;
+                }
+
+                if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                    Debug.Log($"[ImageLoader] Reference dispose of URL={Url}");
+
+                if (referenceCounters[Url] == 0)
+                    ImageLoader.ClearMemoryCache(Url);
             }
         }
     }
