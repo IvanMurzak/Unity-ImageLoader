@@ -16,8 +16,8 @@ namespace Extensions.Unity.ImageLoader.Tests
 
         public async UniTask LoadSprite(string url)
         {
-            var reference = await ImageLoader.LoadSprite(url);
-            Assert.IsNotNull(reference);
+            var sprite = await ImageLoader.LoadSprite(url);
+            Assert.IsNotNull(sprite);
         }
 
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
