@@ -51,7 +51,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Reference<Sprite>? LoadFromMemoryCache(string url)
+        public static Reference<Sprite>? LoadFromMemoryCacheRef(string url)
         {
             if (!settings.useMemoryCache) return null;
 
@@ -62,6 +62,17 @@ namespace Extensions.Unity.ImageLoader
             return new Reference<Sprite>(url, sprite);
         }
         /// <summary>
+        /// Loads directly from Memory cache if exists and allowed
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
+        public static Sprite? LoadFromMemoryCache(string url)
+        {
+            if (!settings.useMemoryCache) return null;
+
+            return memorySpriteCache.GetValueOrDefault(url);
+        }
+        /// <summary>
         /// Clear Memory cache for the given url
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
@@ -70,7 +81,8 @@ namespace Extensions.Unity.ImageLoader
             Reference<Sprite>.Clear(url);
             if (memorySpriteCache.Remove(url, out var cache))
             {
-                if (cache?.texture != null)
+                if (!ReferenceEquals(cache, null) && cache != null &&
+                    !ReferenceEquals(cache.texture, null))
                     UnityEngine.Object.DestroyImmediate(cache.texture);
             }
         }
@@ -83,7 +95,8 @@ namespace Extensions.Unity.ImageLoader
             Reference<Sprite>.Clear();
             foreach (var cache in memorySpriteCache.Values)
             {
-                if (cache?.texture != null)
+                if (!ReferenceEquals(cache, null) && cache != null &&
+                    !ReferenceEquals(cache.texture, null))
                     UnityEngine.Object.DestroyImmediate(cache.texture);
             }
             memorySpriteCache.Clear();

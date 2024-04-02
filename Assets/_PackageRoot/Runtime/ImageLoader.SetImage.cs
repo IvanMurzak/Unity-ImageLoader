@@ -41,12 +41,12 @@ namespace Extensions.Unity.ImageLoader
                         return;
                     try
                     {
-                        image.sprite = sprite.Value;
+                        image.sprite = sprite;
                     }
                     catch (Exception e)
                     {
                         if (settings.debugLevel <= DebugLevel.Exception)
-                            Debug.LogException(e); 
+                            Debug.LogException(e);
                     }
                 });
             }
@@ -121,9 +121,9 @@ namespace Extensions.Unity.ImageLoader
                         if (images[i] == null || images[i].IsDestroyed() || GameObject.Equals(images[i].gameObject, null))
                             continue;
 
-                        images[i].sprite = sprite.Value;
+                        images[i].sprite = sprite;
                     }
-                    catch (Exception e) 
+                    catch (Exception e)
                     {
                         if (settings.debugLevel <= DebugLevel.Exception)
                             Debug.LogException(e); 
