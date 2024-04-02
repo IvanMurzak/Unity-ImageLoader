@@ -46,7 +46,7 @@ namespace Extensions.Unity.ImageLoader
                     catch (Exception e)
                     {
                         if (settings.debugLevel <= DebugLevel.Exception)
-                            Debug.LogException(e); 
+                            Debug.LogException(e);
                     }
                 });
             }
@@ -123,7 +123,7 @@ namespace Extensions.Unity.ImageLoader
 
                         images[i].sprite = sprite;
                     }
-                    catch (Exception e) 
+                    catch (Exception e)
                     {
                         if (settings.debugLevel <= DebugLevel.Exception)
                             Debug.LogException(e); 
