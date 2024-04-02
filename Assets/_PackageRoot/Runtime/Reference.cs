@@ -83,5 +83,9 @@ namespace Extensions.Unity.ImageLoader
                     ImageLoader.ClearMemoryCache(Url);
             }
         }
+        ~Reference()
+        {
+            Dispose();
+        }
     }
 }
