@@ -92,9 +92,9 @@ namespace Extensions.Unity.ImageLoader
 
             if (MemoryCacheContains(url))
             {
-                var sprite = LoadFromMemoryCache(url);
-                if (sprite != null)
-                    return new Reference<Sprite>(url, sprite);
+                var reference = LoadFromMemoryCache(url);
+                if (reference != null)
+                    return reference;
             }
 
             if (IsLoading(url))

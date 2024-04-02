@@ -7,14 +7,26 @@ namespace Extensions.Unity.ImageLoader
     public class Reference<T> : IDisposable
     {
         private static Dictionary<string, int> referenceCounters = new Dictionary<string, int>();
+        internal static void Clear()
+        {
+            lock (referenceCounters) referenceCounters.Clear();
+        }
+        internal static void Clear(string url)
+        {
+            lock (referenceCounters) referenceCounters.Remove(url);
+        }
+        public static int Counter(string url)
+        {
+            lock (referenceCounters) return referenceCounters.GetValueOrDefault(url);
+        }
 
         /// <summary>
         /// True: Keep the texture in memory, you are responsible to release the memory.
         /// False: Release memory automatically when the Reference.Dispose executed.
         /// </summary>
         public bool Keep { get; set; }
-        public string Url { get; }
-        public T Value { get; }
+        public T Value { get; private set; }
+        public readonly string Url;
 
         private bool disposed;
 
@@ -41,6 +53,7 @@ namespace Extensions.Unity.ImageLoader
             if (disposed)
                 return;
 
+            Value = default;
             disposed = true;
 
             lock (referenceCounters)
