@@ -51,13 +51,13 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Reference<Sprite>? LoadFromMemoryCacheRef(string url)
+        public static Reference<Sprite> LoadFromMemoryCacheRef(string url)
         {
-            if (!settings.useMemoryCache) return null;
+            if (!settings.useMemoryCache) return Reference<Sprite>.Empty;
 
             var sprite = memorySpriteCache.GetValueOrDefault(url);
             if (sprite == null)
-                return null;
+                return Reference<Sprite>.Empty;
 
             return new Reference<Sprite>(url, sprite);
         }

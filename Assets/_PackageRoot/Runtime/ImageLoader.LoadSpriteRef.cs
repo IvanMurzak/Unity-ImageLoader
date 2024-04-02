@@ -31,13 +31,13 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (settings.debugLevel <= DebugLevel.Error)
                     Debug.LogError($"[ImageLoader] Empty url. Image could not be loaded!");
-                return null;
+                return Reference<Sprite>.Empty;
             }
 
             if (MemoryCacheContains(url))
             {
                 var reference = LoadFromMemoryCacheRef(url);
-                if (reference != null)
+                if (reference.IsValid)
                     return reference;
             }
 
@@ -115,7 +115,7 @@ namespace Extensions.Unity.ImageLoader
 #else
                     Debug.LogError($"[ImageLoader] {request.error}: url={url}");
 #endif
-                return null;
+                return Reference<Sprite>.Empty;
             }
             else
             {

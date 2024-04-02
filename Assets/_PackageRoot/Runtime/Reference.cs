@@ -4,23 +4,28 @@ using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Reference<T> : IDisposable
+    public partial struct Reference<T> : IDisposable
     {
+        public static Reference<T> Empty = new Reference<T>();
 
         /// <summary>
         /// True: Keep the texture in memory, you are responsible to release the memory.
         /// False: Release memory automatically when the Reference.Dispose executed.
         /// </summary>
         public bool Keep { get; set; }
+        public bool IsValid { get; private set; }
         public T Value { get; private set; }
-        public readonly string Url;
 
         private bool disposed;
+        public readonly string Url;
 
         internal Reference(string url, T value)
         {
             Url = url;
             Value = value;
+            Keep = false;
+            disposed = false;
+            IsValid = !string.IsNullOrEmpty(url);
 
             EventOnClearUrl += OnClearUrl;
             EventOnClearAll += OnClearAll;
@@ -55,6 +60,7 @@ namespace Extensions.Unity.ImageLoader
             if (disposed)
                 return;
 
+            IsValid = false;
             Value = default;
             disposed = true;
 
