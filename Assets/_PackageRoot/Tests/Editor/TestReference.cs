@@ -40,6 +40,57 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
+        //[UnityTest]
+        //public IEnumerator DisposeOnOutOfScope()
+        //{
+        //    yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+        //    ImageLoader.settings.useDiskCache = true;
+        //    ImageLoader.settings.useMemoryCache = true;
+
+        //    foreach (var url in ImageURLs)
+        //    {
+        //        var task = ImageLoader.LoadSpriteRef(url).AsTask();
+        //        while (!task.IsCompleted)
+        //            yield return null;
+
+        //        Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+        //    }
+
+        //    yield return null;
+        //    System.GC.Collect(100, System.GCCollectionMode.Forced, blocking: true);
+        //    yield return null;
+
+        //    foreach (var url in ImageURLs)
+        //    {
+        //        Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+        //    }
+        //}
+
+        [UnityTest]
+        public IEnumerator DisposeOnOutDisposingBlock()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var task = ImageLoader.LoadSpriteRef(url).AsTask();
+                while (!task.IsCompleted)
+                    yield return null;
+
+                using (var reference = task.Result)
+                {
+                    Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+                }
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            }
+            foreach (var url in ImageURLs)
+            {
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            }
+        }
+
         [UnityTest]
         public IEnumerator CleanMemoryCacheAll()
         {
