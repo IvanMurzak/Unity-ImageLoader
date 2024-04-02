@@ -60,6 +60,18 @@ public class ImageLoaderSample : MonoBehaviour
 }
 ```
 
+# Texture Memory Management
+
+ImageLoader can manager memory usage of loaded textures. To use it need to call `ImageLoader.LoadSpriteRef` instead of `ImageLoader.LoadSprite`. It will return `Reference<Sprite>` object which contains `Sprite` and `Url` objects. When `Reference<Sprite>` object is not needed anymore, call `Dispose` method to release memory, or just don't save the reference on it. It is `IDisposable` and it will clean itself automatically. Each new instance of `Reference<Sprite>` increments reference counter of the texture. When the last reference is disposed, the texture will be unloaded from memory. Also the all related References will be automatically disposed if you call `ImageLoader.ClearMemoryCache` or `ImageLoader.ClearCache`.
+
+``` C#
+// Load sprite image and get reference to it
+await ImageLoader.LoadSpriteRef(imageURL);
+
+// Take from Memory cache reference for specific image if exists
+ImageLoader.LoadFromMemoryCacheRef(url);
+```
+
 # Cache
 
 Cache system based on the two layers. The first layer is **memory cache**, second is **disk cache**. Each layer could be enabled or disabled. Could be used without caching at all. By default both layers are enabled.
@@ -68,7 +80,7 @@ Cache system based on the two layers. The first layer is **memory cache**, secon
 
 - `ImageLoader.settings.useMemoryCache = true;` default value is `true`
 - `ImageLoader.settings.useDiskCache = true;` default value is `true`
-  
+
 Change disk cache folder:
 
 ``` C#
