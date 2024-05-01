@@ -51,6 +51,7 @@ namespace Extensions.Unity.ImageLoader
         }
         public void Cancel()
         {
+            if (IsCancelled) return;
             IsCancelled = true;
             OnCancelled?.Invoke();
             Dispose();
