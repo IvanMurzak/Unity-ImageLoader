@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -20,6 +21,9 @@ namespace Extensions.Unity.ImageLoader
             Directory.CreateDirectory(settings.diskSaveLocation);
             Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
             if (!DiskCacheContains(url)) return null;
+
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Load from disk cache: {url}");
             return File.ReadAllBytes(DiskCachePath(url));
         }
         private static Task SaveDiskAsync(string url, byte[] data)
@@ -27,6 +31,8 @@ namespace Extensions.Unity.ImageLoader
             if (!settings.useDiskCache)
                 return Task.CompletedTask;
 
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Save to disk cache: {url}");
             return diskTaskFactory.StartNew(() => SaveDisk(url, data));
         }
         private static Task<byte[]> LoadDiskAsync(string url)
@@ -60,6 +66,8 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public static Task ClearDiskCache()
         {
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Clear disk cache All");
             return diskTaskFactory.StartNew(() =>
             {
                 if (Directory.Exists(settings.diskSaveLocation))
@@ -73,6 +81,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static Task ClearDiskCache(string url)
         {
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Clear disk cache: {url}");
             var diskPath = DiskCachePath(url);
             return diskTaskFactory.StartNew(() =>
             {

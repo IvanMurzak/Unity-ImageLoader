@@ -6,7 +6,6 @@ namespace Extensions.Unity.ImageLoader
 {
     public partial class Reference<T> : IDisposable
     {
-
         /// <summary>
         /// True: Keep the texture in memory, you are responsible to release the memory.
         /// False: Release memory automatically when the Reference.Dispose executed.

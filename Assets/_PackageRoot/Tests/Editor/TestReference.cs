@@ -15,6 +15,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
 
+        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+
         [UnityTest]
         public IEnumerator CleanMemoryCache()
         {

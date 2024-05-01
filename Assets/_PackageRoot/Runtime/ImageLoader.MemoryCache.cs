@@ -44,6 +44,8 @@ namespace Extensions.Unity.ImageLoader
                     Debug.LogError($"[ImageLoader] Memory cache already contains key: {url}");
                 return;
             }
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Save to memory cache: {url}");
             memorySpriteCache[url] = sprite;
         }
         /// <summary>
@@ -78,6 +80,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache(string url)
         {
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Clearing Memory cache: {url}");
             Reference<Sprite>.Clear(url);
             if (memorySpriteCache.Remove(url, out var cache))
             {
@@ -92,6 +96,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache()
         {
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Clearing Memory cache All");
             Reference<Sprite>.Clear();
             foreach (var cache in memorySpriteCache.Values)
             {

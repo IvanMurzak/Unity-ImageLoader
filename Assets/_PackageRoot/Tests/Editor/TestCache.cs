@@ -14,6 +14,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
 
+        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+
         public async UniTask LoadSprite(string url)
         {
             var sprite = await ImageLoader.LoadSprite(url);
