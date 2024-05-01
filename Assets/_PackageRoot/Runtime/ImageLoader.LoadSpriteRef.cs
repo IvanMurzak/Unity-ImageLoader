@@ -55,8 +55,7 @@ namespace Extensions.Unity.ImageLoader
                 if (settings.debugLevel <= DebugLevel.Log)
                     Debug.Log($"[ImageLoader] Waiting while another task is loading the sprite url={future.Url}");
                 await UniTask.WaitWhile(() => IsLoading(future.Url));
-                var reference = await LoadSpriteRef(future.Url, textureFormat, ignoreImageNotFoundError);
-                future.CompleteSuccess(reference);
+                InternalLoadSpriteRef(future, pivot, textureFormat, ignoreImageNotFoundError);
                 return;
             }
 
