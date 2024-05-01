@@ -39,9 +39,10 @@ namespace Extensions.Unity.ImageLoader
         internal void CompleteFail(Exception exception)
         {
             if (cleared) return;
+            Successeded = false;
+            this.exception = exception;
             if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
                 Debug.LogError(exception.Message);
-            this.exception = exception;
             OnFail?.Invoke(exception);
             Clear();
         }
