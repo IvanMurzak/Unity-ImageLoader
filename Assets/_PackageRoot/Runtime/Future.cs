@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -14,55 +15,93 @@ namespace Extensions.Unity.ImageLoader
         private event Action<Exception> OnFail;
         private event Action OnCancelled;
 
-        public bool IsCancelled { get; private set; } = false;
+        private bool cleared = false;
+        private T value = default;
+        private Exception exception = default;
 
-        internal Future(string url)
+        public bool IsCancelled { get; private set; } = false;
+        public bool Successeded { get; private set; } = false;
+
+        internal Future(string url, CancellationToken cancellationToken)
         {
             Url = url;
+            cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
-        internal void CompleteSuccess(T sprite)
+        internal void CompleteSuccess(T value)
         {
-            OnSuccess?.Invoke(sprite);
-            Dispose();
+            if (cleared) return;
+            Successeded = true;
+            this.value = value;
+            OnSuccess?.Invoke(value);
+            Clear();
         }
         internal void CompleteFail(Exception exception)
         {
+            if (cleared) return;
             if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
                 Debug.LogError(exception.Message);
+            this.exception = exception;
             OnFail?.Invoke(exception);
-            Dispose();
+            Clear();
+        }
+
+        private void Clear()
+        {
+            cleared = true;
+            OnSuccess = null;
+            OnFail = null;
+            OnCancelled = null;
         }
 
         public Future<T> Then(Action<T> action)
         {
+            if (cleared)
+            {
+                if (Successeded)
+                    action(value);
+                return this;
+            }
             OnSuccess += action;
             return this;
         }
         public Future<T> Fail(Action<Exception> action)
         {
+            if (cleared)
+            {
+                if (!Successeded && !IsCancelled)
+                    action(exception);
+                return this;
+            }
             OnFail += action;
             return this;
         }
         public Future<T> Cancelled(Action action)
         {
+            if (cleared)
+            {
+                if (IsCancelled)
+                    action();
+                return this;
+            }
             OnCancelled += action;
             return this;
         }
         public void Cancel()
         {
+            if (cleared) return;
             if (IsCancelled) return;
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
                 Debug.Log($"[ImageLoader] Cancel: {Url}");
             IsCancelled = true;
             OnCancelled?.Invoke();
-            Dispose();
+            Clear();
         }
         public void Dispose()
         {
-            OnSuccess = null;
-            OnFail = null;
-            OnCancelled = null;
+            Clear();
+            value = default;
+            exception = default;
         }
         public async UniTask<T> AsUniTask() => await this;
         public async Task<T> AsTask() => await this;
