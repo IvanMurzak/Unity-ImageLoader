@@ -6,7 +6,7 @@ namespace Extensions.Unity.ImageLoader
     }
     public partial class Settings
     {
-        public DebugLevel debugLevel = DebugLevel.Error;
+        public DebugLevel debugLevel = DebugLevel.Log;
         public bool useMemoryCache = true;
 #if UNITY_WEBGL 
         public bool useDiskCache = false; // default value for WebGL = false

@@ -15,15 +15,24 @@ namespace Extensions.Unity.ImageLoader
 
         public bool IsCancelled { get; private set; } = false;
 
-        internal Future(string url) { Url = url; }
+        internal Future(string url)
+        {
+            Url = url;
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Future: {Url}");
+        }
         ~Future() => Dispose();
         internal void CompleteSuccess(T sprite)
         {
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Future Complete: {Url}");
             OnSuccess?.Invoke(sprite);
             Dispose();
         }
         internal void CompleteFail(Exception exception)
         {
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Future Fail: {Url}");
             if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
                 Debug.LogError(exception.Message);
             OnFail?.Invoke(exception);
@@ -47,14 +56,19 @@ namespace Extensions.Unity.ImageLoader
         }
         public void Cancel()
         {
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Future Cancel: {Url}");
             IsCancelled = true;
             OnCancelled?.Invoke();
             Dispose();
         }
         public void Dispose()
         {
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Future Dispose: {Url}");
             OnSuccess = null;
             OnFail = null;
+            OnCancelled = null;
         }
         public FutureAwaiter GetAwaiter()
         {
