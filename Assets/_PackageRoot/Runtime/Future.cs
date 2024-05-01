@@ -30,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
         ~Future() => Dispose();
         internal void CompleteSuccess(T value)
         {
-            if (cleared) return;
+            if (cleared || IsCancelled) return;
             Successeded = true;
             this.value = value;
             OnSuccess?.Invoke(value);
@@ -38,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
         }
         internal void CompleteFail(Exception exception)
         {
-            if (cleared) return;
+            if (cleared || IsCancelled) return;
             Successeded = false;
             this.exception = exception;
             if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
@@ -101,6 +101,9 @@ namespace Extensions.Unity.ImageLoader
         public void Dispose()
         {
             Clear();
+            IsCancelled = true;
+            if (value is IDisposable disposable)
+                disposable?.Dispose();
             value = default;
             exception = default;
         }
