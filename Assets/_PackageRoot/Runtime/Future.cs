@@ -52,6 +52,8 @@ namespace Extensions.Unity.ImageLoader
         public void Cancel()
         {
             if (IsCancelled) return;
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] Cancel: {Url}");
             IsCancelled = true;
             OnCancelled?.Invoke();
             Dispose();
