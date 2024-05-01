@@ -17,8 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
         [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
 
-        [UnityTest]
-        public IEnumerator LoadingAndWaiting()
+        [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -42,8 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest]
-        public IEnumerator Loading2RefAndCancelFirst()
+        [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -65,8 +63,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest]
-        public IEnumerator Loading2RefAndWait()
+        [UnityTest] public IEnumerator Loading2RefAndWait()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -94,8 +91,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest]
-        public IEnumerator Loading2RefAndDisposeAll()
+        [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -117,8 +113,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest]
-        public IEnumerator DisposeOnOutDisposingBlock()
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
