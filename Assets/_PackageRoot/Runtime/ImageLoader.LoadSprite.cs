@@ -32,7 +32,7 @@ namespace Extensions.Unity.ImageLoader
             InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return future;
         }
-        internal static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
             if (string.IsNullOrEmpty(future.Url))
             {

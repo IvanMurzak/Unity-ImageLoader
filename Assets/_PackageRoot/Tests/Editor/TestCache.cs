@@ -30,8 +30,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
+                Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
@@ -44,8 +43,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
+                Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }

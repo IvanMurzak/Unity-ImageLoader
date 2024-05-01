@@ -14,7 +14,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static UniTask<Reference<Sprite>> LoadSpriteRef(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static Future<Reference<Sprite>> LoadSpriteRef(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
             => LoadSpriteRef(url, new Vector2(0.5f, 0.5f), textureFormat, ignoreImageNotFoundError);
 
         /// <summary>
@@ -25,37 +25,48 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static async UniTask<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static Future<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
-            if (string.IsNullOrEmpty(url))
+            var future = new Future<Reference<Sprite>>(url);
+            InternalLoadSpriteRef(future, pivot, textureFormat, ignoreImageNotFoundError);
+            return future;
+        }
+        static async void InternalLoadSpriteRef(Future<Reference<Sprite>> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        {
+            if (string.IsNullOrEmpty(future.Url))
             {
                 if (settings.debugLevel <= DebugLevel.Error)
-                    Debug.LogError($"[ImageLoader] Empty url. Image could not be loaded!");
-                return null;
+                    future.CompleteFail(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
+                return;
             }
 
-            if (MemoryCacheContains(url))
+            if (MemoryCacheContains(future.Url))
             {
-                var reference = LoadFromMemoryCacheRef(url);
+                var reference = LoadFromMemoryCacheRef(future.Url);
                 if (reference != null)
-                    return reference;
+                {
+                    future.CompleteSuccess(reference);
+                    return;
+                }
             }
 
-            if (IsLoading(url))
+            if (IsLoading(future.Url))
             {
                 if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] Waiting while another task is loading the sprite url={url}");
-                await UniTask.WaitWhile(() => IsLoading(url));
-                return await LoadSpriteRef(url, textureFormat, ignoreImageNotFoundError);
+                    Debug.Log($"[ImageLoader] Waiting while another task is loading the sprite url={future.Url}");
+                await UniTask.WaitWhile(() => IsLoading(future.Url));
+                var reference = await LoadSpriteRef(future.Url, textureFormat, ignoreImageNotFoundError);
+                future.CompleteSuccess(reference);
+                return;
             }
 
-            AddLoading(url);
+            AddLoading(future.Url);
 
             if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Loading new Sprite into memory url={url}");
+                Debug.Log($"[ImageLoader] Loading new Sprite into memory url={future.Url}");
             try
             {
-                var cachedImage = await LoadDiskAsync(url);
+                var cachedImage = await LoadDiskAsync(future.Url);
                 if (cachedImage != null && cachedImage.Length > 0)
                 {
                     await UniTask.SwitchToMainThread();
@@ -64,10 +75,10 @@ namespace Extensions.Unity.ImageLoader
                     {
                         var sprite = ToSprite(texture, pivot);
                         if (sprite != null)
-                            SaveToMemoryCache(url, sprite, replace: true);
+                            SaveToMemoryCache(future.Url, sprite, replace: true);
 
-                        RemoveLoading(url);
-                        return new Reference<Sprite>(url, sprite);
+                        RemoveLoading(future.Url);
+                        future.CompleteSuccess(new Reference<Sprite>(future.Url, sprite));
                     }
                 }
             }
@@ -83,7 +94,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 try
                 {
-                    request = UnityWebRequestTexture.GetTexture(url);
+                    request = UnityWebRequestTexture.GetTexture(future.Url);
                     await request.SendWebRequest();
                 }
                 catch (Exception e) 
@@ -99,7 +110,7 @@ namespace Extensions.Unity.ImageLoader
             });
             await UniTask.WaitUntil(() => finished);
 
-            RemoveLoading(url);
+            RemoveLoading(future.Url);
 
 #if UNITY_2020_1_OR_NEWER
             var isError = request.result != UnityWebRequest.Result.Success;
@@ -111,18 +122,18 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (settings.debugLevel <= DebugLevel.Error)
 #if UNITY_2020_1_OR_NEWER
-                    Debug.LogError($"[ImageLoader] {request.result} {request.error}: url={url}");
+                    future.CompleteFail(new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}"));
 #else
-                    Debug.LogError($"[ImageLoader] {request.error}: url={url}");
+                    future.CompleteFail(new Exception($"[ImageLoader] {request.error}: url={future.Url}"));
 #endif
-                return null;
+                return;
             }
             else
             {
-                await SaveDiskAsync(url, request.downloadHandler.data);
+                await SaveDiskAsync(future.Url, request.downloadHandler.data);
                 var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
-                SaveToMemoryCache(url, sprite, replace: true);
-                return new Reference<Sprite>(url, sprite);
+                SaveToMemoryCache(future.Url, sprite, replace: true);
+                future.CompleteSuccess(new Reference<Sprite>(future.Url, sprite));
             }
         }
     }
