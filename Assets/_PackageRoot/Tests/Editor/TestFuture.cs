@@ -43,7 +43,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest]
-        public IEnumerator LoadingTwoRefCancelFirst()
+        public IEnumerator Loading2RefAndCancelFirst()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -66,7 +66,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest]
-        public IEnumerator LoadingAndWaiting2()
+        public IEnumerator Loading2RefAndWait()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -95,6 +95,29 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest]
+        public IEnumerator Loading2RefAndDisposeAll()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var future1 = ImageLoader.LoadSpriteRef(url1);
+            var future2 = ImageLoader.LoadSpriteRef(url1);
+
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+
+            future1.Cancel();
+            future2.Cancel();
+
+            future1.Dispose();
+            future2.Dispose();
+
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+        }
+
+        [UnityTest]
         public IEnumerator DisposeOnOutDisposingBlock()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -103,12 +126,20 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in ImageURLs)
             {
-                var task = ImageLoader.LoadSpriteRef(url).AsTask();
-                while (!task.IsCompleted)
+                var future1 = ImageLoader.LoadSpriteRef(url);
+                var task1 = future1.AsTask();
+                while (!task1.IsCompleted)
                     yield return null;
 
-                using (var reference = task.Result)
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+                future1.Dispose();
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+
+                using (var future2 = ImageLoader.LoadSpriteRef(url))
                 {
+                    var task2 = future2.AsTask();
+                    while (!task2.IsCompleted)
+                        yield return null;
                     Assert.AreEqual(1, Reference<Sprite>.Counter(url));
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
