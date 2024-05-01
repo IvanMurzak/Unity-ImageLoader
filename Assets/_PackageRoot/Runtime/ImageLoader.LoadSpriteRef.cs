@@ -120,12 +120,12 @@ namespace Extensions.Unity.ImageLoader
 
             if (isError)
             {
-                if (settings.debugLevel <= DebugLevel.Error)
 #if UNITY_2020_1_OR_NEWER
-                    future.CompleteFail(new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}"));
+                var exception = new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}");
 #else
-                    future.CompleteFail(new Exception($"[ImageLoader] {request.error}: url={future.Url}"));
+                var exception = new Exception($"[ImageLoader] {request.error}: url={future.Url}");
 #endif
+                future.CompleteFail(exception);
                 return;
             }
             else
