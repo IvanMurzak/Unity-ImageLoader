@@ -36,7 +36,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (string.IsNullOrEmpty(future.Url))
             {
-                future.TrySetException(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
+                future.CompleteFail(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace Extensions.Unity.ImageLoader
                 var sprite = LoadFromMemoryCache(future.Url);
                 if (sprite != null)
                 {
-                    future.TrySetResult(sprite);
+                    future.CompleteSuccess(sprite);
                     return;
                 }
             }
@@ -77,7 +77,7 @@ namespace Extensions.Unity.ImageLoader
                             SaveToMemoryCache(future.Url, sprite, replace: true);
 
                         RemoveLoading(future.Url);
-                        future.TrySetResult(sprite);
+                        future.CompleteSuccess(sprite);
                         return;
                     }
                 }
@@ -122,9 +122,9 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (settings.debugLevel <= DebugLevel.Error)
 #if UNITY_2020_1_OR_NEWER
-                    future.TrySetException(new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}"));
+                    future.CompleteFail(new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}"));
 #else
-                    future.TrySetException(new Exception($"[ImageLoader] {request.error}: url={future.Url}"));
+                    future.CompleteFail(new Exception($"[ImageLoader] {request.error}: url={future.Url}"));
 #endif
                 return;
             }
@@ -133,7 +133,7 @@ namespace Extensions.Unity.ImageLoader
                 await SaveDiskAsync(future.Url, request.downloadHandler.data);
                 var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
                 SaveToMemoryCache(future.Url, sprite, replace: true);
-                future.TrySetResult(sprite);
+                future.CompleteSuccess(sprite);
             }
         }
     }

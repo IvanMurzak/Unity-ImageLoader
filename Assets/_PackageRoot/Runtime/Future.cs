@@ -1,11 +1,11 @@
 ﻿using System;
-using Cysharp.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using UnityEngine;
-using System.Threading;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Future<T> : IDisposable, IPromise<T>
+    public partial class Future<T> : IDisposable
     {
         public readonly string Url;
 
@@ -13,13 +13,22 @@ namespace Extensions.Unity.ImageLoader
         private event Action<Exception> OnFail;
         private event Action OnCancelled;
 
-        private CancellationToken cancellationToken;
-        private bool disposed;
-
-        public bool IsCancelled => cancellationToken.IsCancellationRequested;
+        public bool IsCancelled { get; private set; } = false;
 
         internal Future(string url) { Url = url; }
         ~Future() => Dispose();
+        internal void CompleteSuccess(T sprite)
+        {
+            OnSuccess?.Invoke(sprite);
+            Dispose();
+        }
+        internal void CompleteFail(Exception exception)
+        {
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
+                Debug.LogError(exception.Message);
+            OnFail?.Invoke(exception);
+            Dispose();
+        }
 
         public Future<T> Then(Action<T> action)
         {
@@ -36,46 +45,32 @@ namespace Extensions.Unity.ImageLoader
             OnCancelled += action;
             return this;
         }
+        public void Cancel()
+        {
+            IsCancelled = true;
+            OnCancelled?.Invoke();
+            Dispose();
+        }
         public void Dispose()
         {
-            disposed = true;
             OnSuccess = null;
             OnFail = null;
-            OnCancelled = null;
         }
-        
-        // public UniTask<T>.Awaiter GetAwaiter()
-        // {
-        //     var tcs = new UniTaskCompletionSource<T>();
-        //     Then(r => tcs.TrySetResult(r));
-        //     Fail(e => tcs.TrySetException(e));
-        //     Cancelled(() => tcs.TrySetCanceled());
-        //     return tcs.Task.GetAwaiter();
-        // }
-
-        public bool TrySetResult(T value)
+        public FutureAwaiter GetAwaiter()
         {
-            if (disposed) return false;
-            OnSuccess?.Invoke(value);
-            Dispose();
-            return true;
+            var tcs = new TaskCompletionSource<T>();
+            Then(tcs.SetResult);
+            Fail(tcs.SetException);
+            Cancelled(tcs.SetCanceled);
+            return new FutureAwaiter(tcs.Task.GetAwaiter());
         }
-
-        public bool TrySetException(Exception exception)
+        public class FutureAwaiter : INotifyCompletion
         {
-            if (disposed) return false;
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
-                Debug.LogError(exception.Message);
-            OnFail?.Invoke(exception);
-            Dispose();
-            return true;
-        }
-
-        public bool TrySetCanceled(CancellationToken cancellationToken)
-        {
-            if (disposed) return false;
-            this.cancellationToken = cancellationToken;
-            return true;
+            private readonly TaskAwaiter<T> _awaiter;
+            public FutureAwaiter(TaskAwaiter<T> awaiter) { _awaiter = awaiter; }
+            public bool IsCompleted => _awaiter.IsCompleted;
+            public T GetResult() => _awaiter.GetResult();
+            public void OnCompleted(Action continuation) => _awaiter.OnCompleted(continuation);
         }
     }
 }
