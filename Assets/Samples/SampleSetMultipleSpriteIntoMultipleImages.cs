@@ -1,9 +1,8 @@
 ﻿using Extensions.Unity.ImageLoader;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ImageLoaderSample2 : MonoBehaviour
+public class SampleSetMultipleSpriteIntoMultipleImages : MonoBehaviour
 {
     [SerializeField] string imageURL;
     [SerializeField] Image image1;
@@ -11,7 +10,7 @@ public class ImageLoaderSample2 : MonoBehaviour
 
     void Start()
     {
-        // Loading with auto set to image
-        ImageLoader.SetSprite(imageURL, image1, image2).Forget();
+        // Loading with auto set to multiple images 
+        ImageLoader.LoadSprite(imageURL).ThenSet(image1, image2).Forget();
     }
 }

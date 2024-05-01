@@ -66,7 +66,7 @@ namespace Extensions.Unity.ImageLoader
             OnSuccess += action;
             return this;
         }
-        public Future<T> Fail(Action<Exception> action)
+        public Future<T> Failed(Action<Exception> action)
         {
             if (cleared)
             {
@@ -107,13 +107,44 @@ namespace Extensions.Unity.ImageLoader
             value = default;
             exception = default;
         }
+        public void Forget()
+        {
+            var awaiter = GetAwaiter();
+            if (awaiter.IsCompleted)
+            {
+                try
+                {
+                    awaiter.GetResult();
+                }
+                catch (Exception ex)
+                {
+                    if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
+                        Debug.LogException(ex);
+                }
+            }
+            else
+            {
+                awaiter.OnCompleted(() =>
+                {
+                    try
+                    {
+                        awaiter.GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
+                            Debug.LogException(ex);
+                    }
+                });
+            }
+        }
         public async UniTask<T> AsUniTask() => await this;
         public async Task<T> AsTask() => await this;
         public FutureAwaiter GetAwaiter()
         {
             var tcs = new TaskCompletionSource<T>();
             Then(tcs.SetResult);
-            Fail(tcs.SetException);
+            Failed(tcs.SetException);
             Cancelled(tcs.SetCanceled);
             return new FutureAwaiter(tcs.Task.GetAwaiter());
         }
