@@ -1,4 +1,5 @@
 ﻿using Extensions.Unity.ImageLoader;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,5 +27,43 @@ public class SampleCancellation : MonoBehaviour
             .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
             .CancelOnDisable(this) // cancel OnDisable event of current gameObject
             .Forget();
+    }
+
+    void SimpleCancellation()
+    {
+        var future = ImageLoader.LoadSprite(imageURL).ThenSet(image);
+        future.Cancel();
+    }
+
+    void CancellationTokenSample1()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        // loading with attached cancellation token
+        ImageLoader.LoadSprite(imageURL, cancellationToken: cancellationTokenSource.Token)
+            .ThenSet(image)
+            .Forget();
+
+        cancellationTokenSource.Cancel(); // canceling
+    }
+
+    void CancellationTokenSample2()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        ImageLoader.LoadSprite(imageURL)
+            .ThenSet(image)
+            .Register(cancellationTokenSource.Token) // registering cancellation token
+            .Forget();
+
+        cancellationTokenSource.Cancel(); // canceling
+    }
+
+    void DisposeSample()
+    {
+        using (var future = ImageLoader.LoadSprite(imageURL).ThenSet(image))
+        {
+            // future would be canceled and disposed outside of the brackets
+        }
     }
 }
