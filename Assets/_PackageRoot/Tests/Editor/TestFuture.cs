@@ -43,6 +43,29 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest]
+        public IEnumerator LoadingTwoRefCancelFirst()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var future1 = ImageLoader.LoadSpriteRef(url1);
+            var future2 = ImageLoader.LoadSpriteRef(url1);
+
+            future1.Cancel();
+
+            var task2 = future2.AsTask();
+            while (!task2.IsCompleted)
+                yield return null;
+
+            var ref0 = task2.Result;
+            Assert.IsNotNull(ref0.Value);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+        }
+
+        [UnityTest]
         public IEnumerator LoadingAndWaiting2()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
