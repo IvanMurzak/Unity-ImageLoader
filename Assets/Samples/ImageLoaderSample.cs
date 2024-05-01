@@ -1,5 +1,4 @@
 ﻿using Extensions.Unity.ImageLoader;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
