@@ -1,7 +1,7 @@
 ﻿using Extensions.Unity.ImageLoader;
 using UnityEngine;
 
-static class CacheSample
+static class SampleCache
 {
     static string url = "";
     static Sprite sprite;

@@ -14,6 +14,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
 
+        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+
         public async UniTask LoadSprite(string url)
         {
             var sprite = await ImageLoader.LoadSprite(url);
@@ -28,8 +30,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
+                Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
@@ -42,8 +43,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
-                Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
+                Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
                 yield return LoadSprite(imageURL).ToCoroutine();
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }

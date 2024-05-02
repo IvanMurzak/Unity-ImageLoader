@@ -1,9 +1,8 @@
 ﻿using Extensions.Unity.ImageLoader;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ImageLoaderSample : MonoBehaviour
+public class SampleImageLoading : MonoBehaviour
 {
     [SerializeField] string imageURL;
     [SerializeField] Image image;
@@ -14,6 +13,6 @@ public class ImageLoaderSample : MonoBehaviour
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
         // Same loading with auto set to image
-        await ImageLoader.SetSprite(imageURL, image);
+        await ImageLoader.LoadSprite(imageURL).ThenSet(image);
     }
 }
