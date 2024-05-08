@@ -14,10 +14,10 @@ namespace Extensions.Unity.ImageLoader
         {
             if (duration <= TimeSpan.Zero)
             {
-                future.CompleteFail(new Exception($"Timeout ({duration})"));
+                future.FailToLoad(new Exception($"Timeout ({duration})"));
                 return future;
             }
-            UniTask.Delay(duration).ContinueWith(() => future.CompleteFail(new Exception($"Timeout ({duration})")));
+            UniTask.Delay(duration).ContinueWith(() => future.FailToLoad(new Exception($"Timeout ({duration})")));
             return future;
         }
     }

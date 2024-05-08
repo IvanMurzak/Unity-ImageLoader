@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -37,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (string.IsNullOrEmpty(future.Url))
             {
-                future.CompleteFail(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
+                future.FailToLoad(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
                 return;
             }
 
@@ -46,7 +47,7 @@ namespace Extensions.Unity.ImageLoader
                 var sprite = LoadFromMemoryCache(future.Url);
                 if (sprite != null)
                 {
-                    future.CompleteSuccess(sprite);
+                    future.Loaded(sprite, FutureLoadedFrom.MemoryCache);
                     return;
                 }
             }
@@ -80,10 +81,14 @@ namespace Extensions.Unity.ImageLoader
                             SaveToMemoryCache(future.Url, sprite, replace: true);
 
                         RemoveLoading(future.Url);
-                        future.CompleteSuccess(sprite);
+                        future.Loaded(sprite, FutureLoadedFrom.DiskCache);
                         return;
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                future.Cancel();
             }
             catch (Exception e)
             {
@@ -101,6 +106,10 @@ namespace Extensions.Unity.ImageLoader
                     {
                         request = UnityWebRequestTexture.GetTexture(future.Url);
                         await request.SendWebRequest();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        future.Cancel();
                     }
                     catch (Exception e) 
                     {
@@ -127,7 +136,7 @@ namespace Extensions.Unity.ImageLoader
 #else
                     var exception = new Exception($"[ImageLoader] {request.error}: url={future.Url}");
 #endif
-                    future.CompleteFail(exception);
+                    future.FailToLoad(exception);
                 }
                 else
                 {
@@ -135,8 +144,12 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled) return;
                     var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
                     SaveToMemoryCache(future.Url, sprite, replace: true);
-                    future.CompleteSuccess(sprite);
+                    future.Loaded(sprite, FutureLoadedFrom.Source);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                future.Cancel();
             }
             finally
             {

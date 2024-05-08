@@ -32,7 +32,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if ((targets?.Length ?? 0) == 0)
             {
-                future.CompleteFail(new Exception("No targets to set image"));
+                future.FailToLoad(new Exception("No targets to set image"));
                 return future;
             }
 
