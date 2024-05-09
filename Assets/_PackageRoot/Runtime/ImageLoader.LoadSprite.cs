@@ -31,10 +31,10 @@ namespace Extensions.Unity.ImageLoader
         public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new Future<Sprite>(url, cancellationToken);
-            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError, cancellationToken);
+            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return future;
         }
-        static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
+        static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
             if (string.IsNullOrEmpty(future.Url))
             {
@@ -115,15 +115,16 @@ namespace Extensions.Unity.ImageLoader
                     try
                     {
                         request = UnityWebRequestTexture.GetTexture(future.Url);
+                        request.timeout = (int)Math.Ceiling(settings.timeout.TotalSeconds);
                         var asyncOperation = request.SendWebRequest();
-                        await asyncOperation.WithCancellation(cancellationToken);
+                        await asyncOperation.WithCancellation(future.CancellationToken);
                     }
                     catch (OperationCanceledException)
                     {
                         future.Cancel();
                         return;
                     }
-                    catch (Exception e) 
+                    catch (Exception e)
                     {
                         if (!ignoreImageNotFoundError)
                             if (settings.debugLevel <= DebugLevel.Exception)
@@ -136,6 +137,7 @@ namespace Extensions.Unity.ImageLoader
                 });
                 await UniTask.WaitUntil(() => finished);
                 if (future.IsCancelled) return;
+                if (future.Status == FutureStatus.FailedToLoad) return;
 #if UNITY_2020_1_OR_NEWER
                 var isError = request.result != UnityWebRequest.Result.Success;
 #else

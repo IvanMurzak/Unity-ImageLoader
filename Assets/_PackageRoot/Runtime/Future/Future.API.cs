@@ -105,6 +105,7 @@ namespace Extensions.Unity.ImageLoader
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
                 Debug.Log($"[ImageLoader] Cancel: {Url}");
             Status = FutureStatus.Canceled;
+            cts.Cancel();
             OnCancelled?.Invoke();
             Clear();
         }

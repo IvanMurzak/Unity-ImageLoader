@@ -36,7 +36,7 @@ namespace Extensions.Unity.ImageLoader
             future.Failed               (futureRef.FailToLoad);
             futureRef.Cancelled         (future.Cancel);
 
-            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError, cancellationToken);
+            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return futureRef;
         }
 

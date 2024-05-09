@@ -16,6 +16,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
+        static readonly string IncorrectImageURL = "https://doesntexist.com/404.png";
 
         [SetUp]
         public void SetUp()
@@ -460,6 +461,55 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return UniTask.Delay(1000).ToCoroutine();
                 Assert.IsTrue(called);
             }
+        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url = IncorrectImageURL;
+            var exception = default(Exception);
+            var startTime = DateTime.Now;
+            var future1 = ImageLoader.LoadSprite(url)
+                .Timeout(TimeSpan.FromSeconds(1.5f))
+                .Failed(e => exception = e);
+
+            Assert.IsNull(exception);
+
+            LogAssert.ignoreFailingMessages = true;
+            {
+                yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+                var task1 = future1.AsTask();
+                Assert.IsTrue(task1.IsCompleted);
+                Assert.IsNotNull(exception);
+            }
+            LogAssert.ignoreFailingMessages = false;
+        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url = IncorrectImageURL;
+            var exception = default(Exception);
+            var startTime = DateTime.Now;
+            var future1 = ImageLoader.LoadSprite(url)
+                .Failed(e => exception = e);
+
+            Assert.IsNull(exception);
+
+            var task1 = future1.AsTask();
+            future1.Cancel();
+
+            while (!task1.IsCompleted)
+            {
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                yield return null;
+            }
+            yield return UniTask.Delay(1000).ToCoroutine();
+            Assert.IsNull(exception);
         }
     }
 }

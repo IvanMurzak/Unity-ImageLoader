@@ -8,19 +8,20 @@ namespace Extensions.Unity.ImageLoader
     {
         public readonly string Url;
 
-        private event Action<T>         OnLoadedFromMemoryCache;
-        private event Action            OnLoadingFromDiskCache;
-        private event Action<T>         OnLoadedFromDiskCache;
-        private event Action            OnLoadingFromSource;
-        private event Action<T>         OnLoadedFromSource;
-        private event Action<T>         OnLoaded;
-        private event Action<Exception> OnFailedToLoad;
-        private event Action<bool>      OnCompleted;
-        private event Action            OnCancelled;
+        private event Action<T>           OnLoadedFromMemoryCache;
+        private event Action              OnLoadingFromDiskCache;
+        private event Action<T>           OnLoadedFromDiskCache;
+        private event Action              OnLoadingFromSource;
+        private event Action<T>           OnLoadedFromSource;
+        private event Action<T>           OnLoaded;
+        private event Action<Exception>   OnFailedToLoad;
+        private event Action<bool>        OnCompleted;
+        private event Action              OnCancelled;
 
-        private bool                    cleared   = false;
-        private T                       value     = default;
-        private Exception               exception = default;
+        private readonly CancellationTokenSource cts;
+        private bool cleared = false;
+        private T value = default;
+        private Exception exception = default;
 
         public bool IsCancelled => Status == FutureStatus.Canceled;
         public bool IsLoaded => Status == FutureStatus.LoadedFromMemoryCache
@@ -34,10 +35,12 @@ namespace Extensions.Unity.ImageLoader
             || Status == FutureStatus.LoadingFromDiskCache
             || Status == FutureStatus.LoadingFromSource;
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
+        public CancellationToken CancellationToken => cts.Token;
 
         internal Future(string url, CancellationToken cancellationToken)
         {
             Url = url;
+            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
@@ -111,6 +114,7 @@ namespace Extensions.Unity.ImageLoader
             if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
                 Debug.LogError(exception.Message);
 
+            cts.Cancel();
             OnFailedToLoad?.Invoke(exception);
             OnCompleted?.Invoke(false);
             Clear();
