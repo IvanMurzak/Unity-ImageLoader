@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
+using System.Linq;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -15,7 +16,12 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
 
-        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+        [SetUp]
+        public void SetUp()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Log;
+            ImageLoader.ClearRef();
+        }
 
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
@@ -111,9 +117,57 @@ namespace Extensions.Unity.ImageLoader.Tests
             future2.Dispose();
 
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            yield return UniTask.Delay(1000).ToCoroutine();
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                using (var future1 = ImageLoader.LoadSpriteRef(url))
+                {
+                    var task1 = future1.AsTask();
+                    Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+                    while (!task1.IsCompleted)
+                        yield return null;
+
+                    Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+                }
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            }
+            foreach (var url in ImageURLs)
+            {
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
+            }
+        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var future1 = ImageLoader.LoadSpriteRef(url);
+                var task1 = future1.AsTask();
+                while (!task1.IsCompleted)
+                    yield return null;
+
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+                future1.Dispose();
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            }
+            foreach (var url in ImageURLs)
+            {
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
+            }
+        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -141,7 +195,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
             foreach (var url in ImageURLs)
             {
-                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
     }

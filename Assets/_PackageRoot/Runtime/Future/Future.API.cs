@@ -85,7 +85,6 @@ namespace Extensions.Unity.ImageLoader
             OnLoadingFromSource += action;
             return this;
         }
-
         public Future<T> LoadedFromDiskCache(Action<T> action)
         {
             if (cleared)
@@ -97,11 +96,6 @@ namespace Extensions.Unity.ImageLoader
             OnLoadedFromDiskCache += action;
             return this;
         }
-
-
-
-
-
         public Future<T> Cancelled(Action action)
         {
             if (cleared)
@@ -113,7 +107,6 @@ namespace Extensions.Unity.ImageLoader
             OnCancelled += action;
             return this;
         }
-
 
         public void Cancel()
         {

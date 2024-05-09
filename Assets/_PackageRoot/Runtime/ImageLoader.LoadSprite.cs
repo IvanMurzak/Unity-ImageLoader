@@ -31,10 +31,10 @@ namespace Extensions.Unity.ImageLoader
         public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new Future<Sprite>(url, cancellationToken);
-            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
+            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError, cancellationToken);
             return future;
         }
-        static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(future.Url))
             {
@@ -62,39 +62,49 @@ namespace Extensions.Unity.ImageLoader
                 return;
             }
 
-            AddLoading(future.Url);
+            AddLoading(future.Url); // LOADING ADDED
 
-            if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Loading new Sprite into memory url={future.Url}");
-            try
+            if (settings.useDiskCache)
             {
-                var cachedImage = await LoadDiskAsync(future.Url);
-                if (cachedImage != null && cachedImage.Length > 0)
+                future.Loading(FutureLoadingFrom.DiskCache);
+                try
                 {
-                    await UniTask.SwitchToMainThread();
-                    if (future.IsCancelled) return;
-                    var texture = new Texture2D(2, 2, textureFormat, true);
-                    if (texture.LoadImage(cachedImage))
+                    var cachedImage = await LoadDiskAsync(future.Url);
+                    if (cachedImage != null && cachedImage.Length > 0)
                     {
-                        var sprite = ToSprite(texture, pivot);
-                        if (sprite != null)
-                            SaveToMemoryCache(future.Url, sprite, replace: true);
+                        await UniTask.SwitchToMainThread();
+                        if (future.IsCancelled)
+                        {
+                            RemoveLoading(future.Url); // LOADING REMOVED
+                            return;
+                        }
+                        var texture = new Texture2D(2, 2, textureFormat, true);
+                        if (texture.LoadImage(cachedImage))
+                        {
+                            var sprite = ToSprite(texture, pivot);
+                            if (sprite != null)
+                                SaveToMemoryCache(future.Url, sprite, replace: true);
 
-                        RemoveLoading(future.Url);
-                        future.Loaded(sprite, FutureLoadedFrom.DiskCache);
-                        return;
+                            RemoveLoading(future.Url); // LOADING REMOVED
+                            if (future.IsCancelled) return;
+                            future.Loaded(sprite, FutureLoadedFrom.DiskCache);
+                            return;
+                        }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    future.Cancel();
+                    return;
+                }
+                catch (Exception e)
+                {
+                    if (settings.debugLevel <= DebugLevel.Exception)
+                        Debug.LogException(e);
+                }
             }
-            catch (OperationCanceledException)
-            {
-                future.Cancel();
-            }
-            catch (Exception e)
-            {
-                if (settings.debugLevel <= DebugLevel.Exception)
-                    Debug.LogException(e);
-            }
+
+            future.Loading(FutureLoadingFrom.Source);
 
             UnityWebRequest request = null;
             var finished = false;
@@ -105,11 +115,13 @@ namespace Extensions.Unity.ImageLoader
                     try
                     {
                         request = UnityWebRequestTexture.GetTexture(future.Url);
-                        await request.SendWebRequest();
+                        var asyncOperation = request.SendWebRequest();
+                        await asyncOperation.WithCancellation(cancellationToken);
                     }
                     catch (OperationCanceledException)
                     {
                         future.Cancel();
+                        return;
                     }
                     catch (Exception e) 
                     {
@@ -144,16 +156,18 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled) return;
                     var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
                     SaveToMemoryCache(future.Url, sprite, replace: true);
+                    RemoveLoading(future.Url); // LOADING REMOVED
                     future.Loaded(sprite, FutureLoadedFrom.Source);
                 }
             }
             catch (OperationCanceledException)
             {
                 future.Cancel();
+                return;
             }
             finally
             {
-                RemoveLoading(future.Url);
+                RemoveLoading(future.Url); // LOADING REMOVED
             }
         }
     }
