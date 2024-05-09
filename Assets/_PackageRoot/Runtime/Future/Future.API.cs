@@ -10,10 +10,9 @@ namespace Extensions.Unity.ImageLoader
     {
         public Future<T> Then(Action<T> action)
         {
-            if (cleared)
+            if (IsLoaded)
             {
-                if (IsLoaded)
-                    action(value);
+                action(value);
                 return this;
             }
             OnLoaded += action;
@@ -21,10 +20,9 @@ namespace Extensions.Unity.ImageLoader
         }
         public Future<T> Failed(Action<Exception> action)
         {
-            if (cleared)
+            if (Status == FutureStatus.FailedToLoad)
             {
-                if (!IsLoaded && !IsCancelled)
-                    action(exception);
+                action(exception);
                 return this;
             }
             OnFailedToLoad += action;
@@ -32,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
         }
         public Future<T> Completed(Action<bool> action)
         {
-            if (cleared)
+            if (IsCompleted)
             {
                 action?.Invoke(IsLoaded);
                 return this;
@@ -42,10 +40,9 @@ namespace Extensions.Unity.ImageLoader
         }
         public Future<T> LoadedFromMemoryCache(Action<T> action)
         {
-            if (cleared)
+            if (Status == FutureStatus.LoadedFromMemoryCache)
             {
-                if (Status == FutureStatus.LoadedFromMemoryCache)
-                    action?.Invoke(value);
+                action?.Invoke(value);
                 return this;
             }
             OnLoadedFromMemoryCache += action;
@@ -53,55 +50,49 @@ namespace Extensions.Unity.ImageLoader
         }
         public Future<T> LoadingFromDiskCache(Action action)
         {
-            if (cleared)
+            if (Status == FutureStatus.LoadingFromDiskCache || Status == FutureStatus.LoadedFromDiskCache)
             {
-                if (Status == FutureStatus.LoadingFromDiskCache)
-                    action?.Invoke();
+                action?.Invoke();
                 return this;
             }
             OnLoadingFromDiskCache += action;
             return this;
         }
-
-        public Future<T> LoadedFromSource(Action<T> action)
-        {
-            if (cleared)
-            {
-                if (Status == FutureStatus.LoadedFromSource)
-                    action?.Invoke(value);
-                return this;
-            }
-            OnLoadedFromSource += action;
-            return this;
-        }
-        public Future<T> LoadingFromSource(Action action)
-        {
-            if (cleared)
-            {
-                if (Status == FutureStatus.LoadingFromSource)
-                    action?.Invoke();
-                return this;
-            }
-            OnLoadingFromSource += action;
-            return this;
-        }
         public Future<T> LoadedFromDiskCache(Action<T> action)
         {
-            if (cleared)
+            if (Status == FutureStatus.LoadedFromDiskCache)
             {
-                if (Status == FutureStatus.LoadedFromDiskCache)
-                    action?.Invoke(value);
+                action?.Invoke(value);
                 return this;
             }
             OnLoadedFromDiskCache += action;
             return this;
         }
+        public Future<T> LoadingFromSource(Action action)
+        {
+            if (Status == FutureStatus.LoadingFromSource || Status == FutureStatus.LoadedFromSource)
+            {
+                action?.Invoke();
+                return this;
+            }
+            OnLoadingFromSource += action;
+            return this;
+        }
+        public Future<T> LoadedFromSource(Action<T> action)
+        {
+            if (Status == FutureStatus.LoadedFromSource)
+            {
+                action?.Invoke(value);
+                return this;
+            }
+            OnLoadedFromSource += action;
+            return this;
+        }
         public Future<T> Cancelled(Action action)
         {
-            if (cleared)
+            if (IsCancelled)
             {
-                if (IsCancelled)
-                    action();
+                action();
                 return this;
             }
             OnCancelled += action;

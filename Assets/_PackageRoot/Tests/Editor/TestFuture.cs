@@ -4,6 +4,7 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System.Linq;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -196,6 +197,268 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromMemoryCache(x => sprite = x);
+
+                var task1 = future1.AsTask();
+
+                while (sprite != null)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                while (!task1.IsCompleted)
+                    yield return null;
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromMemoryCache(x => sprite = x);
+
+                var task1 = future1.AsTask();
+                future1.Cancel();
+
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                yield return UniTask.Delay(1000).ToCoroutine();
+                Assert.IsNull(sprite);
+            }
+        }
+                [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromDiskCache(x => sprite = x);
+
+                var task1 = future1.AsTask();
+
+                while (sprite != null)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                while (!task1.IsCompleted)
+                    yield return null;
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromDiskCache(x => sprite = x);
+
+                var task1 = future1.AsTask();
+                future1.Cancel();
+
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                yield return UniTask.Delay(1000).ToCoroutine();
+                Assert.IsNull(sprite);
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromSourceCalled()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromSource(x => sprite = x);
+
+                var task1 = future1.AsTask();
+
+                while (sprite != null)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                while (!task1.IsCompleted)
+                    yield return null;
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var sprite = default(Sprite);
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadedFromSource(x => sprite = x);
+
+                var task1 = future1.AsTask();
+                future1.Cancel();
+
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                yield return UniTask.Delay(1000).ToCoroutine();
+                Assert.IsNull(sprite);
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = false;
+
+            foreach (var url in ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
+                var called = false;
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadingFromDiskCache(() => called = true);
+
+                var task1 = future1.AsTask();
+
+                while (!called)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                while (!task1.IsCompleted)
+                    yield return null;
+
+                Assert.IsTrue(called);
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = false;
+
+            foreach (var url in ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
+                var called = false;
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadingFromDiskCache(() => called = true);
+
+                Assert.IsTrue(called);
+
+                var task1 = future1.AsTask();
+                future1.Cancel();
+
+                Assert.IsTrue(called);
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                Assert.IsTrue(called);
+                yield return UniTask.Delay(1000).ToCoroutine();
+                Assert.IsTrue(called);
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var called = false;
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadingFromSource(() => called = true);
+
+                var task1 = future1.AsTask();
+
+                while (!called)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                while (!task1.IsCompleted)
+                    yield return null;
+
+                Assert.IsTrue(called);
+            }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var called = false;
+                var startTime = DateTime.Now;
+                var future1 = ImageLoader.LoadSprite(url)
+                    .LoadingFromSource(() => called = true);
+
+                Assert.IsTrue(called);
+
+                var task1 = future1.AsTask();
+                future1.Cancel();
+
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                yield return UniTask.Delay(1000).ToCoroutine();
+                Assert.IsTrue(called);
             }
         }
     }

@@ -56,7 +56,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (settings.debugLevel <= DebugLevel.Log)
                     Debug.Log($"[ImageLoader] Waiting while another task is loading the sprite url={future.Url}");
-                await UniTask.WaitWhile(() => IsLoading(future.Url));
+                await UniTask.WaitWhile(() => IsLoading(future.Url) && !future.IsCancelled);
                 if (future.IsCancelled) return;
                 InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
                 return;
@@ -64,7 +64,7 @@ namespace Extensions.Unity.ImageLoader
 
             AddLoading(future.Url); // LOADING ADDED
 
-            if (settings.useDiskCache)
+            if (settings.useDiskCache && DiskCacheContains(future.Url))
             {
                 future.Loading(FutureLoadingFrom.DiskCache);
                 try
