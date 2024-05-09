@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SampleSetMultipleSpriteIntoMultipleImages : MonoBehaviour
+public class SampleSetSpriteIntoMultipleImages : MonoBehaviour
 {
     [SerializeField] string imageURL;
     [SerializeField] Image image1;
