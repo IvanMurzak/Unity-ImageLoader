@@ -117,6 +117,8 @@ namespace Extensions.Unity.ImageLoader
                 disposable?.Dispose();
             value = default;
             exception = default;
+            cts.Cancel();
+            cts.Dispose();
         }
         public void Forget()
         {
