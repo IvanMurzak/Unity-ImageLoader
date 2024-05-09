@@ -34,7 +34,6 @@ namespace Extensions.Unity.ImageLoader
             future.LoadingFromSource    (() =>     futureRef.Loading(FutureLoadingFrom.Source));
             future.LoadedFromSource     (sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.Source));
             future.Failed               (futureRef.FailToLoad);
-            // future.Cancelled            (futureRef.Cancel);
             futureRef.Cancelled         (future.Cancel);
 
             InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError, cancellationToken);
