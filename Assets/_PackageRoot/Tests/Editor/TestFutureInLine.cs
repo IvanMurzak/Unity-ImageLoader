@@ -244,8 +244,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
+            ImageLoader.settings.useDiskCache = false;
+            ImageLoader.settings.useMemoryCache = false;
 
             foreach (var url in ImageURLs)
             {
@@ -272,8 +272,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
+            ImageLoader.settings.useDiskCache = false;
+            ImageLoader.settings.useMemoryCache = false;
 
             foreach (var url in ImageURLs)
             {
