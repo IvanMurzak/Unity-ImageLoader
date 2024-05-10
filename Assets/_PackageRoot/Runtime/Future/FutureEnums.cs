@@ -12,11 +12,11 @@
         Canceled,
         Disposed
     }
-    internal enum FutureLoadedFrom
+    public enum FutureLoadedFrom
     {
         MemoryCache, DiskCache, Source, FailedToLoad
     }
-    internal enum FutureLoadingFrom
+    public enum FutureLoadingFrom
     {
         DiskCache, Source
     }
