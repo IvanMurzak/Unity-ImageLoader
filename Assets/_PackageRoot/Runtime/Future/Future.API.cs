@@ -185,7 +185,14 @@ namespace Extensions.Unity.ImageLoader
             {
                 try
                 {
+                    if (Status == FutureStatus.Canceled)
+                        return;
+
                     awaiter.GetResult();
+                }
+                catch (TaskCanceledException)
+                {
+                    // ignore
                 }
                 catch (Exception ex)
                 {
@@ -199,6 +206,9 @@ namespace Extensions.Unity.ImageLoader
                 {
                     try
                     {
+                        if (Status == FutureStatus.Canceled)
+                            return;
+
                         awaiter.GetResult();
                     }
                     catch (TaskCanceledException)
