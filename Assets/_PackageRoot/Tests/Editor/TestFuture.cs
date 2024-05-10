@@ -555,16 +555,34 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in ImageURLs)
             {
                 var completed = false;
+                var cancelled = false;
+                var startTime = DateTime.Now;
                 var future = ImageLoader.LoadSprite(url)
-                    .Completed(success => completed = true);
+                    .Completed(success => completed = true)
+                    .Cancelled(() => cancelled = true);
 
                 Assert.IsFalse(completed);
+                Assert.IsFalse(cancelled);
+                var task1 = future.AsTask();
                 future.Cancel();
-                Assert.IsFalse(completed);
-
-                yield return future.AsUniTask().ToCoroutine();
+                var task2 = future.AsTask();
 
                 Assert.IsFalse(completed);
+                Assert.IsTrue(cancelled);
+
+                while (!task1.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+                while (!task2.IsCompleted)
+                {
+                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                    yield return null;
+                }
+
+                Assert.IsFalse(completed);
+                Assert.IsTrue(cancelled);
             }
         }
     }
