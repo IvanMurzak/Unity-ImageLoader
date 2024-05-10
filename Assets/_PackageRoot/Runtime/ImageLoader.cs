@@ -6,9 +6,21 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        private static HashSet<string> loadingInProcess = new HashSet<string>();
-        private static void AddLoading(string url) => loadingInProcess.Add(url);
-        private static void RemoveLoading(string url) => loadingInProcess.Remove(url);
+        private static Dictionary<string, Future<Sprite>> loadingInProcess = new Dictionary<string, Future<Sprite>>();
+        private static void AddLoading(Future<Sprite> future)
+        {
+            loadingInProcess.Add(future.Url, future);
+            if (settings.debugLevel <= DebugLevel.Log)
+                Debug.Log($"[ImageLoader] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
+        }
+        private static void RemoveLoading(Future<Sprite> future)
+        {
+            if (loadingInProcess.Remove(future.Url))
+            {
+                if (settings.debugLevel <= DebugLevel.Log)
+                    Debug.Log($"[ImageLoader] RemoveLoading: {future.Url}, left {loadingInProcess.Count} loading tasks");
+            }
+        }
 
         /// <summary>
         /// Initialization of static variables, should be called from main thread at project start
@@ -23,7 +35,20 @@ namespace Extensions.Unity.ImageLoader
         /// Check if the url is loading right now
         /// </summary>
         /// <returns>Returns true if the url is loading right now</returns>
-        public static bool IsLoading(string url) => loadingInProcess.Contains(url);
+        public static bool IsLoading(string url) => loadingInProcess.ContainsKey(url);
+
+        /// <summary>
+        /// Find and return current loading Future by the url
+        /// <param name="url">URL to the picture, web or local</param>
+        /// </summary>
+        /// <returns>Returns current loading Future or null if none</returns>
+        public static Future<Sprite> GetLoadingFuture(string url) => loadingInProcess.TryGetValue(url, out var future) ? future : null;
+
+        /// <summary>
+        /// Return all current loading Futures
+        /// </summary>
+        /// <returns>Returns read only list of all current loading Futures</returns>
+        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values;
 
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls

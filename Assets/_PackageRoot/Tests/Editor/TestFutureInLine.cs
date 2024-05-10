@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
-using System.Linq;
 using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
@@ -21,6 +20,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [SetUp]
         public void SetUp()
         {
+            LogAssert.ignoreFailingMessages = false;
             ImageLoader.settings.debugLevel = DebugLevel.Log;
             ImageLoader.ClearRef();
         }
@@ -196,6 +196,8 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var future1 = ImageLoader.LoadSprite(url)
                     .LoadingFromDiskCache(() => called = true);
 
+                Assert.AreEqual(future1.Status, FutureStatus.LoadingFromDiskCache);
+                Assert.IsTrue(called);
                 var task1 = future1.AsTask();
 
                 while (!called)
@@ -314,13 +316,10 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(exception);
 
             LogAssert.ignoreFailingMessages = true;
-            {
-                yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
-                var task1 = future1.AsTask();
-                Assert.IsTrue(task1.IsCompleted);
-                Assert.IsNotNull(exception);
-            }
-            LogAssert.ignoreFailingMessages = false;
+            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            var task1 = future1.AsTask();
+            Assert.IsTrue(task1.IsCompleted);
+            Assert.IsNotNull(exception);
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {

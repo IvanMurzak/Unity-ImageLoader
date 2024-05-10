@@ -19,8 +19,7 @@ namespace Extensions.Unity.ImageLoader
             }
             UniTask.Delay(duration).ContinueWith(() =>
             {
-                if (!future.IsCompleted)
-                    future.FailToLoad(new Exception($"[ImageLoader] Timeout ({duration}): {future.Url}"));
+                future.FailToLoad(new Exception($"[ImageLoader] Timeout ({duration}): {future.Url}"));
             });
             return future;
         }

@@ -4,9 +4,20 @@ using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Future<T> : IDisposable
+    public interface IFuture
     {
-        public readonly string Url;
+        string Url { get; }
+        bool IsCancelled { get; }
+        bool IsLoaded { get; }
+        bool IsCompleted { get; }
+        bool IsInProgress { get; }
+        FutureStatus Status { get; }
+        CancellationToken CancellationToken { get; }
+        void Cancel();
+    }
+    public partial class Future<T> : IFuture, IDisposable
+    {
+        public string Url { get; }
 
         private event Action<T>           OnLoadedFromMemoryCache;
         private event Action              OnLoadingFromDiskCache;
@@ -19,6 +30,7 @@ namespace Extensions.Unity.ImageLoader
         private event Action              OnCancelled;
 
         private readonly CancellationTokenSource cts;
+        private readonly bool muteLogs;
         private bool cleared = false;
         private T value = default;
         private Exception exception = default;
@@ -37,23 +49,26 @@ namespace Extensions.Unity.ImageLoader
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
         public CancellationToken CancellationToken => cts.Token;
 
-        internal Future(string url, CancellationToken cancellationToken)
+        internal Future(string url, CancellationToken cancellationToken, bool muteLogs = false)
         {
             Url = url;
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            this.muteLogs = muteLogs;
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
         
-        internal Future<T> PassEvents(Future<T> to)
+        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true)
         {
-            OnLoadedFromMemoryCache += (v) => to.Loaded(v, FutureLoadedFrom.MemoryCache);
-            OnLoadingFromDiskCache  += ( ) => to.Loading(FutureLoadingFrom.DiskCache);
-            OnLoadedFromDiskCache   += (v) => to.Loaded(v, FutureLoadedFrom.DiskCache);
-            OnLoadingFromSource     += ( ) => to.Loading(FutureLoadingFrom.Source);
-            OnLoadedFromSource      += (v) => to.Loaded(v, FutureLoadedFrom.Source);
-            OnFailedToLoad          += to.FailToLoad;
-            OnCancelled             += to.Cancel;
+            LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     ((v) => to.Loaded(v, FutureLoadedFrom.Source));
+            Failed               (to.FailToLoad);
+
+            if (passCancelled)
+                Cancelled(to.Cancel);
 
             return this;
         }
@@ -73,7 +88,7 @@ namespace Extensions.Unity.ImageLoader
                 _ => throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom")
             };
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
                 Debug.Log($"[ImageLoader] Loading: {Url}, from: {loadingFrom}");
 
             onLoadingEvent?.Invoke();
@@ -97,7 +112,7 @@ namespace Extensions.Unity.ImageLoader
                 _ => throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded")
             };
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
                 Debug.Log($"[ImageLoader] Loaded: {Url}, from: {loadedFrom}");
 
             onLoadedEvent?.Invoke(value);
@@ -108,10 +123,11 @@ namespace Extensions.Unity.ImageLoader
         internal void FailToLoad(Exception exception)
         {
             if (cleared || IsCancelled) return;
+            if (IsCompleted || Status == FutureStatus.FailedToLoad) return;
             this.exception = exception;
             Status = FutureStatus.FailedToLoad;
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Error && !muteLogs)
                 Debug.LogError(exception.Message);
 
             cts.Cancel();
@@ -134,5 +150,9 @@ namespace Extensions.Unity.ImageLoader
             OnCompleted = null;
             OnCancelled = null;
         }
+
+        public override string ToString() => Url;
+        public override int GetHashCode() => Url.GetHashCode();
+        public override bool Equals(object obj) => obj is IFuture future && future.Url == Url;
     }
 }

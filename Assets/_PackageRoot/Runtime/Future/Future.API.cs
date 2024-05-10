@@ -102,7 +102,7 @@ namespace Extensions.Unity.ImageLoader
         public void Cancel()
         {
             if (cleared || IsCancelled) return;
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
                 Debug.Log($"[ImageLoader] Cancel: {Url}");
             Status = FutureStatus.Canceled;
             cts.Cancel();
@@ -131,7 +131,7 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (Exception ex)
                 {
-                    if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
+                    if (ImageLoader.settings.debugLevel <= DebugLevel.Exception && !muteLogs)
                         Debug.LogException(ex);
                 }
             }
@@ -143,9 +143,13 @@ namespace Extensions.Unity.ImageLoader
                     {
                         awaiter.GetResult();
                     }
+                    catch (TaskCanceledException)
+                    {
+                        // ignore
+                    }
                     catch (Exception ex)
                     {
-                        if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
+                        if (ImageLoader.settings.debugLevel <= DebugLevel.Exception && !muteLogs)
                             Debug.LogException(ex);
                     }
                 });

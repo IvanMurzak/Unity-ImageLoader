@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
-using System.Linq;
 using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
@@ -21,8 +20,24 @@ namespace Extensions.Unity.ImageLoader.Tests
         [SetUp]
         public void SetUp()
         {
+            LogAssert.ignoreFailingMessages = false;
             ImageLoader.settings.debugLevel = DebugLevel.Log;
             ImageLoader.ClearRef();
+        }
+        
+        [UnityTest] public IEnumerator GetAllLoadingFutures()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var loadingFutures = ImageLoader.GetLoadingFutures();
+            Debug.Log($"Loading future count={loadingFutures.Count}");
+            foreach (var loadingFuture in loadingFutures)
+            {
+                Debug.Log($"Loading future: {loadingFuture.Url}, Status={loadingFuture.Status}");
+            }
+            Assert.Zero(loadingFutures.Count);
         }
 
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
@@ -56,15 +71,20 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             var url1 = ImageURLs[0];
+            var startTime = DateTime.Now;
 
             var future1 = ImageLoader.LoadSpriteRef(url1);
             var future2 = ImageLoader.LoadSpriteRef(url1);
 
+            LogAssert.ignoreFailingMessages = true;
             future1.Cancel();
 
             var task2 = future2.AsTask();
             while (!task2.IsCompleted)
+            {
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
                 yield return null;
+            }
 
             var ref2 = task2.Result;
             Assert.IsNotNull(ref2.Value);
@@ -478,13 +498,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(exception);
 
             LogAssert.ignoreFailingMessages = true;
-            {
-                yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
-                var task1 = future1.AsTask();
-                Assert.IsTrue(task1.IsCompleted);
-                Assert.IsNotNull(exception);
-            }
-            LogAssert.ignoreFailingMessages = false;
+            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            var task1 = future1.AsTask();
+            Assert.IsTrue(task1.IsCompleted);
+            Assert.IsNotNull(exception);
+            future1.Cancel();
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
@@ -510,6 +528,44 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
             yield return UniTask.Delay(1000).ToCoroutine();
             Assert.IsNull(exception);
+        }
+        [UnityTest] public IEnumerator AsyncOperationCompletion()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var completed = false;
+                yield return ImageLoader.LoadSprite(url)
+                    .Completed(success => completed = true)
+                    .AsUniTask().ToCoroutine();
+
+                Assert.IsTrue(completed);
+            }
+        }
+        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+            LogAssert.ignoreFailingMessages = true;
+
+            foreach (var url in ImageURLs)
+            {
+                var completed = false;
+                var future = ImageLoader.LoadSprite(url)
+                    .Completed(success => completed = true);
+
+                Assert.IsFalse(completed);
+                future.Cancel();
+                Assert.IsFalse(completed);
+
+                yield return future.AsUniTask().ToCoroutine();
+
+                Assert.IsFalse(completed);
+            }
         }
     }
 }
