@@ -16,9 +16,9 @@ public class SampleLifecycle : MonoBehaviour
             .LoadingFromSource(() => Debug.Log("Loading from source")) // if loading from source
             .LoadedFromSource(sprite => Debug.Log("Loaded from source")) // if loaded from source
             .Failed(exception => Debug.LogException(exception)) // if failed to load
-            .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // if completed 
+            .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // if completed  (failed, loaded or canceled)
             .Then(sprite => Debug.Log("Loaded")) // if loaded
-            .ThenSet(image) // if success set sprite into image
+            .ThenSet(image) // if loaded set sprite into image
             .Canceled(() => Debug.Log("Canceled")) // if cancelled
             .Forget();
     }
