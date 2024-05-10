@@ -1,160 +1,158 @@
-﻿using Cysharp.Threading.Tasks;
-using System;
-using System.Runtime.CompilerServices;
+﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Future<T> : IDisposable
+    public interface IFuture
     {
-        public readonly string Url;
+        string Url { get; }
+        bool IsCancelled { get; }
+        bool IsLoaded { get; }
+        bool IsCompleted { get; }
+        bool IsInProgress { get; }
+        FutureStatus Status { get; }
+        CancellationToken CancellationToken { get; }
+        void Cancel();
+    }
+    public partial class Future<T> : IFuture, IDisposable
+    {
+        public string Url { get; }
 
-        private event Action<T> OnSuccess;
-        private event Action<Exception> OnFail;
-        private event Action OnCancelled;
+        private event Action<T>           OnLoadedFromMemoryCache;
+        private event Action              OnLoadingFromDiskCache;
+        private event Action<T>           OnLoadedFromDiskCache;
+        private event Action              OnLoadingFromSource;
+        private event Action<T>           OnLoadedFromSource;
+        private event Action<T>           OnLoaded;
+        private event Action<Exception>   OnFailedToLoad;
+        private event Action<bool>        OnCompleted;
+        private event Action              OnCancelled;
 
+        private readonly CancellationTokenSource cts;
+        private readonly bool muteLogs;
         private bool cleared = false;
         private T value = default;
         private Exception exception = default;
 
-        public bool IsCancelled { get; private set; } = false;
-        public bool Successeded { get; private set; } = false;
+        public bool IsCancelled => Status == FutureStatus.Canceled;
+        public bool IsLoaded => Status == FutureStatus.LoadedFromMemoryCache
+            || Status == FutureStatus.LoadedFromDiskCache
+            || Status == FutureStatus.LoadedFromSource;
+        public bool IsCompleted => Status == FutureStatus.LoadedFromMemoryCache
+            || Status == FutureStatus.LoadedFromDiskCache
+            || Status == FutureStatus.LoadedFromSource
+            || Status == FutureStatus.FailedToLoad;
+        public bool IsInProgress => Status == FutureStatus.Initialized
+            || Status == FutureStatus.LoadingFromDiskCache
+            || Status == FutureStatus.LoadingFromSource;
+        public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
+        public CancellationToken CancellationToken => cts.Token;
 
-        internal Future(string url, CancellationToken cancellationToken)
+        internal Future(string url, CancellationToken cancellationToken, bool muteLogs = false)
         {
             Url = url;
+            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            this.muteLogs = muteLogs;
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
-        internal void CompleteSuccess(T value)
+        
+        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true)
+        {
+            LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     ((v) => to.Loaded(v, FutureLoadedFrom.Source));
+            Failed               (to.FailToLoad);
+
+            if (passCancelled)
+                Canceled(to.Cancel);
+
+            return this;
+        }
+        internal void Loading(FutureLoadingFrom loadingFrom)
         {
             if (cleared || IsCancelled) return;
-            Successeded = true;
+            Status = loadingFrom switch
+            {
+                FutureLoadingFrom.DiskCache => FutureStatus.LoadingFromDiskCache,
+                FutureLoadingFrom.Source    => FutureStatus.LoadingFromSource,
+                _ => throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom")
+            };
+            var onLoadingEvent = loadingFrom switch
+            {
+                FutureLoadingFrom.DiskCache => OnLoadingFromDiskCache,
+                FutureLoadingFrom.Source    => OnLoadingFromSource,
+                _ => throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom")
+            };
+
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                Debug.Log($"[ImageLoader] Loading: {Url}, from: {loadingFrom}");
+
+            onLoadingEvent?.Invoke();
+        }
+        internal void Loaded(T value, FutureLoadedFrom loadedFrom)
+        {
+            if (cleared || IsCancelled) return;
             this.value = value;
-            OnSuccess?.Invoke(value);
+            Status = loadedFrom switch
+            {
+                FutureLoadedFrom.MemoryCache => FutureStatus.LoadedFromMemoryCache,
+                FutureLoadedFrom.DiskCache   => FutureStatus.LoadedFromDiskCache,
+                FutureLoadedFrom.Source      => FutureStatus.LoadedFromSource,
+                _ => throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded")
+            };
+            var onLoadedEvent = loadedFrom switch
+            {
+                FutureLoadedFrom.MemoryCache => OnLoadedFromMemoryCache,
+                FutureLoadedFrom.DiskCache => OnLoadedFromDiskCache,
+                FutureLoadedFrom.Source => OnLoadedFromSource,
+                _ => throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded")
+            };
+
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                Debug.Log($"[ImageLoader] Loaded: {Url}, from: {loadedFrom}");
+
+            onLoadedEvent?.Invoke(value);
+            OnLoaded?.Invoke(value);
+            OnCompleted?.Invoke(true);
             Clear();
         }
-        internal void CompleteFail(Exception exception)
+        internal void FailToLoad(Exception exception)
         {
             if (cleared || IsCancelled) return;
-            Successeded = false;
+            if (IsCompleted || Status == FutureStatus.FailedToLoad) return;
             this.exception = exception;
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Error)
+            Status = FutureStatus.FailedToLoad;
+
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Error && !muteLogs)
                 Debug.LogError(exception.Message);
-            OnFail?.Invoke(exception);
+
+            cts.Cancel();
+            OnFailedToLoad?.Invoke(exception);
+            OnCompleted?.Invoke(false);
             Clear();
         }
 
         private void Clear()
         {
             cleared = true;
-            OnSuccess = null;
-            OnFail = null;
+
+            OnLoadedFromMemoryCache = null;
+            OnLoadingFromDiskCache = null;
+            OnLoadedFromDiskCache = null;
+            OnLoadingFromSource = null;
+            OnLoadedFromSource = null;
+            OnLoaded = null;
+            OnFailedToLoad = null;
+            OnCompleted = null;
             OnCancelled = null;
         }
 
-        public Future<T> Then(Action<T> action)
-        {
-            if (cleared)
-            {
-                if (Successeded)
-                    action(value);
-                return this;
-            }
-            OnSuccess += action;
-            return this;
-        }
-        public Future<T> Failed(Action<Exception> action)
-        {
-            if (cleared)
-            {
-                if (!Successeded && !IsCancelled)
-                    action(exception);
-                return this;
-            }
-            OnFail += action;
-            return this;
-        }
-        public Future<T> Cancelled(Action action)
-        {
-            if (cleared)
-            {
-                if (IsCancelled)
-                    action();
-                return this;
-            }
-            OnCancelled += action;
-            return this;
-        }
-        public void Cancel()
-        {
-            if (cleared) return;
-            if (IsCancelled) return;
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Cancel: {Url}");
-            IsCancelled = true;
-            OnCancelled?.Invoke();
-            Clear();
-        }
-        public void Dispose()
-        {
-            Clear();
-            IsCancelled = true;
-            if (value is IDisposable disposable)
-                disposable?.Dispose();
-            value = default;
-            exception = default;
-        }
-        public void Forget()
-        {
-            var awaiter = GetAwaiter();
-            if (awaiter.IsCompleted)
-            {
-                try
-                {
-                    awaiter.GetResult();
-                }
-                catch (Exception ex)
-                {
-                    if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
-                        Debug.LogException(ex);
-                }
-            }
-            else
-            {
-                awaiter.OnCompleted(() =>
-                {
-                    try
-                    {
-                        awaiter.GetResult();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ImageLoader.settings.debugLevel <= DebugLevel.Exception)
-                            Debug.LogException(ex);
-                    }
-                });
-            }
-        }
-        public async UniTask<T> AsUniTask() => await this;
-        public async Task<T> AsTask() => await this;
-        public FutureAwaiter GetAwaiter()
-        {
-            var tcs = new TaskCompletionSource<T>();
-            Then(tcs.SetResult);
-            Failed(tcs.SetException);
-            Cancelled(tcs.SetCanceled);
-            return new FutureAwaiter(tcs.Task.GetAwaiter());
-        }
-        public class FutureAwaiter : INotifyCompletion
-        {
-            private readonly TaskAwaiter<T> _awaiter;
-            public FutureAwaiter(TaskAwaiter<T> awaiter) { _awaiter = awaiter; }
-            public bool IsCompleted => _awaiter.IsCompleted;
-            public T GetResult() => _awaiter.GetResult();
-            public void OnCompleted(Action continuation) => _awaiter.OnCompleted(continuation);
-        }
+        public override string ToString() => Url;
+        public override int GetHashCode() => Url.GetHashCode();
+        public override bool Equals(object obj) => obj is IFuture future && future.Url == Url;
     }
 }

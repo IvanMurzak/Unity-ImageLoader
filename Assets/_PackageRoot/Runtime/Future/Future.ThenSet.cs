@@ -25,14 +25,14 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Set image into array of the generic target instances
         /// </summary>
-        /// <param name="setter">Setter function that gets Target instance and Sprite instnace, it should set the Sprite value into Target instance</param>
+        /// <param name="setter">Setter function that gets Target instance and Sprite instance, it should set the Sprite value into Target instance</param>
         /// <param name="targets">Array of generic Target instances</param>
         /// <returns>Returns async Future</returns>
         public static Future<Sprite> ThenSet<T>(this Future<Sprite> future, Action<T, Sprite> setter, params T[] targets)
         {
             if ((targets?.Length ?? 0) == 0)
             {
-                future.CompleteFail(new Exception("No targets to set image"));
+                future.FailToLoad(new Exception("No targets to set image"));
                 return future;
             }
 

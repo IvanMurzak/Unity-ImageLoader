@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -29,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns sprite asynchronously </returns>
         public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
-            var future = new Future<Sprite>(url, cancellationToken);
+            var future = new Future<Sprite>(url, cancellationToken, muteLogs: false);
             InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return future;
         }
@@ -37,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (string.IsNullOrEmpty(future.Url))
             {
-                future.CompleteFail(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
+                future.FailToLoad(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
                 return;
             }
 
@@ -46,101 +47,151 @@ namespace Extensions.Unity.ImageLoader
                 var sprite = LoadFromMemoryCache(future.Url);
                 if (sprite != null)
                 {
-                    future.CompleteSuccess(sprite);
+                    future.Loaded(sprite, FutureLoadedFrom.MemoryCache);
                     return;
                 }
             }
 
-            if (IsLoading(future.Url))
+            var anotherLoadingFuture = GetLoadingFuture(future.Url);
+            if (anotherLoadingFuture != null)
             {
                 if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] Waiting while another task is loading the sprite url={future.Url}");
-                await UniTask.WaitWhile(() => IsLoading(future.Url));
-                if (future.IsCancelled) return;
+                    Debug.Log($"[ImageLoader] Waiting while another task is loading {future.Url}");
+
+                anotherLoadingFuture.PassEvents(future, passCancelled: false).Forget();
+                await UniTask.WaitWhile(() => IsLoading(future.Url) && !future.IsCancelled);
+
+                if (settings.debugLevel <= DebugLevel.Log)
+                {
+                    Debug.Log(future.IsCancelled
+                        ? $"[ImageLoader] Cancelled {future.Url}"
+                        : future.Status == FutureStatus.FailedToLoad 
+                            ? $"[ImageLoader] Failed to load {future.Url}"
+                            : $"[ImageLoader] Complete waiting for another task to load {future.Url}");
+                }
+                if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
+                    return;
                 InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
                 return;
             }
 
-            AddLoading(future.Url);
+            AddLoading(future); // LOADING ADDED
 
-            if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Loading new Sprite into memory url={future.Url}");
-            try
+            if (settings.useDiskCache && DiskCacheContains(future.Url))
             {
-                var cachedImage = await LoadDiskAsync(future.Url);
-                if (cachedImage != null && cachedImage.Length > 0)
+                future.Loading(FutureLoadingFrom.DiskCache);
+                try
                 {
-                    await UniTask.SwitchToMainThread();
-                    if (future.IsCancelled) return;
-                    var texture = new Texture2D(2, 2, textureFormat, true);
-                    if (texture.LoadImage(cachedImage))
+                    var cachedImage = await LoadDiskAsync(future.Url);
+                    if (cachedImage != null && cachedImage.Length > 0)
                     {
-                        var sprite = ToSprite(texture, pivot);
-                        if (sprite != null)
-                            SaveToMemoryCache(future.Url, sprite, replace: true);
+                        await UniTask.SwitchToMainThread();
+                        if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
+                        {
+                            RemoveLoading(future); // LOADING REMOVED
+                            return;
+                        }
+                        var texture = new Texture2D(2, 2, textureFormat, true);
+                        if (texture.LoadImage(cachedImage))
+                        {
+                            var sprite = ToSprite(texture, pivot);
+                            if (sprite != null)
+                                SaveToMemoryCache(future.Url, sprite, replace: true);
 
-                        RemoveLoading(future.Url);
-                        future.CompleteSuccess(sprite);
-                        return;
+                            RemoveLoading(future); // LOADING REMOVED
+                            if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
+                                return;
+                            future.Loaded(sprite, FutureLoadedFrom.DiskCache);
+                            return;
+                        }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                if (settings.debugLevel <= DebugLevel.Exception)
-                    Debug.LogException(e);
+                catch (OperationCanceledException)
+                {
+                    RemoveLoading(future); // LOADING REMOVED
+                    future.Cancel();
+                    return;
+                }
+                catch (Exception e)
+                {
+                    if (settings.debugLevel <= DebugLevel.Exception)
+                        Debug.LogException(e);
+                }
             }
 
-            UnityWebRequest request = null;
+            future.Loading(FutureLoadingFrom.Source);
+
+            var request = default(UnityWebRequest);
             var finished = false;
+            UniTask.Post(async () =>
+            {
+                try
+                {
+                    if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
+                        return;
+
+                    request = UnityWebRequestTexture.GetTexture(future.Url);
+                    request.timeout = (int)Math.Ceiling(settings.timeout.TotalSeconds);
+                    var asyncOperation = request.SendWebRequest();
+                    await asyncOperation.WithCancellation(future.CancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    future.Cancel();
+                }
+                catch (Exception e)
+                {
+                    if (settings.debugLevel <= DebugLevel.Exception && !ignoreImageNotFoundError)
+                        Debug.LogException(e);
+                }
+                finally
+                {
+                    finished = true;
+                }
+            });
             try
             {
-                UniTask.Post(async () =>
-                {
-                    try
-                    {
-                        request = UnityWebRequestTexture.GetTexture(future.Url);
-                        await request.SendWebRequest();
-                    }
-                    catch (Exception e) 
-                    {
-                        if (!ignoreImageNotFoundError)
-                            if (settings.debugLevel <= DebugLevel.Exception)
-                                Debug.LogException(e);
-                    }
-                    finally
-                    {
-                        finished = true;
-                    }
-                });
                 await UniTask.WaitUntil(() => finished);
-                if (future.IsCancelled) return;
-#if UNITY_2020_1_OR_NEWER
-                var isError = request.result != UnityWebRequest.Result.Success;
-#else
-                var isError = request.isNetworkError || request.isHttpError;
-#endif
-                if (isError)
+                if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                 {
-#if UNITY_2020_1_OR_NEWER
-                    var exception = new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}");
-#else
-                    var exception = new Exception($"[ImageLoader] {request.error}: url={future.Url}");
-#endif
-                    future.CompleteFail(exception);
-                }
-                else
-                {
-                    await SaveDiskAsync(future.Url, request.downloadHandler.data);
-                    if (future.IsCancelled) return;
-                    var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
-                    SaveToMemoryCache(future.Url, sprite, replace: true);
-                    future.CompleteSuccess(sprite);
+                    RemoveLoading(future); // LOADING REMOVED
+                    return;
                 }
             }
-            finally
+            catch (OperationCanceledException)
             {
-                RemoveLoading(future.Url);
+                RemoveLoading(future); // LOADING REMOVED
+                future.Cancel();
+                return;
+            }
+            
+#if UNITY_2020_1_OR_NEWER
+            var isError = request == null || request.result != UnityWebRequest.Result.Success;
+#else
+            var isError = request == null || request.isNetworkError || request.isHttpError;
+#endif
+            if (isError)
+            {
+#if UNITY_2020_1_OR_NEWER
+                var exception = new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}");
+#else
+                var exception = new Exception($"[ImageLoader] {request.error}: url={future.Url}");
+#endif
+                RemoveLoading(future); // LOADING REMOVED
+                future.FailToLoad(exception);
+            }
+            else
+            {
+                await SaveDiskAsync(future.Url, request.downloadHandler.data);
+                if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
+                {
+                    RemoveLoading(future); // LOADING REMOVED
+                    return;
+                }
+                var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
+                SaveToMemoryCache(future.Url, sprite, replace: true);
+                RemoveLoading(future); // LOADING REMOVED
+                future.Loaded(sprite, FutureLoadedFrom.Source);
             }
         }
     }
