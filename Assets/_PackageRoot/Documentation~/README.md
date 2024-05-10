@@ -19,6 +19,16 @@ Async image loader with two caching layers for Unity.
 - ✔️ Error handling `ImageLoader.LoadSprite(imageURL).Failed(exception => ...);`
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
 
+# Installation
+
+- [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
+- Open command line in Unity project folder
+- Run the command
+
+``` CLI
+openupm add extensions.unity.imageloader
+```
+
 # Usage
 
 In the main thread somewhere at the start of the project need to call `ImageLoader.Init();` once to initialize static properties in the right thread. It is required to make in the main thread. Then you can use `ImageLoader` from any thread and at any time.
@@ -125,7 +135,7 @@ public class SampleCancellation : MonoBehaviour
             .ThenSet(image) // if success set sprite into image
             .Then(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
             .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
-            .Cancelled(() => Debug.Log("ImageLoading cancelled")) // if cancelled
+            .Canceled(() => Debug.Log("ImageLoading canceled")) // if canceled
             .CancelOnDisable(this) // cancel OnDisable event of current gameObject
             .Forget();
     }
@@ -198,6 +208,36 @@ public class SampleAwaitAndForget : MonoBehaviour
 }
 ```
 
+# Sample - Lifecycle
+
+``` C#
+using Extensions.Unity.ImageLoader;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class SampleLifecycle : MonoBehaviour
+{
+    [SerializeField] string imageURL;
+    [SerializeField] Image image;
+
+    void Start()
+    {
+        ImageLoader.LoadSprite(imageURL) // load sprite
+            .LoadedFromMemoryCache(sprite => Debug.Log("Loaded from memory cache")) // if loaded from memory cache
+            .LoadingFromDiskCache(() => Debug.Log("Loading from disk cache")) // if loading from disk cache
+            .LoadedFromDiskCache(sprite => Debug.Log("Loaded from disk cache")) // if loaded from disk cache
+            .LoadingFromSource(() => Debug.Log("Loading from source")) // if loading from source
+            .LoadedFromSource(sprite => Debug.Log("Loaded from source")) // if loaded from source
+            .Failed(exception => Debug.LogException(exception)) // if failed to load
+            .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // if completed  (failed, loaded or canceled)
+            .Then(sprite => Debug.Log("Loaded")) // if loaded
+            .ThenSet(image) // if loaded set sprite into image
+            .Canceled(() => Debug.Log("Canceled")) // if cancelled
+            .Forget();
+    }
+}
+```
+
 # Texture Memory Management
 
 ImageLoader can manager memory usage of loaded textures. To use it need to call `ImageLoader.LoadSpriteRef` instead of `ImageLoader.LoadSprite`. It will return `Reference<Sprite>` object which contains `Sprite` and `Url` objects. When `Reference<Sprite>` object is not needed anymore, call `Dispose` method to release memory, or just don't save the reference on it. It is `IDisposable` and it will clean itself automatically. Each new instance of `Reference<Sprite>` increments reference counter of the texture. When the last reference is disposed, the texture will be unloaded from memory. Also the all related References will be automatically disposed if you call `ImageLoader.ClearMemoryCache` or `ImageLoader.ClearCache`.
@@ -265,14 +305,4 @@ ImageLoader.ClearDiskCache();
 
 // Clear only Disk cache for specific image
 ImageLoader.ClearDiskCache(url);
-```
-
-# Installation
-
-- [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
-- Open command line in Unity project folder
-- Run the command
-
-``` CLI
-openupm add extensions.unity.imageloader
 ```
