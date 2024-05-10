@@ -68,7 +68,7 @@ namespace Extensions.Unity.ImageLoader
             Failed               (to.FailToLoad);
 
             if (passCancelled)
-                Cancelled(to.Cancel);
+                Canceled(to.Cancel);
 
             return this;
         }

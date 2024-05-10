@@ -559,7 +559,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var startTime = DateTime.Now;
                 var future = ImageLoader.LoadSprite(url)
                     .Completed(success => completed = true)
-                    .Cancelled(() => cancelled = true);
+                    .Canceled(() => cancelled = true);
 
                 Assert.IsFalse(completed);
                 Assert.IsFalse(cancelled);
