@@ -77,7 +77,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
         public static Future<Sprite> ThenSet(this Future<Sprite> future, params RawImage[] rawImages)
-            => future.ThenSet((target, sprite) => target.texture = sprite.texture, rawImages);
+            => future.ThenSet((target, sprite) => target.texture = sprite?.texture, rawImages);
 
         /// <summary>
         /// Set image into array of SpriteRenderers
@@ -93,6 +93,6 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Materials</param>
         /// <returns>Returns async Future</returns>
         public static Future<Sprite> ThenSet(this Future<Sprite> future, string propertyName = "_MainTex", params Material[] materials)
-            => future.ThenSet((target, sprite) => target.SetTexture(propertyName, sprite.texture), materials);
+            => future.ThenSet((target, sprite) => target.SetTexture(propertyName, sprite?.texture), materials);
     }
 }

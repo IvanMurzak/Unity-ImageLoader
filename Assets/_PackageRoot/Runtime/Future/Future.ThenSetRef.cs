@@ -47,7 +47,7 @@ namespace Extensions.Unity.ImageLoader
                         setter?.Invoke(target, reference);
 
                         if (target is Component monoBehaviour)
-                            reference.AddTo(monoBehaviour.GetCancellationTokenOnDestroy());
+                            reference?.AddTo(monoBehaviour.GetCancellationTokenOnDestroy());
                     }
                 });
             });
@@ -59,7 +59,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Images</param>
         /// <returns>Returns async Future</returns>
         public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params Image[] images)
-            => future.ThenSet((target, reference) => target.sprite = reference.Value, images);
+            => future.ThenSet((target, reference) => target.sprite = reference?.Value, images);
 
         /// <summary>
         /// Set image into array of RawImages
@@ -67,7 +67,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
         public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params RawImage[] rawImages)
-            => future.ThenSet((target, reference) => target.texture = reference.Value.texture, rawImages);
+            => future.ThenSet((target, reference) => target.texture = reference?.Value?.texture, rawImages);
 
         /// <summary>
         /// Set image into array of SpriteRenderers
@@ -75,7 +75,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of SpriteRenderers</param>
         /// <returns>Returns async Future</returns>
         public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params SpriteRenderer[] spriteRenderers)
-            => future.ThenSet((target, reference) => target.sprite = reference.Value, spriteRenderers);
+            => future.ThenSet((target, reference) => target.sprite = reference?.Value, spriteRenderers);
 
         /// <summary>
         /// Set image into array of Materials
@@ -83,6 +83,6 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Materials</param>
         /// <returns>Returns async Future</returns>
         public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, string propertyName = "_MainTex", params Material[] materials)
-            => future.ThenSet((target, reference) => target.SetTexture(propertyName, reference.Value.texture), materials);
+            => future.ThenSet((target, reference) => target.SetTexture(propertyName, reference?.Value?.texture), materials);
     }
 }
