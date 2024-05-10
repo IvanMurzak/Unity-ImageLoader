@@ -25,7 +25,7 @@ public class SampleCancellation : MonoBehaviour
             .ThenSet(image) // if success set sprite into image
             .Then(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
             .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
-            .Canceled(() => Debug.Log("ImageLoading cancelled")) // if cancelled
+            .Canceled(() => Debug.Log("ImageLoading canceled")) // if cancelled
             .CancelOnDisable(this) // cancel OnDisable event of current gameObject
             .Forget();
     }
