@@ -28,6 +28,12 @@ namespace Extensions.Unity.ImageLoader
                 {
                     foreach (var target in targets)
                     {
+                        if (target == null)
+                        {
+                            if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
+                                Debug.LogWarning($"[ImageLoader] The target is null. Can't set image into it. Skipping.");
+                            continue;
+                        }
                         if (target is UIBehaviour uiBehaviour)
                         {
                             if (IsDestroyed(uiBehaviour))
@@ -37,7 +43,9 @@ namespace Extensions.Unity.ImageLoader
                                 continue;
                             }
                         }
+
                         setter?.Invoke(target, reference);
+
                         if (target is Component monoBehaviour)
                             reference.AddTo(monoBehaviour.GetCancellationTokenOnDestroy());
                     }
