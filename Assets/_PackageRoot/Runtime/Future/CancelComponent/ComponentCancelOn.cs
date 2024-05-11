@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public abstract class ComponentCancelOn : Component
+    public abstract class ComponentCancelOn : MonoBehaviour
     {
         protected event Action onTrigger;
         protected bool isTriggered;
