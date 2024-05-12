@@ -132,12 +132,18 @@ namespace Extensions.Unity.ImageLoader
 
                     request = UnityWebRequestTexture.GetTexture(future.Url);
                     request.timeout = (int)Math.Ceiling(settings.timeout.TotalSeconds);
-                    var asyncOperation = request.SendWebRequest();
-                    await asyncOperation.WithCancellation(future.CancellationToken);
+                    future = future.Canceled(request.Abort);
+                    await request.SendWebRequest();
                 }
                 catch (OperationCanceledException)
                 {
                     future.Cancel();
+                }
+                catch (TimeoutException e)
+                {
+                    RemoveLoading(future); // LOADING REMOVED
+                    future.FailToLoad(e);
+                    return;
                 }
                 catch (Exception e)
                 {

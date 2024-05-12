@@ -1,24 +1,35 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        private static Dictionary<string, Future<Sprite>> loadingInProcess = new Dictionary<string, Future<Sprite>>();
+        private static ConcurrentDictionary<string, Future<Sprite>> loadingInProcess = new ConcurrentDictionary<string, Future<Sprite>>();
         private static void AddLoading(Future<Sprite> future)
         {
-            loadingInProcess.Add(future.Url, future);
+            if (!loadingInProcess.TryAdd(future.Url, future))
+                throw new Exception($"[ImageLoader] AddLoading: {future.Url} already loading");
+
             if (settings.debugLevel <= DebugLevel.Log)
                 Debug.Log($"[ImageLoader] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
         }
-        private static void RemoveLoading(Future<Sprite> future)
+        private static void RemoveLoading(Future<Sprite> future) => RemoveLoading(future.Url);
+        private static void RemoveLoading(string url)
         {
-            if (loadingInProcess.Remove(future.Url))
+            if (loadingInProcess.TryRemove(url, out var future))
             {
                 if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] RemoveLoading: {future.Url}, left {loadingInProcess.Count} loading tasks");
+                    Debug.Log($"[ImageLoader] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
+            }
+            else
+            {
+                if (settings.debugLevel <= DebugLevel.Warning)
+                    Debug.LogWarning($"[ImageLoader] RemoveLoading: {url} not found in loading tasks");
             }
         }
 
@@ -48,15 +59,27 @@ namespace Extensions.Unity.ImageLoader
         /// Return all current loading Futures
         /// </summary>
         /// <returns>Returns read only list of all current loading Futures</returns>
-        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values;
+        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values.ToArray();
 
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls
         /// </summary>
+        /// <returns>Returns task of the disk cache clearing process</returns>
         public static Task ClearCache()
         {
             ClearMemoryCache();
             return ClearDiskCache();
+        }
+
+        /// <summary>
+        /// Clear cache from Memory and Disk layers for all urls
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns task of the disk cache clearing process</returns>
+        public static Task ClearCache(string url)
+        {
+            ClearMemoryCache(url);
+            return ClearDiskCache(url);
         }
 
         /// <summary>
