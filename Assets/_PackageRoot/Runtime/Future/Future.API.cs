@@ -142,7 +142,18 @@ namespace Extensions.Unity.ImageLoader
                 action();
                 return this;
             }
-            OnCancelled += action;
+            OnCanceled += action;
+            return this;
+        }
+
+        /// <summary>
+        /// When the Future is going to be disposed
+        /// </summary>
+        /// <param name="action">action to execute on the event</param>
+        /// <returns>Returns the Future instance</returns>
+        public Future<T> Disposed(Action action)
+        {
+            OnDispose += action;
             return this;
         }
 
@@ -156,7 +167,7 @@ namespace Extensions.Unity.ImageLoader
                 Debug.Log($"[ImageLoader] Cancel: {Url}");
             Status = FutureStatus.Canceled;
             cts.Cancel();
-            OnCancelled?.Invoke();
+            OnCanceled?.Invoke();
             Clear();
         }
 
@@ -167,8 +178,12 @@ namespace Extensions.Unity.ImageLoader
         {
             Clear();
             Status = FutureStatus.Disposed;
+            OnDispose?.Invoke();
+            OnDispose = null;
+
             if (value is IDisposable disposable)
                 disposable?.Dispose();
+
             value = default;
             exception = default;
             cts.Cancel();

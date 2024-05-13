@@ -232,7 +232,8 @@ public class SampleLifecycle : MonoBehaviour
             .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // if completed  (failed, loaded or canceled)
             .Then(sprite => Debug.Log("Loaded")) // if loaded
             .ThenSet(image) // if loaded set sprite into image
-            .Canceled(() => Debug.Log("Canceled")) // if cancelled
+            .Canceled(() => Debug.Log("Canceled")) // if canceled
+            .Disposed(() => Debug.Log("Disposed")) // if disposed
             .Forget();
     }
 }

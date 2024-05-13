@@ -27,7 +27,8 @@ namespace Extensions.Unity.ImageLoader
         private event Action<T>           OnLoaded;
         private event Action<Exception>   OnFailedToLoad;
         private event Action<bool>        OnCompleted;
-        private event Action              OnCancelled;
+        private event Action              OnCanceled;
+        private event Action              OnDispose;
 
         private readonly CancellationTokenSource cts;
         private readonly bool muteLogs;
@@ -69,6 +70,8 @@ namespace Extensions.Unity.ImageLoader
 
             if (passCancelled)
                 Canceled(to.Cancel);
+
+            Disposed(to.Dispose);
 
             return this;
         }
@@ -148,7 +151,7 @@ namespace Extensions.Unity.ImageLoader
             OnLoaded = null;
             OnFailedToLoad = null;
             OnCompleted = null;
-            OnCancelled = null;
+            OnCanceled = null;
         }
 
         public override string ToString() => Url;
