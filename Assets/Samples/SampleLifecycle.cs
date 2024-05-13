@@ -20,7 +20,7 @@ public class SampleLifecycle : MonoBehaviour
             .Then(sprite => Debug.Log("Loaded")) // if loaded
             .ThenSet(image) // if loaded set sprite into image
             .Canceled(() => Debug.Log("Canceled")) // if canceled
-            .Disposed(() => Debug.Log("Disposed")) // if disposed
+            .Disposed(future => Debug.Log("Disposed")) // if disposed
             .Forget();
     }
 }

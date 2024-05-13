@@ -28,7 +28,7 @@ namespace Extensions.Unity.ImageLoader
         private event Action<Exception>   OnFailedToLoad;
         private event Action<bool>        OnCompleted;
         private event Action              OnCanceled;
-        private event Action              OnDispose;
+        private event Action<Future<T>>   OnDispose;
 
         private readonly CancellationTokenSource cts;
         private readonly bool muteLogs;
@@ -71,7 +71,7 @@ namespace Extensions.Unity.ImageLoader
             if (passCancelled)
                 Canceled(to.Cancel);
 
-            Disposed(to.Dispose);
+            Disposed(future => to.Dispose());
 
             return this;
         }

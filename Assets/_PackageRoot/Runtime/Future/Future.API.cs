@@ -151,7 +151,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> Disposed(Action action)
+        public Future<T> Disposed(Action<Future<T>> action)
         {
             OnDispose += action;
             return this;
@@ -178,7 +178,7 @@ namespace Extensions.Unity.ImageLoader
         {
             Clear();
             Status = FutureStatus.Disposed;
-            OnDispose?.Invoke();
+            OnDispose?.Invoke(this);
             OnDispose = null;
 
             if (value is IDisposable disposable)
