@@ -5,7 +5,7 @@
         "name": "Ivan Murzak",
         "url": "https://github.com/IvanMurzak"
     },
-    "version": "5.3.1",
+    "version": "5.3.2",
     "unity": "2019.2",
     "description": "Asynchronous image loading from remote or local destination. It has two layers of configurable Memory and Disk cache systems.",
     "dependencies": {

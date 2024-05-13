@@ -36,6 +36,7 @@ namespace Extensions.Unity.ImageLoader
         private T value = default;
         private Exception exception = default;
 
+        public T Value => value;
         public bool IsCancelled => Status == FutureStatus.Canceled;
         public bool IsLoaded => Status == FutureStatus.LoadedFromMemoryCache
             || Status == FutureStatus.LoadedFromDiskCache
