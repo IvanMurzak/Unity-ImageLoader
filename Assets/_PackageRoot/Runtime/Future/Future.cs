@@ -32,6 +32,8 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
         private readonly bool muteLogs;
+        public bool UseDiskCache { get; private set; }
+        public bool UseMemoryCache { get; private set; }
         private bool cleared = false;
         private T value = default;
         private Exception exception = default;
@@ -56,10 +58,12 @@ namespace Extensions.Unity.ImageLoader
             Url = url;
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             this.muteLogs = muteLogs;
+            UseDiskCache = ImageLoader.settings.useDiskCache;
+            UseMemoryCache = ImageLoader.settings.useMemoryCache;
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
-        
+
         internal Future<T> PassEvents(Future<T> to, bool passCancelled = true)
         {
             LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));

@@ -65,7 +65,7 @@ namespace Extensions.Unity.ImageLoader
                 {
                     Debug.Log(future.IsCancelled
                         ? $"[ImageLoader] Cancelled {future.Url}"
-                        : future.Status == FutureStatus.FailedToLoad 
+                        : future.Status == FutureStatus.FailedToLoad
                             ? $"[ImageLoader] Failed to load {future.Url}"
                             : $"[ImageLoader] Complete waiting for another task to load {future.Url}");
                 }
@@ -77,7 +77,7 @@ namespace Extensions.Unity.ImageLoader
 
             AddLoading(future); // LOADING ADDED
 
-            if (settings.useDiskCache && DiskCacheContains(future.Url))
+            if (future.UseDiskCache && DiskCacheContains(future.Url))
             {
                 future.Loading(FutureLoadingFrom.DiskCache);
                 try
@@ -95,7 +95,7 @@ namespace Extensions.Unity.ImageLoader
                         if (texture.LoadImage(cachedImage))
                         {
                             var sprite = ToSprite(texture, pivot);
-                            if (sprite != null)
+                            if (sprite != null && future.UseMemoryCache)
                                 SaveToMemoryCache(future.Url, sprite, replace: true);
 
                             RemoveLoading(future); // LOADING REMOVED
@@ -170,7 +170,7 @@ namespace Extensions.Unity.ImageLoader
                 future.Cancel();
                 return;
             }
-            
+
 #if UNITY_2020_1_OR_NEWER
             var isError = request == null || request.result != UnityWebRequest.Result.Success;
 #else
@@ -195,7 +195,8 @@ namespace Extensions.Unity.ImageLoader
                     return;
                 }
                 var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
-                SaveToMemoryCache(future.Url, sprite, replace: true);
+                if (future.UseMemoryCache)
+                    SaveToMemoryCache(future.Url, sprite, replace: true);
                 RemoveLoading(future); // LOADING REMOVED
                 future.Loaded(sprite, FutureLoadedFrom.Source);
             }
