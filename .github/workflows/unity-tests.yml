@@ -3,7 +3,7 @@ name: Unity Editor Tests
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   test:
