@@ -12,8 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - .
+        projectPath: .
         unityVersion: '2020.3.0f1'
         testMode:
           - editmode
