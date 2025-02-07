@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
-        static readonly string IncorrectImageURL = "https://doesntexist.com/404.png";
+        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
 
         [SetUp]
         public void SetUp()

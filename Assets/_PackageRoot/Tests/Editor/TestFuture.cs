@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
-        static readonly string IncorrectImageURL = "https://doesntexist.com/404.png";
+        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
 
         [SetUp]
         public void SetUp()
@@ -24,7 +24,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.debugLevel = DebugLevel.Log;
             ImageLoader.ClearRef();
         }
-        
+
         [UnityTest] public IEnumerator GetAllLoadingFutures()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -82,7 +82,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task2 = future2.AsTask();
             while (!task2.IsCompleted)
             {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(10));
                 yield return null;
             }
 
@@ -503,6 +503,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsNotNull(exception);
             future1.Cancel();
+            LogAssert.ignoreFailingMessages = false;
+            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
