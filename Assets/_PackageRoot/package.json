@@ -5,11 +5,11 @@
         "name": "Ivan Murzak",
         "url": "https://github.com/IvanMurzak"
     },
-    "version": "5.3.3",
+    "version": "5.4.0",
     "unity": "2019.2",
     "description": "Asynchronous image loading from remote or local destination. It has two layers of configurable Memory and Disk cache systems.",
     "dependencies": {
-        "com.cysharp.unitask": "2.5.4"
+        "com.cysharp.unitask": "2.5.10"
     },
     "scopedRegistries": [
         {
