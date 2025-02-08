@@ -1,4 +1,4 @@
-name: Unity Editor Tests
+name: Editor Tests
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   testAllModes:
-    name: Test in ${{ matrix.testMode }}
+    name: Test in ${{ matrix.unityVersion }} ${{ matrix.testMode }}
     runs-on: ubuntu-latest
     environment: Test
     strategy:
