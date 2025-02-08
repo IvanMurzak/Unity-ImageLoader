@@ -12,6 +12,7 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns async Future</returns>
         public Future<T> Timeout(TimeSpan duration)
         {
+            timeout = duration;
             if (WebRequest != null)
             {
                 WebRequest.timeout = (int)Math.Ceiling(duration.TotalSeconds);

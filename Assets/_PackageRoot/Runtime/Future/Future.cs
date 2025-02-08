@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -35,6 +35,7 @@ namespace Extensions.Unity.ImageLoader
         private readonly bool muteLogs;
         public bool UseDiskCache { get; private set; }
         public bool UseMemoryCache { get; private set; }
+        private TimeSpan timeout;
         private bool cleared = false;
         private T value = default;
         private Exception exception = default;
