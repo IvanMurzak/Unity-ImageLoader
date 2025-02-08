@@ -184,6 +184,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 cts.Cancel();
                 OnCanceled?.Invoke();
+                OnCanceled = null;
             }
             Status = FutureStatus.Disposed;
             OnDispose?.Invoke(this);
@@ -197,6 +198,8 @@ namespace Extensions.Unity.ImageLoader
             exception = default;
 
             cts.Dispose();
+            WebRequest?.Dispose();
+            WebRequest = null;
         }
 
         /// <summary>

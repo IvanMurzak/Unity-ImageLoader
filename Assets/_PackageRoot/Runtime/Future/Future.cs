@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -38,6 +39,8 @@ namespace Extensions.Unity.ImageLoader
         private T value = default;
         private Exception exception = default;
 
+        internal UnityWebRequest WebRequest { get; private set; }
+
         public T Value => value;
         public bool IsCancelled => Status == FutureStatus.Canceled;
         public bool IsLoaded => Status == FutureStatus.LoadedFromMemoryCache
@@ -60,6 +63,8 @@ namespace Extensions.Unity.ImageLoader
             this.muteLogs = muteLogs;
             UseDiskCache = ImageLoader.settings.useDiskCache;
             UseMemoryCache = ImageLoader.settings.useMemoryCache;
+            timeout = ImageLoader.settings.timeout;
+
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
@@ -157,6 +162,8 @@ namespace Extensions.Unity.ImageLoader
             OnFailedToLoad = null;
             OnCompleted = null;
             OnCanceled = null;
+
+            WebRequest?.Abort();
         }
 
         public override string ToString() => Url;

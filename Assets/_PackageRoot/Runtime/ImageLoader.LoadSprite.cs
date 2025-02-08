@@ -121,7 +121,6 @@ namespace Extensions.Unity.ImageLoader
 
             future.Loading(FutureLoadingFrom.Source);
 
-            var request = default(UnityWebRequest);
             var finished = false;
             UniTask.Post(async () =>
             {
@@ -130,10 +129,10 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                         return;
 
-                    request = UnityWebRequestTexture.GetTexture(future.Url);
-                    request.timeout = (int)Math.Ceiling(settings.timeout.TotalSeconds);
-                    future = future.Canceled(request.Abort);
-                    await request.SendWebRequest();
+                    var asyncOperation = future.SetWebRequest(UnityWebRequestTexture.GetTexture(future.Url))
+                        .SendWebRequest();
+
+                    await UniTask.WaitUntil(() => asyncOperation.isDone || future.IsCancelled);
                 }
                 catch (OperationCanceledException)
                 {
@@ -155,6 +154,7 @@ namespace Extensions.Unity.ImageLoader
                     finished = true;
                 }
             });
+
             try
             {
                 await UniTask.WaitUntil(() => finished);
@@ -172,29 +172,29 @@ namespace Extensions.Unity.ImageLoader
             }
 
 #if UNITY_2020_1_OR_NEWER
-            var isError = request == null || request.result != UnityWebRequest.Result.Success;
+            var isError = future.WebRequest == null || future.WebRequest.result != UnityWebRequest.Result.Success;
 #else
-            var isError = request == null || request.isNetworkError || request.isHttpError;
+            var isError = future.WebRequest == null || future.WebRequest.isNetworkError || request.isHttpError;
 #endif
             if (isError)
             {
 #if UNITY_2020_1_OR_NEWER
-                var exception = new Exception($"[ImageLoader] {request.result} {request.error}: url={future.Url}");
+                var exception = new Exception($"[ImageLoader] {future.WebRequest?.result} {future.WebRequest?.error}: url={future.Url}");
 #else
-                var exception = new Exception($"[ImageLoader] {request.error}: url={future.Url}");
+                var exception = new Exception($"[ImageLoader] {future.WebRequest?.error}: url={future.Url}");
 #endif
                 RemoveLoading(future); // LOADING REMOVED
                 future.FailToLoad(exception);
             }
             else
             {
-                await SaveDiskAsync(future.Url, request.downloadHandler.data);
+                await SaveDiskAsync(future.Url, future.WebRequest.downloadHandler.data);
                 if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                 {
                     RemoveLoading(future); // LOADING REMOVED
                     return;
                 }
-                var sprite = ToSprite(((DownloadHandlerTexture)request.downloadHandler).texture);
+                var sprite = ToSprite(((DownloadHandlerTexture)future.WebRequest.downloadHandler).texture);
                 if (future.UseMemoryCache)
                     SaveToMemoryCache(future.Url, sprite, replace: true);
                 RemoveLoading(future); // LOADING REMOVED

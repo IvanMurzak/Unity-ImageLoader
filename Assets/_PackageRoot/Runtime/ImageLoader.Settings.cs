@@ -10,7 +10,7 @@ namespace Extensions.Unity.ImageLoader
     {
         public DebugLevel debugLevel = DebugLevel.Warning;
         public bool useMemoryCache = true;
-#if UNITY_WEBGL 
+#if UNITY_WEBGL
         public bool useDiskCache = false; // default value for WebGL = false
 #else
         public bool useDiskCache = true;  // default value for non WebGL = true

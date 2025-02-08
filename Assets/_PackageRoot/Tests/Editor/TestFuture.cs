@@ -230,7 +230,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromMemoryCache(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -255,7 +255,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromMemoryCache(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -280,7 +280,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromDiskCache(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -305,7 +305,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromDiskCache(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -330,7 +330,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromSource(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -355,7 +355,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadedFromSource(x => sprite = x);
 
                 var task1 = future1.AsTask();
@@ -381,7 +381,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadingFromDiskCache(() => called = true);
 
                 var task1 = future1.AsTask();
@@ -409,7 +409,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadingFromDiskCache(() => called = true);
 
                 Assert.IsTrue(called);
@@ -438,7 +438,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var called = false;
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadingFromSource(() => called = true);
 
                 var task1 = future1.AsTask();
@@ -465,7 +465,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var called = false;
                 var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
+                using var future1 = ImageLoader.LoadSprite(url)
                     .LoadingFromSource(() => called = true);
 
                 Assert.IsTrue(called);
@@ -491,8 +491,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url = IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
-            var future1 = ImageLoader.LoadSprite(url)
-                .Timeout(TimeSpan.FromSeconds(1.5f))
+            using var future1 = ImageLoader.LoadSprite(url)
+                .Timeout(TimeSpan.FromSeconds(0.5f))
                 .Failed(e => exception = e);
 
             Assert.IsNull(exception);
@@ -515,7 +515,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url = IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
-            var future1 = ImageLoader.LoadSprite(url)
+            using var future1 = ImageLoader.LoadSprite(url)
                 .Failed(e => exception = e);
 
             Assert.IsNull(exception);
@@ -546,6 +546,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 Assert.IsTrue(completed);
             }
+            yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
         }
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
         {
@@ -559,7 +560,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var completed = false;
                 var cancelled = false;
                 var startTime = DateTime.Now;
-                var future = ImageLoader.LoadSprite(url)
+                using var future = ImageLoader.LoadSprite(url)
                     .Completed(success => completed = true)
                     .Canceled(() => cancelled = true);
 
@@ -585,6 +586,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 Assert.IsFalse(completed);
                 Assert.IsTrue(cancelled);
+                yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
             }
         }
     }
