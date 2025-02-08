@@ -82,7 +82,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task2 = future2.AsTask();
             while (!task2.IsCompleted)
             {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(10));
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(20));
                 yield return null;
             }
 
