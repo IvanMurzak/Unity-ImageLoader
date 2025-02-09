@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -70,7 +70,7 @@ namespace Extensions.Unity.ImageLoader
         }
         ~Future() => Dispose();
 
-        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true)
+        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true, bool passDisposed = false)
         {
             LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
@@ -82,6 +82,7 @@ namespace Extensions.Unity.ImageLoader
             if (passCancelled)
                 Canceled(to.Cancel);
 
+            if (passDisposed)
             Disposed(future => to.Dispose());
 
             return this;
