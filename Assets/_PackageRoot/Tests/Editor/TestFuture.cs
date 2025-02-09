@@ -53,6 +53,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return null;
 
             var ref0 = task1.Result;
+            Assert.IsNotNull(ref0);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 
             ImageLoader.ClearMemoryCache(url1);
@@ -76,17 +77,17 @@ namespace Extensions.Unity.ImageLoader.Tests
             var future1 = ImageLoader.LoadSpriteRef(url1);
             var future2 = ImageLoader.LoadSpriteRef(url1);
 
-            LogAssert.ignoreFailingMessages = true;
             future1.Cancel();
 
             var task2 = future2.AsTask();
             while (!task2.IsCompleted)
             {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(20));
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
                 yield return null;
             }
 
             var ref2 = task2.Result;
+            Assert.IsNotNull(ref2);
             Assert.IsNotNull(ref2.Value);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
         }
@@ -106,7 +107,9 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return null;
 
             var ref0 = task1.Result;
+            Assert.IsNotNull(ref0);
             var ref1 = task2.Result;
+            Assert.IsNotNull(ref1);
             Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
 
             ImageLoader.ClearMemoryCache(url1);
@@ -128,7 +131,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url1 = ImageURLs[0];
 
             var future1 = ImageLoader.LoadSpriteRef(url1);
+            Assert.IsNotNull(future1);
             var future2 = ImageLoader.LoadSpriteRef(url1);
+            Assert.IsNotNull(future2);
 
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
 

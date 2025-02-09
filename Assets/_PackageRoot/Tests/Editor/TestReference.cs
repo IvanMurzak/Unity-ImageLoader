@@ -185,6 +185,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return null;
 
             var ref1_1 = task1.Result;
+            Assert.NotNull(ref1_1);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 
             var task2 = ImageLoader.LoadSpriteRef(url2).AsTask();
@@ -192,12 +193,15 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return null;
 
             var ref2_1 = task2.Result;
+            Assert.NotNull(ref2_1);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url2));
 
             var ref1_2 = ImageLoader.LoadFromMemoryCacheRef(url1);
+            Assert.NotNull(ref1_2);
             Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
 
             var ref2_2 = ImageLoader.LoadFromMemoryCacheRef(url2);
+            Assert.NotNull(ref2_2);
             Assert.AreEqual(2, Reference<Sprite>.Counter(url2));
 
             ref1_1.Dispose();
