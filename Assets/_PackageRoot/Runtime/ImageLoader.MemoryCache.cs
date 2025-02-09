@@ -7,7 +7,7 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        internal static ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
+        internal static volatile ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnEnterPlayMode]
