@@ -164,7 +164,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (cleared || IsCancelled) return;
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
-                Debug.Log($"[ImageLoader] Cancel: {Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Cancel: {Url}");
             Status = FutureStatus.Canceled;
             if (!cts.IsCancellationRequested)
             {
@@ -180,6 +180,10 @@ namespace Extensions.Unity.ImageLoader
         public void Dispose()
         {
             if (Status == FutureStatus.Disposed) return;
+
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
+
             if (!cts.IsCancellationRequested)
             {
                 cts.Cancel();

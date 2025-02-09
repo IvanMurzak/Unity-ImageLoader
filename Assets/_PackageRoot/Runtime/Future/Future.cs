@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,6 +18,8 @@ namespace Extensions.Unity.ImageLoader
     }
     public partial class Future<T> : IFuture, IDisposable
     {
+        private static int idCounter = 0;
+
         public string Url { get; }
 
         private event Action<T>           OnLoadedFromMemoryCache;
@@ -33,6 +35,9 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
         private readonly bool muteLogs;
+
+        internal readonly int id = idCounter++;
+
         public bool UseDiskCache { get; private set; }
         public bool UseMemoryCache { get; private set; }
         private TimeSpan timeout;
@@ -83,7 +88,7 @@ namespace Extensions.Unity.ImageLoader
                 Canceled(to.Cancel);
 
             if (passDisposed)
-            Disposed(future => to.Dispose());
+                Disposed(future => to.Dispose());
 
             return this;
         }
@@ -104,7 +109,7 @@ namespace Extensions.Unity.ImageLoader
             };
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
-                Debug.Log($"[ImageLoader] Loading: {Url}, from: {loadingFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loading: {Url}, from: {loadingFrom}");
 
             onLoadingEvent?.Invoke();
         }
@@ -128,7 +133,7 @@ namespace Extensions.Unity.ImageLoader
             };
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
-                Debug.Log($"[ImageLoader] Loaded: {Url}, from: {loadedFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loaded: {Url}, from: {loadedFrom}");
 
             onLoadedEvent?.Invoke(value);
             OnLoaded?.Invoke(value);

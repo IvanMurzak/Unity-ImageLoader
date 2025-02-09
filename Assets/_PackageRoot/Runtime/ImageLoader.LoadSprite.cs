@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -38,7 +37,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (string.IsNullOrEmpty(future.Url))
             {
-                future.FailToLoad(new Exception($"[ImageLoader] Empty url. Image could not be loaded!"));
+                future.FailToLoad(new Exception($"[ImageLoader] Future[id={future.id}] Empty url. Image could not be loaded!"));
                 return;
             }
 
@@ -56,7 +55,7 @@ namespace Extensions.Unity.ImageLoader
             if (anotherLoadingFuture != null)
             {
                 if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] Waiting while another task is loading {future.Url}");
+                    Debug.Log($"[ImageLoader] Future[id={future.id}] Waiting while another task is loading {future.Url}");
 
                 anotherLoadingFuture.PassEvents(future, passCancelled: false).Forget();
                 await UniTask.WaitWhile(() => IsLoading(future.Url) && !future.IsCancelled);
@@ -64,10 +63,10 @@ namespace Extensions.Unity.ImageLoader
                 if (settings.debugLevel <= DebugLevel.Log)
                 {
                     Debug.Log(future.IsCancelled
-                        ? $"[ImageLoader] Cancelled {future.Url}"
+                        ? $"[ImageLoader] Future[id={future.id}] Cancelled {future.Url}"
                         : future.Status == FutureStatus.FailedToLoad
-                            ? $"[ImageLoader] Failed to load {future.Url}"
-                            : $"[ImageLoader] Complete waiting for another task to load {future.Url}");
+                            ? $"[ImageLoader] Future[id={future.id}] Another task. Failed to load {future.Url}"
+                            : $"[ImageLoader] Future[id={future.id}] Another task. Complete waiting for another task to load {future.Url}");
                 }
                 if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                     return;
@@ -129,6 +128,9 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                         return;
 
+                    if (settings.debugLevel <= DebugLevel.Log)
+                        Debug.Log($"[ImageLoader] Future[id={future.id}] Creating UnityWebRequest for loading from Source {future.Url}");
+
                     var asyncOperation = future.SetWebRequest(UnityWebRequestTexture.GetTexture(future.Url))
                         .SendWebRequest();
 
@@ -171,20 +173,27 @@ namespace Extensions.Unity.ImageLoader
                 return;
             }
 
+            if (future.WebRequest == null)
+            {
+                RemoveLoading(future); // LOADING REMOVED
+                future.FailToLoad(new Exception($"[ImageLoader] Future[id={future.id}] UnityWebRequest is null: url={future.Url}"));
+                return;
+            }
+
 #if UNITY_2020_1_OR_NEWER
-            var isError = future.WebRequest == null || future.WebRequest.result != UnityWebRequest.Result.Success;
+            var isError = future.WebRequest.result != UnityWebRequest.Result.Success;
 #else
-            var isError = future.WebRequest == null || future.WebRequest.isNetworkError || request.isHttpError;
+            var isError = future.WebRequest.isNetworkError || request.isHttpError;
 #endif
             if (isError)
             {
 #if UNITY_2020_1_OR_NEWER
-                var exception = new Exception($"[ImageLoader] {future.WebRequest?.result} {future.WebRequest?.error}: url={future.Url}");
+                var errorMessage = $"[ImageLoader] Future[id={future.id}] {future.WebRequest.result} {future.WebRequest.error}: url={future.Url}";
 #else
-                var exception = new Exception($"[ImageLoader] {future.WebRequest?.error}: url={future.Url}");
+                var errorMessage = $"[ImageLoader] Future[id={future.id}] {future.WebRequest.error}: url={future.Url}";
 #endif
                 RemoveLoading(future); // LOADING REMOVED
-                future.FailToLoad(exception);
+                future.FailToLoad(new Exception(errorMessage));
             }
             else
             {
