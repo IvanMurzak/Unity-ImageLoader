@@ -16,7 +16,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (WebRequest == null)
             {
-                throw new Exception("[ImageLoader]  Future[id={future.id}]UnityWebRequest is not set. Use SetWebRequest method before calling SendWebRequest.");
+                throw new Exception($"[ImageLoader] Future[id={id}] UnityWebRequest is not set. Use SetWebRequest method before calling SendWebRequest.");
             }
             return WebRequest.SendWebRequest();
         }

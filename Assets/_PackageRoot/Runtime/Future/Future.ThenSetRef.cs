@@ -31,7 +31,7 @@ namespace Extensions.Unity.ImageLoader
                         if (target == null)
                         {
                             if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
-                                Debug.LogWarning($"[ImageLoader]  Future[id={future.id}]The target is null. Can't set image into it. Skipping.");
+                                Debug.LogWarning($"[ImageLoader] Future[id={future.id}] The target is null. Can't set image into it. Skipping.");
                             continue;
                         }
                         if (target is UIBehaviour uiBehaviour)
