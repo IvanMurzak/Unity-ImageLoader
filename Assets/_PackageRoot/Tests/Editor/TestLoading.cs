@@ -22,14 +22,24 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(sprite);
         }
 
+        [UnityTest] public IEnumerator LoadSpritesCacheMemoryDiskNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadSpritesCacheMemoryDisk();
+        }
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
+        }
+        [UnityTest] public IEnumerator LoadSpritesCacheMemoryNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadSpritesCacheMemory();
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
         {
@@ -37,8 +47,13 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
+        }
+        [UnityTest] public IEnumerator LoadSpritesCacheDiskNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadSpritesCacheDisk();
         }
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
         {
@@ -46,8 +61,13 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
+        }
+        [UnityTest] public IEnumerator LoadSpritesNoCacheNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadSpritesNoCache();
         }
         [UnityTest] public IEnumerator LoadSpritesNoCache()
         {
@@ -55,7 +75,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var imageURL in ImageURLs) 
+            foreach (var imageURL in ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
     }

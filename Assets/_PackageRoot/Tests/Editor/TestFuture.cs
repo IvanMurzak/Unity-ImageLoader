@@ -25,6 +25,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.ClearRef();
         }
 
+        [UnityTest] public IEnumerator GetAllLoadingFuturesNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return GetAllLoadingFutures();
+        }
         [UnityTest] public IEnumerator GetAllLoadingFutures()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -39,7 +44,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
             Assert.Zero(loadingFutures.Count);
         }
-
+        [UnityTest] public IEnumerator LoadingRefAndWaitingNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadingRefAndWaiting();
+        }
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -64,7 +73,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref0.Value);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-
+        [UnityTest] public IEnumerator Loading2RefAndCancelFirstNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Loading2RefAndCancelFirst();
+        }
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -91,7 +104,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref2.Value);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
         }
-
+        [UnityTest] public IEnumerator Loading2RefAndWaitNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Loading2RefAndWait();
+        }
         [UnityTest] public IEnumerator Loading2RefAndWait()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -121,7 +138,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref1.Value);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-
+        [UnityTest] public IEnumerator Loading2RefAndDisposeAllNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Loading2RefAndDisposeAll();
+        }
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -147,7 +168,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return UniTask.Delay(1000).ToCoroutine();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlockNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return DisposeOnOutDisposingBlock();
+        }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -156,13 +181,14 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in ImageURLs)
             {
-                using (var future1 = ImageLoader.LoadSpriteRef(url))
-                {
-                    var task1 = future1.AsTask();
-                    Assert.AreEqual(0, Reference<Sprite>.Counter(url));
-                    while (!task1.IsCompleted)
-                        yield return null;
+                var future1 = ImageLoader.LoadSpriteRef(url);
+                var task1 = future1.AsTask();
+                Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+                while (!task1.IsCompleted)
+                    yield return null;
 
+                using (var ref1 = task1.Result)
+                {
                     Assert.AreEqual(1, Reference<Sprite>.Counter(url));
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
@@ -171,6 +197,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
+        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2NoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return DisposeOnOutDisposingBlock2();
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2()
         {
@@ -186,13 +217,20 @@ namespace Extensions.Unity.ImageLoader.Tests
                     yield return null;
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
-                future1.Dispose();
+
+                var ref1 = future1.Value;
+                ref1.Dispose();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
             foreach (var url in ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
+        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3NoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return DisposeOnOutDisposingBlock3();
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3()
         {
@@ -208,14 +246,17 @@ namespace Extensions.Unity.ImageLoader.Tests
                     yield return null;
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
-                future1.Dispose();
+
+                future1.Value.Dispose();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
 
-                using (var future2 = ImageLoader.LoadSpriteRef(url))
+                var future2 = ImageLoader.LoadSpriteRef(url);
+                var task2 = future2.AsTask();
+                while (!task2.IsCompleted)
+                    yield return null;
+
+                using (var ref2 = task2.Result)
                 {
-                    var task2 = future2.AsTask();
-                    while (!task2.IsCompleted)
-                        yield return null;
                     Assert.AreEqual(1, Reference<Sprite>.Counter(url));
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
@@ -224,6 +265,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalledNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromMemoryCacheCalled();
         }
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled()
         {
@@ -250,6 +296,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                     yield return null;
             }
         }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancelNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromMemoryCacheNotCalledBecauseOfCancel();
+        }
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -275,7 +326,12 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsNull(sprite);
             }
         }
-                [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
+        [UnityTest] public IEnumerator EventLoadedFromDiskCalledNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromDiskCalled();
+        }
+        [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
@@ -299,6 +355,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 while (!task1.IsCompleted)
                     yield return null;
             }
+        }
+        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancelNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromDiskNotCalledBecauseOfCancel();
         }
         [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel()
         {
@@ -325,6 +386,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsNull(sprite);
             }
         }
+        [UnityTest] public IEnumerator EventLoadedFromSourceCalledNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromSourceCalled();
+        }
         [UnityTest] public IEnumerator EventLoadedFromSourceCalled()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -350,6 +416,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                     yield return null;
             }
         }
+        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancelNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadedFromSourceNotCalledBecauseOfCancel();
+        }
         [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -374,6 +445,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return UniTask.Delay(1000).ToCoroutine();
                 Assert.IsNull(sprite);
             }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadingFromDiskCacheCalled();
         }
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled()
         {
@@ -402,6 +478,11 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 Assert.IsTrue(called);
             }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediatelyNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadingFromDiskCacheCalledImmediately();
         }
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
         {
@@ -433,6 +514,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(called);
             }
         }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalledNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadingFromSourceCalled();
+        }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -459,6 +545,11 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 Assert.IsTrue(called);
             }
+        }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediatelyNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventLoadingFromSourceCalledImmediately();
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
         {
@@ -487,6 +578,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(called);
             }
         }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeoutNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventFailedWithIncorrectUrlAndTimeout();
+        }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -510,6 +606,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             future1.Cancel();
             LogAssert.ignoreFailingMessages = false;
             yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancelNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventFailedWithIncorrectUrlNotCalledBecauseOfCancel();
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
@@ -536,6 +637,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return UniTask.Delay(1000).ToCoroutine();
             Assert.IsNull(exception);
         }
+        [UnityTest] public IEnumerator AsyncOperationCompletionNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return AsyncOperationCompletion();
+        }
         [UnityTest] public IEnumerator AsyncOperationCompletion()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -552,6 +658,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(completed);
             }
             yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
+        }
+        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancelNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return AsyncOperationCompletionAfterCancel();
         }
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
         {

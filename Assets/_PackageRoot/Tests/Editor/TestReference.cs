@@ -1,8 +1,11 @@
+using System;
+using System.Linq;
+using System.Collections;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
-using System.Collections;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -17,6 +20,11 @@ namespace Extensions.Unity.ImageLoader.Tests
 
         [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
 
+        [UnityTest] public IEnumerator CleanMemoryCacheNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return CleanMemoryCache();
+        }
         [UnityTest] public IEnumerator CleanMemoryCache()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -65,7 +73,11 @@ namespace Extensions.Unity.ImageLoader.Tests
         //        Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         //    }
         //}
-
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlockNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return DisposeOnOutDisposingBlock();
+        }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -90,6 +102,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
+        [UnityTest] public IEnumerator CleanMemoryCacheAllNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return CleanMemoryCacheAll();
+        }
         [UnityTest] public IEnumerator CleanMemoryCacheAll()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -114,6 +131,171 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDisposeNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadOneMake1000ReferencesLaterDispose();
+        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDispose()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
+            while (!task1.IsCompleted)
+                yield return null;
+
+            var ref1_1 = task1.Result;
+            Assert.NotNull(ref1_1);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            var count = 1000;
+            var references = new Reference<Sprite>[count];
+            for (var i = 0; i < count; i++)
+            {
+                var reference = ImageLoader.LoadFromMemoryCacheRef(url1);
+                Assert.NotNull(reference);
+                Assert.AreEqual(i + 2, Reference<Sprite>.Counter(url1));
+                references[i] = reference;
+            }
+
+            ref1_1.Dispose();
+            Assert.AreEqual(count, Reference<Sprite>.Counter(url1));
+
+            for (var i = 0; i < count; i++)
+            {
+                references[i].Dispose();
+                Assert.AreEqual(count - i - 1, Reference<Sprite>.Counter(url1));
+            }
+        }
+
+
+        [UnityTest] public IEnumerator KeepReferenceButDisposeFutureNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return KeepReferenceButDisposeFuture();
+        }
+        [UnityTest] public IEnumerator KeepReferenceButDisposeFuture()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var future = ImageLoader.LoadSpriteRef(url1);
+            var task1 = future.AsTask();
+            while (!task1.IsCompleted)
+                yield return null;
+
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            var ref1 = task1.Result;
+            Assert.NotNull(ref1);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            future.Dispose();
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            ref1.Dispose();
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+        }
+
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDisposeNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadOneMake1000ReferencesImmediateDispose();
+        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var future = ImageLoader.LoadSpriteRef(url1);
+            var task1 = future.AsTask();
+            while (!task1.IsCompleted)
+                yield return null;
+
+            var ref1_1 = task1.Result;
+            Assert.NotNull(ref1_1);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            var count = 1000;
+            for (var i = 0; i < count; i++)
+            {
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url1), $"ref[{i}] going to create.");
+
+                var reference = ImageLoader.LoadFromMemoryCacheRef(url1);
+                Assert.NotNull(reference);
+                Assert.AreEqual(2, Reference<Sprite>.Counter(url1), $"ref[{i}] is created, but reference counter is wrong.");
+
+                reference.Dispose();
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url1), $"ref[{i}] is disposed, but it should be still in memory cache because of another ref.");
+            }
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            future.Dispose();
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            ref1_1.Dispose();
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+        }
+
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDisposeNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return LoadOneMake1000ReferencesInParallelLateDispose();
+        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose()
+        {
+            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url1 = ImageURLs[0];
+
+            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
+            while (!task1.IsCompleted)
+                yield return null;
+
+            var ref1_1 = task1.Result;
+            Assert.NotNull(ref1_1);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            var count = 1000;
+            var references = new Reference<Sprite>[count];
+            var tasks = Enumerable.Range(0, count)
+                .Select(i => Task.Run(() =>
+                {
+                    var reference = ImageLoader.LoadFromMemoryCacheRef(url1);
+                    Assert.NotNull(reference);
+                    references[i] = reference;
+                    return reference;
+                }))
+                .ToArray();
+
+            yield return Task.WhenAll(tasks).AsUniTask().ToCoroutine();
+            Assert.AreEqual(count + 1, Reference<Sprite>.Counter(url1));
+
+            foreach (var reference in references)
+                reference.Dispose();
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+
+            ref1_1.Dispose();
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+        }
+
+        [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCacheNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Load1Sprite2TimesAnd2TimesFromCache();
+        }
         [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
@@ -171,6 +353,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref3.Value);
         }
 
+        [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCacheNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Load2SpritesTimesAnd2TimesFromCache();
+        }
         [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCache()
         {
             yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
