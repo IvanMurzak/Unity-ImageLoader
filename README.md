@@ -8,12 +8,12 @@ Async image loader with two caching layers for Unity.
 
 | Unity Version | Status |
 | ------------- | ------ |
-| 2019.2.13f1   | ![2019.2.13f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.2.13f1)  |
-| 2019.3.15f1   | ![2019.3.15f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.3.15f1)  |
+| 2019.2.11f1   | ![2019.2.11f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.2.11f1)  |
+| 2019.3.10f1   | ![2019.3.10f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.3.10f1)  |
 | 2019.4.40f1   | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.4.40f1)  |
-| 2020.1.17f1   | ![2020.1.17f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2020.1.17f1)  |
-| 2020.3.48f1   | ![2020.3.48f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2020.3.48f1)  |
-| 2021.3.48f1   | ![2021.3.48f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2021.3.48f1)  |
+| 2020.1.12f1   | ![2020.1.12f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2020.1.12f1)  |
+| 2020.3.40f1   | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2020.3.40f1)  |
+| 2021.3.45f1   | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2021.3.45f1)  |
 | 2022.3.57f1   | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2022.3.57f1)  |
 | 2023.1.20f1   | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2023.1.20f1)  |
 | 2023.2.20f1   | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2023.2.20f1)  |
