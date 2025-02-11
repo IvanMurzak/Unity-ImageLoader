@@ -29,7 +29,7 @@ namespace Extensions.Unity.ImageLoader
 
             lock (referenceCounters)
             {
-                referenceCounters[url] = Math.Max(0, referenceCounters.GetValueOrDefault(url, 0)) + 1;
+                referenceCounters.AddOrUpdate(url, 1, (key, oldValue) => oldValue + 1);
                 if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
                     Debug.Log($"[ImageLoader] Ref[id={id}] Reference created [{referenceCounters[url]}] URL={url}");
             }
@@ -62,14 +62,10 @@ namespace Extensions.Unity.ImageLoader
 
             lock (referenceCounters)
             {
-                if (referenceCounters.ContainsKey(Url))
-                    referenceCounters[Url]--;
+                referenceCounters.AddOrUpdate(Url, 0, (key, oldValue) => oldValue - 1);
 
-                if (referenceCounters.GetValueOrDefault(Url) < 0)
-                {
-                    if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
-                        Debug.LogError($"[ImageLoader] Ref[id={id}] Reference dispose has negative counter URL={Url}");
-                }
+                if (ImageLoader.settings.debugLevel <= DebugLevel.Warning && referenceCounters.GetValueOrDefault(Url) < 0)
+                    Debug.LogWarning($"[ImageLoader] Ref[id={id}] Reference dispose has negative counter URL={Url}");
 
                 if (Keep)
                 {
@@ -81,7 +77,7 @@ namespace Extensions.Unity.ImageLoader
                 if (ImageLoader.settings.debugLevel <= DebugLevel.Log)
                     Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose of URL={Url}");
 
-                if (!referenceCounters.ContainsKey(Url) || referenceCounters[Url] == 0)
+                if (referenceCounters.GetValueOrDefault(Url) == 0)
                     ImageLoader.ClearMemoryCache(Url);
             }
         }

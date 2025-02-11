@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader
 {
     public partial class Reference<T> : IDisposable
     {
-        private volatile static Dictionary<string, int> referenceCounters = new Dictionary<string, int>();
+        private volatile static ConcurrentDictionary<string, int> referenceCounters = new ConcurrentDictionary<string, int>();
         internal static void Clear()
         {
             lock (referenceCounters) referenceCounters.Clear();
             EventOnClearAll?.Invoke();
         }
-        internal static void Clear(string url)
+        internal static bool Clear(string url)
         {
-            lock (referenceCounters) referenceCounters.Remove(url);
+            var result = false;
+            lock (referenceCounters) result = referenceCounters.Remove(url, out var _);
             EventOnClearUrl?.Invoke(url);
+            return result;
         }
         public static int Counter(string url)
         {
