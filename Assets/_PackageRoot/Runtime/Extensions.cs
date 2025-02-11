@@ -23,5 +23,15 @@ namespace Extensions.Unity.ImageLoader
         {
             return dictionary.TryGetValue(key, out var value) ? value : defaultValue;
         }
+        public static bool Remove<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, out TValue value)
+        {
+            if (dictionary.TryGetValue(key, out value))
+            {
+                dictionary.Remove(key);
+                return true;
+            }
+            value = default;
+            return false;
+        }
     }
 }
