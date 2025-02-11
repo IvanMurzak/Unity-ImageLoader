@@ -42,6 +42,7 @@ namespace Extensions.Unity.ImageLoader
         public bool UseMemoryCache { get; private set; }
         private TimeSpan timeout;
         private bool cleared = false;
+        private bool disposeValue = false;
         private T value = default;
         private Exception exception = default;
 

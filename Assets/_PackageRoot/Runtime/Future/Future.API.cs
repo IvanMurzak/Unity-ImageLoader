@@ -139,6 +139,8 @@ namespace Extensions.Unity.ImageLoader
         {
             if (IsCancelled)
             {
+                if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                    Debug.Log($"[ImageLoader] Future[id={id}] Canceled: {Url}");
                 action();
                 return this;
             }
@@ -153,6 +155,13 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns the Future instance</returns>
         public Future<T> Disposed(Action<Future<T>> action)
         {
+            if (Status == FutureStatus.Disposed)
+            {
+                if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                    Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
+                action?.Invoke(this);
+                return this;
+            }
             OnDispose += action;
             return this;
         }
@@ -195,7 +204,7 @@ namespace Extensions.Unity.ImageLoader
             OnDispose = null;
             Clear();
 
-            if (value is IDisposable disposable)
+            if (disposeValue && value is IDisposable disposable)
                 disposable?.Dispose();
 
             value = default;
