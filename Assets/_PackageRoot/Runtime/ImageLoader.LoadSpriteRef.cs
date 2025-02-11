@@ -34,7 +34,8 @@ namespace Extensions.Unity.ImageLoader
             future.LoadingFromSource    (() =>     futureRef.Loading(FutureLoadingFrom.Source));
             future.LoadedFromSource     (sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.Source));
             future.Failed               (futureRef.FailToLoad);
-            futureRef.Canceled         (future.Cancel);
+
+            futureRef.Canceled(future.Cancel);
 
             InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return futureRef;
@@ -43,14 +44,13 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Clear all references to all loaded sprites
         /// </summary>
-        /// <returns>Returns sprite asynchronously </returns>
         public static void ClearRef() => Reference<Sprite>.Clear();
 
         /// <summary>
         /// Clear all references to a single loaded sprites by URL
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns sprite asynchronously </returns>
-        public static void ClearRef(string url) => Reference<Sprite>.Clear(url);
+        /// <returns>Returns operation status boolean</returns>
+        public static bool ClearRef(string url) => Reference<Sprite>.Clear(url);
     }
 }

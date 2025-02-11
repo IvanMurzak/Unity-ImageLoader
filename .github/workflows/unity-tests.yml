@@ -1,0 +1,50 @@
+name: Editor Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  testAllModes:
+    name: ${{ matrix.unityVersion }} ${{ matrix.testMode }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projectPath:
+          - './'
+        unityVersion:
+          - '2019.2.1f1'
+          - '2019.3.0f1'
+          - '2019.4.0f1'
+          - '2020.3.0f1'
+          - '2021.3.0f1'
+          - '2022.3.0f1'
+          - '2023.2.0f1'
+          - '6000.0.23f1'
+        testMode:
+          - editmode
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/cache@v4
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ matrix.projectPath }}
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.unityVersion }} ${{ matrix.testMode }} Test Results
+

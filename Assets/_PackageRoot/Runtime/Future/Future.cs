@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -17,6 +18,8 @@ namespace Extensions.Unity.ImageLoader
     }
     public partial class Future<T> : IFuture, IDisposable
     {
+        private static int idCounter = 0;
+
         public string Url { get; }
 
         private event Action<T>           OnLoadedFromMemoryCache;
@@ -32,11 +35,18 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
         private readonly bool muteLogs;
+
+        internal readonly int id = idCounter++;
+
         public bool UseDiskCache { get; private set; }
         public bool UseMemoryCache { get; private set; }
+        private TimeSpan timeout;
         private bool cleared = false;
+        private bool disposeValue = false;
         private T value = default;
         private Exception exception = default;
+
+        internal UnityWebRequest WebRequest { get; private set; }
 
         public T Value => value;
         public bool IsCancelled => Status == FutureStatus.Canceled;
@@ -60,11 +70,13 @@ namespace Extensions.Unity.ImageLoader
             this.muteLogs = muteLogs;
             UseDiskCache = ImageLoader.settings.useDiskCache;
             UseMemoryCache = ImageLoader.settings.useMemoryCache;
+            timeout = ImageLoader.settings.timeout;
+
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
 
-        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true)
+        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true, bool passDisposed = false)
         {
             LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
@@ -76,7 +88,8 @@ namespace Extensions.Unity.ImageLoader
             if (passCancelled)
                 Canceled(to.Cancel);
 
-            Disposed(future => to.Dispose());
+            if (passDisposed)
+                Disposed(future => to.Dispose());
 
             return this;
         }
@@ -97,7 +110,7 @@ namespace Extensions.Unity.ImageLoader
             };
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
-                Debug.Log($"[ImageLoader] Loading: {Url}, from: {loadingFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loading: {Url}, from: {loadingFrom}");
 
             onLoadingEvent?.Invoke();
         }
@@ -121,7 +134,7 @@ namespace Extensions.Unity.ImageLoader
             };
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
-                Debug.Log($"[ImageLoader] Loaded: {Url}, from: {loadedFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loaded: {Url}, from: {loadedFrom}");
 
             onLoadedEvent?.Invoke(value);
             OnLoaded?.Invoke(value);
@@ -157,6 +170,8 @@ namespace Extensions.Unity.ImageLoader
             OnFailedToLoad = null;
             OnCompleted = null;
             OnCanceled = null;
+
+            WebRequest?.Abort();
         }
 
         public override string ToString() => Url;

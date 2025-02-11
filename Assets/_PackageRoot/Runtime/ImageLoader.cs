@@ -13,10 +13,10 @@ namespace Extensions.Unity.ImageLoader
         private static void AddLoading(Future<Sprite> future)
         {
             if (!loadingInProcess.TryAdd(future.Url, future))
-                throw new Exception($"[ImageLoader] AddLoading: {future.Url} already loading");
+                throw new Exception($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url} already loading");
 
             if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
+                Debug.Log($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
         }
         private static void RemoveLoading(Future<Sprite> future) => RemoveLoading(future.Url);
         private static void RemoveLoading(string url)
@@ -24,12 +24,12 @@ namespace Extensions.Unity.ImageLoader
             if (loadingInProcess.TryRemove(url, out var future))
             {
                 if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
+                    Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
             }
             else
             {
                 if (settings.debugLevel <= DebugLevel.Warning)
-                    Debug.LogWarning($"[ImageLoader] RemoveLoading: {url} not found in loading tasks");
+                    Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url} not found in loading tasks");
             }
         }
 
@@ -95,7 +95,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="texture">Texture for creation Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f) 
+        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="pivot">Pivot of created Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f) 
+        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), pivot, pixelDensity);
     }
 }

@@ -2,11 +2,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        internal static ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
+        internal static volatile ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnEnterPlayMode]
@@ -109,3 +110,4 @@ namespace Extensions.Unity.ImageLoader
         }
     }
 }
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
