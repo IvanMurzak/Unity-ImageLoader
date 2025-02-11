@@ -18,6 +18,13 @@ jobs:
         projectPath:
           - './'
         unityVersion:
+          - '2019.2.1f1'
+          - '2019.3.0f1'
+          - '2019.4.0f1'
+          - '2020.3.0f1'
+          - '2021.3.0f1'
+          - '2022.3.0f1'
+          - '2023.2.0f1'
           - '6000.0.23f1'
         testMode:
           - editmode
@@ -39,6 +46,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
