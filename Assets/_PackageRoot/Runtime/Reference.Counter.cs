@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader
 {
     public partial class Reference<T> : IDisposable
     {
-        private volatile static ConcurrentDictionary<string, int> referenceCounters = new ConcurrentDictionary<string, int>();
+        private volatile static Dictionary<string, int> referenceCounters = new Dictionary<string, int>();
         internal static void Clear()
         {
             lock (referenceCounters) referenceCounters.Clear();
@@ -15,7 +14,7 @@ namespace Extensions.Unity.ImageLoader
         internal static bool Clear(string url)
         {
             var result = false;
-            lock (referenceCounters) result = referenceCounters.Remove(url, out var _);
+            lock (referenceCounters) result = referenceCounters.Remove(url);
             EventOnClearUrl?.Invoke(url);
             return result;
         }
