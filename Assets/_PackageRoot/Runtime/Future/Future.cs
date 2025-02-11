@@ -96,18 +96,33 @@ namespace Extensions.Unity.ImageLoader
         internal void Loading(FutureLoadingFrom loadingFrom)
         {
             if (cleared || IsCancelled) return;
-            Status = loadingFrom switch
+
+            switch(loadingFrom)
             {
-                FutureLoadingFrom.DiskCache => FutureStatus.LoadingFromDiskCache,
-                FutureLoadingFrom.Source    => FutureStatus.LoadingFromSource,
-                _ => throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom")
-            };
-            var onLoadingEvent = loadingFrom switch
+                case FutureLoadingFrom.DiskCache:
+                    Status = FutureStatus.LoadingFromDiskCache;
+                    OnLoadingFromDiskCache?.Invoke();
+                    break;
+                case FutureLoadingFrom.Source:
+                    Status = FutureStatus.LoadingFromSource;
+                    OnLoadingFromSource?.Invoke();
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom");
+            }
+
+            Action onLoadingEvent;
+            switch (loadingFrom)
             {
-                FutureLoadingFrom.DiskCache => OnLoadingFromDiskCache,
-                FutureLoadingFrom.Source    => OnLoadingFromSource,
-                _ => throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom")
-            };
+                case FutureLoadingFrom.DiskCache:
+                    onLoadingEvent = OnLoadingFromDiskCache;
+                    break;
+                case FutureLoadingFrom.Source:
+                    onLoadingEvent = OnLoadingFromSource;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom");
+            }
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Loading: {Url}, from: {loadingFrom}");
@@ -117,21 +132,27 @@ namespace Extensions.Unity.ImageLoader
         internal void Loaded(T value, FutureLoadedFrom loadedFrom)
         {
             if (cleared || IsCancelled) return;
+
             this.value = value;
-            Status = loadedFrom switch
+
+            Action<T> onLoadedEvent;
+            switch(loadedFrom)
             {
-                FutureLoadedFrom.MemoryCache => FutureStatus.LoadedFromMemoryCache,
-                FutureLoadedFrom.DiskCache   => FutureStatus.LoadedFromDiskCache,
-                FutureLoadedFrom.Source      => FutureStatus.LoadedFromSource,
-                _ => throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded")
-            };
-            var onLoadedEvent = loadedFrom switch
-            {
-                FutureLoadedFrom.MemoryCache => OnLoadedFromMemoryCache,
-                FutureLoadedFrom.DiskCache => OnLoadedFromDiskCache,
-                FutureLoadedFrom.Source => OnLoadedFromSource,
-                _ => throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded")
-            };
+                case FutureLoadedFrom.MemoryCache:
+                    Status = FutureStatus.LoadedFromMemoryCache;
+                    onLoadedEvent = OnLoadedFromMemoryCache;
+                    break;
+                case FutureLoadedFrom.DiskCache:
+                    Status = FutureStatus.LoadedFromDiskCache;
+                    onLoadedEvent = OnLoadedFromDiskCache;
+                    break;
+                case FutureLoadedFrom.Source:
+                    Status = FutureStatus.LoadedFromSource;
+                    onLoadedEvent = OnLoadedFromSource;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded");
+            }
 
             if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Loaded: {Url}, from: {loadedFrom}");
