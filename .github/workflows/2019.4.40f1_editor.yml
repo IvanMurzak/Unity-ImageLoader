@@ -1,4 +1,4 @@
-name: Editor Tests
+name: 2019.4.40f1 Unity Editor
 
 on:
   pull_request:

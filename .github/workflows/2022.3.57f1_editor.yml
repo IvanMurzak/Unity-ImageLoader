@@ -1,4 +1,4 @@
-name: Editor Tests
+name: 2022.3.57f1 Unity Editor
 
 on:
   pull_request:

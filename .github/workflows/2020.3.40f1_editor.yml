@@ -1,4 +1,4 @@
-name: Editor Tests
+name: 2020.3.40f1 Unity Editor
 
 on:
   pull_request:
