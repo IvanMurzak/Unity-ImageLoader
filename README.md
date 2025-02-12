@@ -4,15 +4,15 @@
 
 Async image loader with two caching layers for Unity.
 
-| Test Status                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------ |
-| ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2019.4.40f1_editor.yml/badge.svg) |
-| ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2020.3.40f1_editor.yml/badge.svg) |
-| ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2021.3.45f1_editor.yml/badge.svg) |
-| ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2022.3.57f1_editor.yml/badge.svg) |
-| ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2023.1.20f1_editor.yml/badge.svg) |
-| ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2023.2.20f1_editor.yml/badge.svg) |
-| ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/6000.0.37f1_editor.yml/badge.svg) |
+## Tests
+
+![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2019.4.40f1_editor.yml/badge.svg)
+![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2020.3.40f1_editor.yml/badge.svg)
+![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2021.3.45f1_editor.yml/badge.svg)
+![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2022.3.57f1_editor.yml/badge.svg)
+![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2023.1.20f1_editor.yml/badge.svg)
+![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/2023.2.20f1_editor.yml/badge.svg)
+![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/6000.0.37f1_editor.yml/badge.svg)
 
 ## Features
 
