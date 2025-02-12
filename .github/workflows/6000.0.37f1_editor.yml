@@ -15,3 +15,7 @@ jobs:
       projectPath: './'
       unityVersion: '6000.0.37f1'
       testMode: 'editmode'
+      unityEmail: ${{ secrets.UNITY_EMAIL }}
+      unityPassword: ${{ secrets.UNITY_PASSWORD }}
+      unityLicense: ${{ secrets.UNITY_LICENSE }}
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
