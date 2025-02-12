@@ -1,4 +1,4 @@
-name: 2021.3.45f1 Unity Editor
+name: 2021.3.45f1 Editor
 
 on:
   pull_request:
