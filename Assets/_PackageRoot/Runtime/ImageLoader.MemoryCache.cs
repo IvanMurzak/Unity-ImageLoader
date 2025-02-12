@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,9 +6,9 @@ namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        internal static volatile ConcurrentDictionary<string, Sprite> memorySpriteCache = new ConcurrentDictionary<string, Sprite>();
+        internal static volatile Dictionary<string, Sprite> memorySpriteCache = new Dictionary<string, Sprite>();
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_2019_3_OR_NEWER
         [UnityEditor.InitializeOnEnterPlayMode]
         private static void ClearMemoryCacheOnEnterPlayMode()
         {
@@ -54,7 +53,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Reference<Sprite>? LoadFromMemoryCacheRef(string url)
+        public static Reference<Sprite> LoadFromMemoryCacheRef(string url)
         {
             if (!settings.useMemoryCache) return null;
 
@@ -69,7 +68,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Sprite? LoadFromMemoryCache(string url)
+        public static Sprite LoadFromMemoryCache(string url)
         {
             if (!settings.useMemoryCache) return null;
 

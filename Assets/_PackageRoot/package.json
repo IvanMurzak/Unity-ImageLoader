@@ -3,12 +3,34 @@
     "displayName": "Image Loader",
     "author": {
         "name": "Ivan Murzak",
+        "email": "ivan.d.murzak@gmail.com",
         "url": "https://github.com/IvanMurzak"
     },
+    "license": "MIT",
     "version": "5.4.0",
-    "unity": "2019.2",
+    "unity": "2019.4",
     "description": "Asynchronous image loading from remote or local destination. It has two layers of configurable Memory and Disk cache systems.",
+    "keywords": [
+        "image",
+        "image loader",
+        "image loading",
+        "image cache",
+        "image placeholder",
+        "async image loading",
+        "memory",
+        "disk",
+        "future"
+    ],
+    "homepage": "https://github.com/IvanMurzak/Unity-ImageLoader",
+    "bugs": {
+        "url": "https://github.com/IvanMurzak/Unity-ImageLoader/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:IvanMurzak/Unity-ImageLoader.git"
+    },
     "dependencies": {
+        "com.unity.ugui": "1.0.0",
         "com.cysharp.unitask": "2.5.10"
     },
     "scopedRegistries": [
@@ -19,6 +41,13 @@
                 "com.cysharp.unitask",
                 "com.openupm"
             ]
+        }
+    ],
+    "samples": [
+        {
+            "displayName": "Full Usage",
+            "description": "Full usage example of ImageLoader",
+            "path": "Samples~"
         }
     ]
 }

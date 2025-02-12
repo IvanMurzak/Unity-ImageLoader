@@ -183,7 +183,7 @@ namespace Extensions.Unity.ImageLoader
 #if UNITY_2020_1_OR_NEWER
             var isError = future.WebRequest.result != UnityWebRequest.Result.Success;
 #else
-            var isError = future.WebRequest.isNetworkError || request.isHttpError;
+            var isError = future.WebRequest.isNetworkError || future.WebRequest.isHttpError;
 #endif
             if (isError)
             {

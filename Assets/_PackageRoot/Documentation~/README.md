@@ -4,6 +4,18 @@
 
 Async image loader with two caching layers for Unity.
 
+## Test Status
+
+| Unity Version | Status |
+| ------------- | ------ |
+| 2019.4.40f1   | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2019.4.40f1)  |
+| 2020.3.40f1   | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2020.3.40f1)  |
+| 2021.3.45f1   | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2021.3.45f1)  |
+| 2022.3.57f1   | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2022.3.57f1)  |
+| 2023.1.20f1   | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2023.1.20f1)  |
+| 2023.2.20f1   | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=2023.2.20f1)  |
+| 6000.0.37f1   | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/unity-tests.yml/badge.svg?unityVersion=6000.0.37f1)  |
+
 ## Features
 
 - ✔️ Async loading from **Web** or **Local** `ImageLoader.LoadSprite(imageURL);`
