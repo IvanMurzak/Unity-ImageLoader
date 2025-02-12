@@ -1,4 +1,4 @@
-name: 6000.0.37f1 Editor
+name: 6000.0.37f1-Editor
 
 on:
   pull_request:

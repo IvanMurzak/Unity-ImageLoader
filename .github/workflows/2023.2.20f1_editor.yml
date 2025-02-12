@@ -1,4 +1,4 @@
-name: 2023.2.20f1 Editor
+name: 2023.2.20f1-Editor
 
 on:
   pull_request:
