@@ -13,18 +13,20 @@ namespace Extensions.Unity.ImageLoader
         public Future<T> Timeout(TimeSpan duration)
         {
             timeout = duration;
-            if (WebRequest != null)
-            {
+
+            if ((WebRequest?.isModifiable) ?? false)
                 WebRequest.timeout = (int)Math.Ceiling(duration.TotalSeconds);
-            }
+
             if (duration <= TimeSpan.Zero)
             {
                 FailToLoad(new Exception($"[ImageLoader] Future[id={id}] Timeout ({duration}): {Url}"));
                 return this;
             }
+
             UniTask.Delay(duration)
                 .ContinueWith(() => FailToLoad(new Exception($"[ImageLoader] Future[id={id}] Timeout ({duration}): {Url}")))
                 .AttachExternalCancellation(CancellationToken);
+
             return this;
         }
     }

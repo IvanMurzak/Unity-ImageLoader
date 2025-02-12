@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -38,14 +40,15 @@ namespace Extensions.Unity.ImageLoader
 
         internal readonly int id = idCounter++;
 
-        public bool UseDiskCache { get; private set; }
-        public bool UseMemoryCache { get; private set; }
         private TimeSpan timeout;
+        private List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
         private bool cleared = false;
         private bool disposeValue = false;
         private T value = default;
         private Exception exception = default;
 
+        public bool UseDiskCache { get; private set; }
+        public bool UseMemoryCache { get; private set; }
         internal UnityWebRequest WebRequest { get; private set; }
 
         public T Value => value;
@@ -92,6 +95,35 @@ namespace Extensions.Unity.ImageLoader
                 Disposed(future => to.Dispose());
 
             return this;
+        }
+        internal void Placeholder(Sprite placeholder)
+        {
+            if (cleared || IsCancelled) return;
+
+            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder: {Url}");
+
+            // UniTask.ReturnToMainThread()
+            // if (UnityMainThreadDispatcher.IsMainThread)
+            // {
+            //     OnLoadedFromMemoryCache?.Invoke(placeholder);
+            //     OnLoadedFromDiskCache?.Invoke(placeholder);
+            //     OnLoadedFromSource?.Invoke(placeholder);
+            //     OnLoaded?.Invoke(placeholder);
+            //     OnCompleted?.Invoke(true);
+            //     Clear();
+            // }
+            // else
+            // {
+            //     UniTask.SwitchToMainThread();
+            //     Placeholder(placeholder);
+            // }
+
+            OnLoadedFromMemoryCache += (v) => { };
+            OnLoadingFromDiskCache += ( ) => { };
+            OnLoadedFromDiskCache += (v) => { };
+            OnLoadingFromSource += ( ) => { };
+            OnLoadedFromSource += (v) => { };
         }
         internal void Loading(FutureLoadingFrom loadingFrom)
         {
@@ -197,6 +229,6 @@ namespace Extensions.Unity.ImageLoader
 
         public override string ToString() => Url;
         public override int GetHashCode() => Url.GetHashCode();
-        public override bool Equals(object obj) => obj is IFuture future && future.Url == Url;
+        public override bool Equals(object obj) => obj != null && obj is IFuture future && future.Url == Url;
     }
 }
