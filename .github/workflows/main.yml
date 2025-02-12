@@ -19,8 +19,6 @@ on:
         required: true
       UNITY_PASSWORD:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   test:
