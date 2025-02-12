@@ -15,7 +15,4 @@ jobs:
       projectPath: './'
       unityVersion: '2023.2.20f1'
       testMode: 'editmode'
-      unityEmail: ${{ secrets.UNITY_EMAIL }}
-      unityPassword: ${{ secrets.UNITY_PASSWORD }}
-      unityLicense: ${{ secrets.UNITY_LICENSE }}
-      githubToken: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit
