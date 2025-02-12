@@ -1,0 +1,17 @@
+name: Editor Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  editor-tests:
+    uses: ./.github/workflows/main.yml
+    with:
+      projectPath: './'
+      unityVersion: '2023.1.20f1'
+      testMode: 'editmode'
