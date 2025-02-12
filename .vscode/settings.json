@@ -53,7 +53,13 @@
     },
     "dotnet.preferCSharpExtension": true,
     "cSpell.words": [
-        "ARGB"
+        "ARGB",
+        "cysharp",
+        "imageloader",
+        "Murzak",
+        "openupm",
+        "ugui",
+        "unitask"
     ],
     "dotnet.defaultSolution": "Unity-ImageLoader.sln"
 }
