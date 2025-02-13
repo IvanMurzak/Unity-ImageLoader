@@ -139,7 +139,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (IsCancelled)
             {
-                if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                     Debug.Log($"[ImageLoader] Future[id={id}] Canceled: {Url}");
                 action();
                 return this;
@@ -157,7 +157,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.Disposed)
             {
-                if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                     Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
                 action?.Invoke(this);
                 return this;
@@ -172,7 +172,7 @@ namespace Extensions.Unity.ImageLoader
         public void Cancel()
         {
             if (cleared || IsCancelled) return;
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Cancel: {Url}");
             Status = FutureStatus.Canceled;
             if (!cts.IsCancellationRequested)
@@ -190,7 +190,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.Disposed) return;
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
 
             if (!cts.IsCancellationRequested)
@@ -236,7 +236,7 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (Exception ex)
                 {
-                    if (ImageLoader.settings.debugLevel <= DebugLevel.Exception && !muteLogs)
+                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Exception) && !muteLogs)
                         Debug.LogException(ex);
                 }
             }
@@ -257,7 +257,7 @@ namespace Extensions.Unity.ImageLoader
                     }
                     catch (Exception ex)
                     {
-                        if (ImageLoader.settings.debugLevel <= DebugLevel.Exception && !muteLogs)
+                        if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Exception) && !muteLogs)
                             Debug.LogException(ex);
                     }
                 });
@@ -268,9 +268,15 @@ namespace Extensions.Unity.ImageLoader
         public FutureAwaiter GetAwaiter()
         {
             var tcs = new TaskCompletionSource<T>();
+
+            // Then(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Then {Url}"));
+            // Failed(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Failed {Url}"));
+            // Canceled(() => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Canceled {Url}"));
+
             Then(tcs.SetResult);
             Failed(tcs.SetException);
             Canceled(tcs.SetCanceled);
+
             return new FutureAwaiter(tcs.Task.GetAwaiter());
         }
         public class FutureAwaiter : INotifyCompletion

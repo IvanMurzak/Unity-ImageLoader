@@ -14,7 +14,15 @@ namespace Extensions.Unity.ImageLoader.Tests
             "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
         };
 
-        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+        [UnitySetUp] public IEnumerator SetUp()
+        {
+            yield return TestUtils.ClearEverything();
+            ImageLoader.settings.debugLevel = DebugLevel.Log;
+        }
+        [UnityTearDown] public IEnumerator TearDown()
+        {
+            yield return TestUtils.ClearEverything();
+        }
 
         public async UniTask LoadSprite(string url)
         {
@@ -29,7 +37,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -43,7 +50,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -57,7 +63,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
@@ -71,7 +76,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadSpritesNoCache()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 

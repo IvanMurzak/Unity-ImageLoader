@@ -28,4 +28,8 @@ namespace Extensions.Unity.ImageLoader
         Exception   = 3,
         None        = 4
     }
+    public static class DebugLevelEx
+    {
+        public static bool IsActive(this DebugLevel debugLevel, DebugLevel level) => debugLevel <= level;
+    }
 }

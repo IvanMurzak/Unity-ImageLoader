@@ -17,12 +17,14 @@ namespace Extensions.Unity.ImageLoader.Tests
         };
         static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
 
-        [SetUp]
-        public void SetUp()
+        [UnitySetUp] public IEnumerator SetUp()
         {
-            LogAssert.ignoreFailingMessages = false;
+            yield return TestUtils.ClearEverything();
             ImageLoader.settings.debugLevel = DebugLevel.Log;
-            ImageLoader.ClearRef();
+        }
+        [UnityTearDown] public IEnumerator TearDown()
+        {
+            yield return TestUtils.ClearEverything();
         }
 
         [UnityTest] public IEnumerator GetAllLoadingFuturesNoLogs()
@@ -32,17 +34,18 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator GetAllLoadingFutures()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
             var loadingFutures = ImageLoader.GetLoadingFutures();
+            Assert.NotNull(loadingFutures);
             Debug.Log($"Loading future count={loadingFutures.Count}");
             foreach (var loadingFuture in loadingFutures)
             {
                 Debug.Log($"Loading future: {loadingFuture.Url}, Status={loadingFuture.Status}");
             }
             Assert.Zero(loadingFutures.Count);
+            yield return null;
         }
         [UnityTest] public IEnumerator LoadingRefAndWaitingNoLogs()
         {
@@ -51,7 +54,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -65,9 +67,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref0);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 
-            ImageLoader.ClearMemoryCache(url1);
-            Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url1));
 
             ref0.Dispose();
             Assert.IsNull(ref0.Value);
@@ -80,7 +80,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -114,7 +113,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator Loading2RefAndWait()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -132,13 +130,19 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref1);
             Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
 
-            ImageLoader.ClearMemoryCache(url1);
-            Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url1));
 
             ref0.Dispose();
+            Assert.IsNull(ref0.Value);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
             ref1.Dispose();
             Assert.IsNull(ref1.Value);
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+
+            var sprite = ImageLoader.LoadFromMemoryCache(url1);
+            Assert.IsNull(sprite);
+
+            ImageLoader.ClearMemoryCache(url1);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
         [UnityTest] public IEnumerator Loading2RefAndDisposeAllNoLogs()
@@ -148,7 +152,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -178,7 +181,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -208,7 +210,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -237,7 +238,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -276,7 +276,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -308,7 +307,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -340,7 +338,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -372,7 +369,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -404,7 +400,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromSourceCalled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -436,7 +431,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -468,7 +462,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
@@ -502,7 +495,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
@@ -538,7 +530,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -571,7 +562,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -604,7 +594,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -634,7 +623,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -665,7 +653,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator AsyncOperationCompletion()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -687,7 +674,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
             LogAssert.ignoreFailingMessages = true;

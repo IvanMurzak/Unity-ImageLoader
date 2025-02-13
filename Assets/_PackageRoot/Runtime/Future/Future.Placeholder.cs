@@ -14,7 +14,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (cleared || IsCancelled)
             {
-                if (ImageLoader.settings.debugLevel <= DebugLevel.Error && !muteLogs)
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error) && !muteLogs)
                     Debug.Log($"[ImageLoader] Future[id={id}] SetPlaceholder: {Url}, is impossible because the future is cleared or canceled");
                 return this;
             }

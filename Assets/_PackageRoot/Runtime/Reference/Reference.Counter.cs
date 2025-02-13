@@ -23,10 +23,7 @@ namespace Extensions.Unity.ImageLoader
             lock (referenceCounters) return referenceCounters.GetValueOrDefault(url);
         }
 
-        private delegate void ClearUrlHandler(string url);
-        private delegate void ClearAllHandler();
-
-        private static event ClearUrlHandler EventOnClearUrl;
-        private static event ClearAllHandler EventOnClearAll;
+        private static WeakAction<string> EventOnClearUrl = new WeakAction<string>();
+        private static WeakAction EventOnClearAll = new WeakAction();
     }
 }

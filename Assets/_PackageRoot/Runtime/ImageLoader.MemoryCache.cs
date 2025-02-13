@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader
             // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
             // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
             // filled with destroyed sprites when the user reenters play mode.
-            memorySpriteCache.Clear();
+            lock (memorySpriteCache) memorySpriteCache.Clear();
             Reference<Sprite>.Clear();
         }
 #endif
@@ -27,7 +27,8 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns true if Sprite exists in Memory cache</returns>
         public static bool MemoryCacheContains(string url)
         {
-            return memorySpriteCache.ContainsKey(url);
+            lock (memorySpriteCache)
+                return memorySpriteCache.ContainsKey(url);
         }
         /// <summary>
         /// Save sprite to Memory cache directly. Should be used for overloading cache system
@@ -37,16 +38,18 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="replace">replace existed cached sprite if any</param>
         public static void SaveToMemoryCache(string url, Sprite sprite, bool replace = false)
         {
-            if (!settings.useMemoryCache) return;
-            if (!replace && memorySpriteCache.ContainsKey(url))
+            lock (memorySpriteCache)
             {
-                if (settings.debugLevel <= DebugLevel.Warning)
-                    Debug.LogError($"[ImageLoader] Memory cache already contains key: {url}");
-                return;
+                if (!replace && memorySpriteCache.ContainsKey(url))
+                {
+                    if (settings.debugLevel.IsActive(DebugLevel.Warning))
+                        Debug.LogError($"[ImageLoader] Memory cache already contains key: {url}");
+                    return;
+                }
+                if (settings.debugLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Save to memory cache: {url}");
+                memorySpriteCache[url] = sprite;
             }
-            if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Save to memory cache: {url}");
-            memorySpriteCache[url] = sprite;
         }
         /// <summary>
         /// Loads directly from Memory cache if exists and allowed
@@ -55,9 +58,11 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
         public static Reference<Sprite> LoadFromMemoryCacheRef(string url)
         {
-            if (!settings.useMemoryCache) return null;
+            Sprite sprite;
 
-            var sprite = memorySpriteCache.GetValueOrDefault(url);
+            lock (memorySpriteCache)
+                sprite = memorySpriteCache.GetValueOrDefault(url);
+
             if (sprite == null)
                 return null;
 
@@ -70,9 +75,8 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
         public static Sprite LoadFromMemoryCache(string url)
         {
-            if (!settings.useMemoryCache) return null;
-
-            return memorySpriteCache.GetValueOrDefault(url);
+            lock (memorySpriteCache)
+                return memorySpriteCache.GetValueOrDefault(url);
         }
         /// <summary>
         /// Clear Memory cache for the given url
@@ -80,14 +84,21 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache(string url)
         {
-            if (settings.debugLevel <= DebugLevel.Log)
+            if (settings.debugLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Clearing Memory cache: {url}");
-            Reference<Sprite>.Clear(url);
-            if (memorySpriteCache.Remove(url, out var cache))
+
+            var refCount = Reference<Sprite>.Counter(url);
+            if (refCount > 0)
+                throw new System.Exception($"[ImageLoader] There are {refCount} references to the sprite, clear them first. URL={url}");
+
+            lock (memorySpriteCache)
             {
-                if (!ReferenceEquals(cache, null) && cache != null &&
-                    !ReferenceEquals(cache.texture, null))
-                    UnityEngine.Object.DestroyImmediate(cache.texture);
+                if (memorySpriteCache.Remove(url, out var cache))
+                {
+                    if (!ReferenceEquals(cache, null) && cache != null &&
+                        !ReferenceEquals(cache.texture, null))
+                        UnityEngine.Object.DestroyImmediate(cache.texture);
+                }
             }
         }
         /// <summary>
@@ -96,16 +107,25 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache()
         {
-            if (settings.debugLevel <= DebugLevel.Log)
+            if (settings.debugLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Clearing Memory cache All");
-            Reference<Sprite>.Clear();
-            foreach (var cache in memorySpriteCache.Values)
+
+            lock (memorySpriteCache)
             {
-                if (!ReferenceEquals(cache, null) && cache != null &&
-                    !ReferenceEquals(cache.texture, null))
-                    UnityEngine.Object.DestroyImmediate(cache.texture);
+                foreach (var keyValue in memorySpriteCache)
+                {
+                    var url = keyValue.Key;
+                    var refCount = Reference<Sprite>.Counter(url);
+                    if (refCount > 0)
+                        throw new System.Exception($"[ImageLoader] There are {refCount} references to the sprite, clear them first. URL={url}");
+
+                    var cache = keyValue.Value;
+                    if (!ReferenceEquals(cache, null) && cache != null &&
+                        !ReferenceEquals(cache.texture, null))
+                        UnityEngine.Object.DestroyImmediate(cache.texture);
+                }
+                memorySpriteCache.Clear();
             }
-            memorySpriteCache.Clear();
         }
     }
 }

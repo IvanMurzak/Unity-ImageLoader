@@ -100,7 +100,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (cleared || IsCancelled) return;
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Placeholder: {Url}");
 
             // UniTask.ReturnToMainThread()
@@ -156,7 +156,7 @@ namespace Extensions.Unity.ImageLoader
                     throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom");
             }
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Loading: {Url}, from: {loadingFrom}");
 
             onLoadingEvent?.Invoke();
@@ -186,7 +186,7 @@ namespace Extensions.Unity.ImageLoader
                     throw new ArgumentException($"Unsupported FutureLoadedFrom with value = '{loadedFrom}' in Loaded");
             }
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Log && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
                 Debug.Log($"[ImageLoader] Future[id={id}] Loaded: {Url}, from: {loadedFrom}");
 
             onLoadedEvent?.Invoke(value);
@@ -201,7 +201,7 @@ namespace Extensions.Unity.ImageLoader
             this.exception = exception;
             Status = FutureStatus.FailedToLoad;
 
-            if (ImageLoader.settings.debugLevel <= DebugLevel.Error && !muteLogs)
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error) && !muteLogs)
                 Debug.LogError(exception.Message);
 
             cts.Cancel();

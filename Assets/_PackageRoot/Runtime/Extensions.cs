@@ -7,16 +7,13 @@ namespace Extensions.Unity.ImageLoader
     {
         public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
         {
-            lock (dictionary)
+            if (dictionary.TryGetValue(key, out var existingValue))
             {
-                if (dictionary.TryGetValue(key, out var existingValue))
-                {
-                    dictionary[key] = updateValueFactory(key, existingValue);
-                }
-                else
-                {
-                    dictionary[key] = addValue;
-                }
+                dictionary[key] = updateValueFactory(key, existingValue);
+            }
+            else
+            {
+                dictionary[key] = addValue;
             }
         }
         public static TValue GetValueOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default)

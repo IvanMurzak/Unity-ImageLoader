@@ -41,7 +41,7 @@ namespace Extensions.Unity.ImageLoader
                 return;
             }
 
-            if (MemoryCacheContains(future.Url))
+            if (future.UseMemoryCache && MemoryCacheContains(future.Url))
             {
                 var sprite = LoadFromMemoryCache(future.Url);
                 if (sprite != null)
@@ -54,13 +54,13 @@ namespace Extensions.Unity.ImageLoader
             var anotherLoadingFuture = GetLoadingFuture(future.Url);
             if (anotherLoadingFuture != null)
             {
-                if (settings.debugLevel <= DebugLevel.Log)
+                if (settings.debugLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Future[id={future.id}] Waiting while another task is loading {future.Url}");
 
                 anotherLoadingFuture.PassEvents(future, passCancelled: false).Forget();
                 await UniTask.WaitWhile(() => IsLoading(future.Url) && !future.IsCancelled);
 
-                if (settings.debugLevel <= DebugLevel.Log)
+                if (settings.debugLevel.IsActive(DebugLevel.Log))
                 {
                     Debug.Log(future.IsCancelled
                         ? $"[ImageLoader] Future[id={future.id}] Cancelled {future.Url}"
@@ -113,7 +113,7 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (Exception e)
                 {
-                    if (settings.debugLevel <= DebugLevel.Exception)
+                    if (settings.debugLevel.IsActive(DebugLevel.Exception))
                         Debug.LogException(e);
                 }
             }
@@ -128,7 +128,7 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                         return;
 
-                    if (settings.debugLevel <= DebugLevel.Log)
+                    if (settings.debugLevel.IsActive(DebugLevel.Log))
                         Debug.Log($"[ImageLoader] Future[id={future.id}] Creating UnityWebRequest for loading from Source {future.Url}");
 
                     var asyncOperation = future.SetWebRequest(UnityWebRequestTexture.GetTexture(future.Url))
@@ -138,17 +138,33 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (OperationCanceledException)
                 {
-                    future.Cancel();
+                    try
+                    {
+                        future.Cancel();
+                    }
+                    catch (Exception e)
+                    {
+                        if (settings.debugLevel.IsActive(DebugLevel.Exception))
+                            Debug.LogException(e);
+                    }
                 }
                 catch (TimeoutException e)
                 {
-                    RemoveLoading(future); // LOADING REMOVED
-                    future.FailToLoad(e);
+                    try
+                    {
+                        RemoveLoading(future); // LOADING REMOVED
+                        future.FailToLoad(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (settings.debugLevel.IsActive(DebugLevel.Exception))
+                            Debug.LogException(ex);
+                    }
                     return;
                 }
                 catch (Exception e)
                 {
-                    if (settings.debugLevel <= DebugLevel.Exception && !ignoreImageNotFoundError)
+                    if (settings.debugLevel.IsActive(DebugLevel.Exception) && !ignoreImageNotFoundError)
                         Debug.LogException(e);
                 }
                 finally
@@ -197,7 +213,9 @@ namespace Extensions.Unity.ImageLoader
             }
             else
             {
-                await SaveDiskAsync(future.Url, future.WebRequest.downloadHandler.data);
+                if (future.UseDiskCache)
+                    await SaveDiskAsync(future.Url, future.WebRequest.downloadHandler.data);
+
                 if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                 {
                     RemoveLoading(future); // LOADING REMOVED

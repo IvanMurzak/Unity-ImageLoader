@@ -30,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
                     {
                         if (target == null)
                         {
-                            if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
+                            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
                                 Debug.LogWarning($"[ImageLoader] Future[id={future.id}] The target is null. Can't set image into it. Skipping.");
                             continue;
                         }
@@ -38,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
                         {
                             if (IsDestroyed(uiBehaviour))
                             {
-                                if (ImageLoader.settings.debugLevel <= DebugLevel.Warning)
+                                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
                                     Debug.LogWarning($"The target UIBehaviour is destroyed. Can't set image into it. Skipping.");
                                 continue;
                             }
