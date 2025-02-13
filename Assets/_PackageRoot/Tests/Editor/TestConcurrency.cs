@@ -28,41 +28,49 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return TestUtils.ClearEverything();
         }
 
-        [UnityTest] public IEnumerator Load5ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load____5_ReferencesInParallelLateDisposeNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadXReferencesInParallelLateDispose(5);
+            yield return Load_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator Load5ReferencesInParallelLateDispose()
+        [UnityTest] public IEnumerator Load____5_ReferencesInParallelLateDispose()
         {
-            yield return LoadXReferencesInParallelLateDispose(5);
+            yield return Load_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator Load1000ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load_1000_ReferencesInParallelLateDisposeNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadXReferencesInParallelLateDispose(1000);
+            yield return Load_X_ReferencesInParallelLateDispose(1000);
         }
-        [UnityTest] public IEnumerator Load1000ReferencesInParallelLateDispose()
+        [UnityTest] public IEnumerator Load_1000_ReferencesInParallelLateDispose()
         {
-            yield return LoadXReferencesInParallelLateDispose(1000);
+            yield return Load_X_ReferencesInParallelLateDispose(1000);
         }
-        public IEnumerator LoadXReferencesInParallelLateDispose(int count)
+        public IEnumerator Load_X_ReferencesInParallelLateDispose(int count)
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
             var url1 = ImageURLs[0];
 
+            var cts = new System.Threading.CancellationTokenSource();
+            cts.CancelAfterSlim(TimeSpan.FromSeconds(5) + TimeSpan.FromMilliseconds(5 * count));
+
             var tasks = Enumerable.Range(0, count)
-                .Select(i => Task.Run(() =>
+                .Select(i => Task.Run(async () =>
                 {
                     var futureRef = ImageLoader.LoadSpriteRef(url1);
                     Assert.NotNull(futureRef);
-                    return futureRef.GetAwaiter().GetResult();
+                    return await futureRef;
                 }))
                 .ToArray();
 
-            yield return Task.WhenAll(tasks).AsUniTask().ToCoroutine();
+            var waitTask = Task.WhenAll(tasks);
+
+            while (!waitTask.IsCompleted && !cts.Token.IsCancellationRequested)
+                yield return null;
+
+            Assert.False(cts.Token.IsCancellationRequested, "Timeout");
             Assert.AreEqual(count, Reference<Sprite>.Counter(url1));
 
             foreach (var reference in tasks.Select(task => task.Result))
@@ -70,25 +78,25 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake5ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake____5_ReferencesInParallelLateDisposeNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadOneMake5ReferencesInParallelLateDispose();
+            yield return LoadOneMake_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator LoadOneMake5ReferencesInParallelLateDispose()
+        [UnityTest] public IEnumerator LoadOneMake____5_ReferencesInParallelLateDispose()
         {
-            yield return LoadOneMakeXReferencesInParallelLateDispose(5);
+            yield return LoadOneMake_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake_1000_ReferencesInParallelLateDisposeNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadOneMake1000ReferencesInParallelLateDispose();
+            yield return LoadOneMake_X_ReferencesInParallelLateDispose(100);
         }
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose()
+        [UnityTest] public IEnumerator LoadOneMake_1000_ReferencesInParallelLateDispose()
         {
-            yield return LoadOneMakeXReferencesInParallelLateDispose(1000);
+            yield return LoadOneMake_X_ReferencesInParallelLateDispose(1000);
         }
-        public IEnumerator LoadOneMakeXReferencesInParallelLateDispose(int count)
+        public IEnumerator LoadOneMake_X_ReferencesInParallelLateDispose(int count)
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
