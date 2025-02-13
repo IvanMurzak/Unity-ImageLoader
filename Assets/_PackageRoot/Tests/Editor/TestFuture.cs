@@ -19,12 +19,13 @@ namespace Extensions.Unity.ImageLoader.Tests
 
         [UnitySetUp] public IEnumerator SetUp()
         {
-            yield return TestUtils.ClearEverything();
+            yield return TestUtils.ClearEverything("<b>Test Start </b>");
             ImageLoader.settings.debugLevel = DebugLevel.Log;
         }
         [UnityTearDown] public IEnumerator TearDown()
         {
-            yield return TestUtils.ClearEverything();
+            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
+            yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
 
         [UnityTest] public IEnumerator GetAllLoadingFuturesNoLogs()
