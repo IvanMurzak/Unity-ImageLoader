@@ -10,7 +10,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public static Future<T> EmptyLoading(string url = null, FutureLoadingFrom from = FutureLoadingFrom.Source, T value = default)
         {
-            var future = new Future<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
+            var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
                 future.Loading(from);
             return future;
         }
@@ -20,7 +20,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public static Future<T> EmptyLoaded(string url = null, FutureLoadedFrom from = FutureLoadedFrom.Source, T value = default)
         {
-            var future = new Future<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
+            var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
                 future.Loaded(value, from);
             return future;
         }
@@ -30,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public static Future<T> EmptyFailedToLoad(string url = null, Exception exception = null)
         {
-            var future = new Future<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
+            var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
                 future.FailToLoad(exception);
             return future;
         }
@@ -40,7 +40,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public static Future<T> EmptyCanceled(string url = null)
         {
-            var future = new Future<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
+            var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
                 future.Cancel();
             return future;
         }

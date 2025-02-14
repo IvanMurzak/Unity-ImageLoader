@@ -67,7 +67,7 @@ namespace Extensions.Unity.ImageLoader
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
         public CancellationToken CancellationToken => cts.Token;
 
-        internal Future(string url, CancellationToken cancellationToken)
+        protected Future(string url, CancellationToken cancellationToken)
         {
             Url = url;
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -87,6 +87,23 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
             LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
             LoadedFromSource     ((v) => to.Loaded(v, FutureLoadedFrom.Source));
+            Failed               (to.FailToLoad);
+
+            if (passCancelled)
+                Canceled(to.Cancel);
+
+            if (passDisposed)
+                Disposed(future => to.Dispose());
+
+            return this;
+        }
+        internal Future<T> PassEvents<T2>(Future<T2> to, Func<T, T2> convert, bool passCancelled = true, bool passDisposed = false)
+        {
+            LoadedFromMemoryCache((v) => to.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  ((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     ((v) => to.Loaded(convert(v), FutureLoadedFrom.Source));
             Failed               (to.FailToLoad);
 
             if (passCancelled)
@@ -205,9 +222,9 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Error))
                 Debug.LogError(exception.Message);
 
-            Safe.Run(cts.Cancel, LogLevel);
-            Safe.Run(OnFailedToLoad, exception, LogLevel);;
-            Safe.Run(OnCompleted, false, LogLevel);;
+            Safe.Run(OnFailedToLoad, exception, LogLevel); // 2 Original order
+            Safe.Run(OnCompleted, false, LogLevel);;       // 3 Original order
+            Safe.Run(cts.Cancel, LogLevel);                // 1 Original order
             Clear();
         }
 

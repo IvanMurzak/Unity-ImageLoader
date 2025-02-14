@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader
 #else
         public bool useDiskCache = true;  // default value for non WebGL = true
 #endif
-        public string diskSaveLocation { get; set; } = UnityEngine.Application.persistentDataPath + "/imageCache";
+        public string diskSaveLocation { get; set; } = UnityEngine.Application.persistentDataPath + "/ImageLoader";
 
         public TimeSpan timeout = TimeSpan.FromSeconds(30);
     }

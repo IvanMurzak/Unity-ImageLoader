@@ -184,10 +184,26 @@ namespace Extensions.Unity.ImageLoader
             Clear();
         }
 
+        public Future<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.None)
+        {
+            var futureRef = new FutureReference<T>(Url, cts.Token).SetLogLevel(logLevel);
+
+            LoadedFromMemoryCache(obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (() =>  futureRef.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  (obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (() =>  futureRef.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     (obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.Source));
+            Failed               (futureRef.FailToLoad);
+
+            futureRef.Canceled(Cancel);
+
+            return futureRef;
+        }
+
         /// <summary>
         /// Dispose the Future instance and all its references and resources. It will also cancel the loading process if it is ongoing.
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (Status == FutureStatus.Disposed) return;
 

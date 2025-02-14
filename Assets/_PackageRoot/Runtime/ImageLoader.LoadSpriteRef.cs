@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Threading;
+using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -25,19 +26,30 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns sprite asynchronously </returns>
         public static Future<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
-            var future = new Future<Sprite>(url, cancellationToken);
-            var futureRef = new Future<Reference<Sprite>>(url, cancellationToken).SetLogLevel(DebugLevel.None);
+            var future = new FutureSprite(url, cancellationToken);
+            var futureRef = future.AsReference(DebugLevel.None);
 
-            future.LoadedFromMemoryCache(sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.MemoryCache));
-            future.LoadingFromDiskCache (() =>     futureRef.Loading(FutureLoadingFrom.DiskCache));
-            future.LoadedFromDiskCache  (sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.DiskCache));
-            future.LoadingFromSource    (() =>     futureRef.Loading(FutureLoadingFrom.Source));
-            future.LoadedFromSource     (sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.Source));
-            future.Failed               (futureRef.FailToLoad);
+            future.StartLoading(
+                createWebRequest: requestUrl =>
+                {
+                    var webRequest = UnityWebRequestTexture.GetTexture(requestUrl);
+                    webRequest.downloadHandler = new DownloadHandlerTexture(true);
+                    return webRequest;
+                },
+                parseBytes: bytes =>
+                {
+                    var texture = new Texture2D(2, 2, textureFormat, true);
+                    if (texture.LoadImage(bytes))
+                        return ToSprite(texture, pivot);
+                    return null;
+                },
+                parseWebRequest: webRequest =>
+                {
+                    var texture = ((DownloadHandlerTexture)webRequest.downloadHandler).texture;
+                    return ToSprite(texture, pivot);
+                },
+                ignoreImageNotFoundError);
 
-            futureRef.Canceled(future.Cancel);
-
-            InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return futureRef;
         }
 

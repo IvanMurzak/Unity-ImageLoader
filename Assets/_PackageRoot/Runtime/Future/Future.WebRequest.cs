@@ -7,9 +7,13 @@ namespace Extensions.Unity.ImageLoader
     {
         internal Future<T> SetWebRequest(UnityWebRequest webRequest)
         {
-            webRequest.timeout = (int)Math.Ceiling(timeout.TotalSeconds);
-            this.WebRequest = webRequest;
+            WebRequest = PrepareWebRequest(webRequest);
             return this;
+        }
+        protected virtual UnityWebRequest PrepareWebRequest(UnityWebRequest webRequest)
+        {
+            webRequest.timeout = (int)Math.Ceiling(timeout.TotalSeconds);
+            return webRequest;
         }
 
         internal UnityWebRequestAsyncOperation SendWebRequest()
