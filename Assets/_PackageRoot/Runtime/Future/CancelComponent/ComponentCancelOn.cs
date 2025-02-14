@@ -1,15 +1,16 @@
-﻿using System;
+﻿using Extensions.Unity.ImageLoader.Utils;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
     public abstract class ComponentCancelOn : MonoBehaviour
     {
-        protected event Action onTrigger;
+        protected WeakAction onTrigger = new WeakAction();
         protected bool isTriggered;
 
         protected void Trigger()
         {
+            isTriggered = true;
             onTrigger?.Invoke();
             onTrigger = null;
         }

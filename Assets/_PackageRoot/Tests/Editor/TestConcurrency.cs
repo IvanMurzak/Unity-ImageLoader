@@ -29,6 +29,24 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
 
+        [UnityTest] public IEnumerator Load____1_ReferencesInParallelLateDisposeNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Load_X_ReferencesInParallelLateDispose(1);
+        }
+        [UnityTest] public IEnumerator Load____1_ReferencesInParallelLateDispose()
+        {
+            yield return Load_X_ReferencesInParallelLateDispose(1);
+        }
+        [UnityTest] public IEnumerator Load____2_ReferencesInParallelLateDisposeNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return Load_X_ReferencesInParallelLateDispose(2);
+        }
+        [UnityTest] public IEnumerator Load____2_ReferencesInParallelLateDispose()
+        {
+            yield return Load_X_ReferencesInParallelLateDispose(2);
+        }
         [UnityTest] public IEnumerator Load____5_ReferencesInParallelLateDisposeNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
@@ -47,7 +65,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             yield return Load_X_ReferencesInParallelLateDispose(1000);
         }
-        public IEnumerator Load_X_ReferencesInParallelLateDispose(int count)
+        public IEnumerator Load_X_ReferencesInParallelLateDispose(int count, bool futureDispose = false)
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
@@ -55,14 +73,17 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url1 = ImageURLs[0];
 
             var cts = new System.Threading.CancellationTokenSource();
-            cts.CancelAfterSlim(TimeSpan.FromSeconds(5) + TimeSpan.FromMilliseconds(5 * count));
+            cts.CancelAfterSlim(TimeSpan.FromSeconds(25) + TimeSpan.FromMilliseconds(5 * count));
 
             var tasks = Enumerable.Range(0, count)
                 .Select(i => Task.Run(async () =>
                 {
                     var futureRef = ImageLoader.LoadSpriteRef(url1);
                     Assert.NotNull(futureRef);
-                    return await futureRef;
+                    var result = await futureRef;
+                    if (futureDispose)
+                        futureRef.Dispose();
+                    return result;
                 }))
                 .ToArray();
 

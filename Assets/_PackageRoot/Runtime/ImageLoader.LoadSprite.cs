@@ -29,12 +29,15 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns sprite asynchronously </returns>
         public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
-            var future = new Future<Sprite>(url, cancellationToken, muteLogs: false);
+            var future = new Future<Sprite>(url, cancellationToken);
             InternalLoadSprite(future, pivot, textureFormat, ignoreImageNotFoundError);
             return future;
         }
         static async void InternalLoadSprite(Future<Sprite> future, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
         {
+            if (future.IsCancelled || future.Status == FutureStatus.Disposed)
+                return;
+
             if (string.IsNullOrEmpty(future.Url))
             {
                 future.FailToLoad(new Exception($"[ImageLoader] Future[id={future.id}] Empty url. Image could not be loaded!"));
@@ -54,13 +57,13 @@ namespace Extensions.Unity.ImageLoader
             var anotherLoadingFuture = GetLoadingFuture(future.Url);
             if (anotherLoadingFuture != null)
             {
-                if (settings.debugLevel.IsActive(DebugLevel.Log))
+                if (future.LogLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Future[id={future.id}] Waiting while another task is loading {future.Url}");
 
                 anotherLoadingFuture.PassEvents(future, passCancelled: false).Forget();
                 await UniTask.WaitWhile(() => IsLoading(future.Url) && !future.IsCancelled);
 
-                if (settings.debugLevel.IsActive(DebugLevel.Log))
+                if (future.LogLevel.IsActive(DebugLevel.Log))
                 {
                     Debug.Log(future.IsCancelled
                         ? $"[ImageLoader] Future[id={future.id}] Cancelled {future.Url}"
@@ -113,7 +116,7 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (Exception e)
                 {
-                    if (settings.debugLevel.IsActive(DebugLevel.Exception))
+                    if (future.LogLevel.IsActive(DebugLevel.Exception))
                         Debug.LogException(e);
                 }
             }
@@ -128,7 +131,7 @@ namespace Extensions.Unity.ImageLoader
                     if (future.IsCancelled || future.Status == FutureStatus.FailedToLoad)
                         return;
 
-                    if (settings.debugLevel.IsActive(DebugLevel.Log))
+                    if (future.LogLevel.IsActive(DebugLevel.Log))
                         Debug.Log($"[ImageLoader] Future[id={future.id}] Creating UnityWebRequest for loading from Source {future.Url}");
 
                     var asyncOperation = future.SetWebRequest(UnityWebRequestTexture.GetTexture(future.Url))
@@ -138,33 +141,17 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (OperationCanceledException)
                 {
-                    try
-                    {
-                        future.Cancel();
-                    }
-                    catch (Exception e)
-                    {
-                        if (settings.debugLevel.IsActive(DebugLevel.Exception))
-                            Debug.LogException(e);
-                    }
+                    future.Cancel();
                 }
                 catch (TimeoutException e)
                 {
-                    try
-                    {
-                        RemoveLoading(future); // LOADING REMOVED
-                        future.FailToLoad(e);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (settings.debugLevel.IsActive(DebugLevel.Exception))
-                            Debug.LogException(ex);
-                    }
+                    RemoveLoading(future); // LOADING REMOVED
+                    future.FailToLoad(e);
                     return;
                 }
                 catch (Exception e)
                 {
-                    if (settings.debugLevel.IsActive(DebugLevel.Exception) && !ignoreImageNotFoundError)
+                    if (future.LogLevel.IsActive(DebugLevel.Exception) && !ignoreImageNotFoundError)
                         Debug.LogException(e);
                 }
                 finally

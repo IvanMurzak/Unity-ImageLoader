@@ -26,7 +26,7 @@ namespace Extensions.Unity.ImageLoader
         public static Future<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new Future<Sprite>(url, cancellationToken);
-            var futureRef = new Future<Reference<Sprite>>(url, cancellationToken, muteLogs: true);
+            var futureRef = new Future<Reference<Sprite>>(url, cancellationToken).SetLogLevel(DebugLevel.None);
 
             future.LoadedFromMemoryCache(sprite => futureRef.Loaded(new Reference<Sprite>(future.Url, sprite), FutureLoadedFrom.MemoryCache));
             future.LoadingFromDiskCache (() =>     futureRef.Loading(FutureLoadingFrom.DiskCache));

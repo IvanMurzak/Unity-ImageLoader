@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Extensions.Unity.ImageLoader.Utils;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -9,13 +10,13 @@ namespace Extensions.Unity.ImageLoader
         internal static void Clear()
         {
             lock (referenceCounters) referenceCounters.Clear();
-            EventOnClearAll?.Invoke();
+            Safe.Run(EventOnClearAll, DebugLevel.Exception);
         }
         internal static bool Clear(string url)
         {
             var result = false;
             lock (referenceCounters) result = referenceCounters.Remove(url);
-            EventOnClearUrl?.Invoke(url);
+            Safe.Run(EventOnClearUrl, url, DebugLevel.Exception);
             return result;
         }
         public static int Counter(string url)

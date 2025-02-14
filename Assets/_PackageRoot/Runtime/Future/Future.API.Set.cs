@@ -25,5 +25,16 @@ namespace Extensions.Unity.ImageLoader
             UseMemoryCache = value;
             return this;
         }
+
+        /// <summary>
+        /// Set log level for this Future instance
+        /// </summary>
+        /// <param name="value">new value</param>
+        /// <returns>Returns the Future instance</returns>
+        public Future<T> SetLogLevel(DebugLevel value)
+        {
+            LogLevel = value;
+            return this;
+        }
     }
 }

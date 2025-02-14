@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Extensions.Unity.ImageLoader.Utils;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,22 +43,13 @@ namespace Extensions.Unity.ImageLoader
                 {
                     foreach (var target in targets)
                     {
-                        if (target == null)
+                        if (target == null || (target is UIBehaviour uiBehaviour && IsDestroyed(uiBehaviour)))
                         {
-                            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
+                            if (future.LogLevel.IsActive(DebugLevel.Warning))
                                 Debug.LogWarning($"[ImageLoader] Future[id={future.id}] The target is null. Can't set image into it. Skipping.");
                             continue;
                         }
-                        if (target is UIBehaviour uiBehaviour)
-                        {
-                            if (IsDestroyed(uiBehaviour))
-                            {
-                                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                                    Debug.LogWarning($"The target UIBehaviour is destroyed. Can't set image into it. Skipping.");
-                                continue;
-                            }
-                        }
-                        setter?.Invoke(target, sprite);
+                        Safe.Run(setter, target, sprite, future.LogLevel);
                     }
                 });
             });

@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using Extensions.Unity.ImageLoader.Utils;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (IsCompleted)
             {
-                action?.Invoke(IsLoaded);
+                Safe.Run(action, IsLoaded, LogLevel);
                 return this;
             }
             OnCompleted += action;
@@ -59,7 +60,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.LoadedFromMemoryCache)
             {
-                action?.Invoke(value);
+                Safe.Run(action, value, LogLevel);
                 return this;
             }
             OnLoadedFromMemoryCache += action;
@@ -75,7 +76,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.LoadingFromDiskCache || Status == FutureStatus.LoadedFromDiskCache)
             {
-                action?.Invoke();
+                Safe.Run(action, LogLevel);
                 return this;
             }
             OnLoadingFromDiskCache += action;
@@ -91,7 +92,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.LoadedFromDiskCache)
             {
-                action?.Invoke(value);
+                Safe.Run(action, value, LogLevel);
                 return this;
             }
             OnLoadedFromDiskCache += action;
@@ -107,7 +108,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.LoadingFromSource || Status == FutureStatus.LoadedFromSource)
             {
-                action?.Invoke();
+                Safe.Run(action, LogLevel);
                 return this;
             }
             OnLoadingFromSource += action;
@@ -123,7 +124,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.LoadedFromSource)
             {
-                action?.Invoke(value);
+                Safe.Run(action, value, LogLevel);
                 return this;
             }
             OnLoadedFromSource += action;
@@ -139,9 +140,9 @@ namespace Extensions.Unity.ImageLoader
         {
             if (IsCancelled)
             {
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
+                if (LogLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Future[id={id}] Canceled: {Url}");
-                action();
+                Safe.Run(action, LogLevel);
                 return this;
             }
             OnCanceled += action;
@@ -157,9 +158,9 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.Disposed)
             {
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
+                if (LogLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
-                action?.Invoke(this);
+                Safe.Run(action, this, LogLevel);
                 return this;
             }
             OnDispose += action;
@@ -172,13 +173,13 @@ namespace Extensions.Unity.ImageLoader
         public void Cancel()
         {
             if (cleared || IsCancelled) return;
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
+            if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={id}] Cancel: {Url}");
             Status = FutureStatus.Canceled;
             if (!cts.IsCancellationRequested)
             {
-                cts.Cancel();
-                OnCanceled?.Invoke();
+                Safe.Run(cts.Cancel, LogLevel);
+                Safe.Run(OnCanceled, LogLevel);
             }
             Clear();
         }
@@ -190,17 +191,17 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.Disposed) return;
 
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log) && !muteLogs)
+            if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
 
             if (!cts.IsCancellationRequested)
             {
                 cts.Cancel();
-                OnCanceled?.Invoke();
+                Safe.Run(OnCanceled, LogLevel);
                 OnCanceled = null;
             }
             Status = FutureStatus.Disposed;
-            OnDispose?.Invoke(this);
+            Safe.Run(OnDispose, this, LogLevel);
             OnDispose = null;
             Clear();
 
@@ -210,7 +211,7 @@ namespace Extensions.Unity.ImageLoader
             value = default;
             exception = default;
 
-            cts.Dispose();
+            Safe.Run(cts.Dispose, LogLevel);
             WebRequest?.Dispose();
             WebRequest = null;
         }
@@ -236,7 +237,7 @@ namespace Extensions.Unity.ImageLoader
                 }
                 catch (Exception ex)
                 {
-                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Exception) && !muteLogs)
+                    if (LogLevel.IsActive(DebugLevel.Exception))
                         Debug.LogException(ex);
                 }
             }
@@ -257,7 +258,7 @@ namespace Extensions.Unity.ImageLoader
                     }
                     catch (Exception ex)
                     {
-                        if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Exception) && !muteLogs)
+                        if (LogLevel.IsActive(DebugLevel.Exception))
                             Debug.LogException(ex);
                     }
                 });

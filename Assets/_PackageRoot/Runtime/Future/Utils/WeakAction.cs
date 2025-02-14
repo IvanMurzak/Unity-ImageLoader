@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Extensions.Unity.ImageLoader
+namespace Extensions.Unity.ImageLoader.Utils
 {
-    internal sealed class WeakAction<T>
+    public sealed class WeakAction<T>
     {
         List<WeakReference<Action<T>>> listeners = new List<WeakReference<Action<T>>>();
 
@@ -42,7 +42,7 @@ namespace Extensions.Unity.ImageLoader
                 foreach (var subscriber in subscribers)
                 {
                     if (subscriber.alive)
-                        subscriber.action.Invoke(data);
+                        Safe.Run(subscriber.action.Invoke, data, DebugLevel.Exception);
                     else
                         isAnyExpired = true;
                 }
@@ -64,7 +64,7 @@ namespace Extensions.Unity.ImageLoader
         }
     }
 
-    internal sealed class WeakAction
+    public sealed class WeakAction
     {
         List<WeakReference<Action>> listeners = new List<WeakReference<Action>>();
 
@@ -102,7 +102,7 @@ namespace Extensions.Unity.ImageLoader
                 foreach (var subscriber in subscribers)
                 {
                     if (subscriber.alive)
-                        subscriber.action.Invoke();
+                        Safe.Run(subscriber.action.Invoke, DebugLevel.Exception);
                     else
                         isAnyExpired = true;
                 }
