@@ -61,7 +61,8 @@
         "Murzak",
         "openupm",
         "ugui",
-        "unitask"
+        "unitask",
+        "WEBGL"
     ],
     "dotnet.defaultSolution": "Unity-ImageLoader.sln"
 }
