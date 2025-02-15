@@ -24,5 +24,8 @@ namespace Extensions.Unity.ImageLoader
             }
             return WebRequest.SendWebRequest();
         }
+
+        protected abstract T ParseWebRequest(UnityWebRequest webRequest);
+        protected abstract UnityWebRequest CreateWebRequest(string url);
     }
 }

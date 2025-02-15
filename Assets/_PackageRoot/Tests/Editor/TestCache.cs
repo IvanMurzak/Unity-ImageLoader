@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Log;
+            ImageLoader.settings.debugLevel = DebugLevel.Trace;
         }
         [UnityTearDown] public IEnumerator TearDown()
         {

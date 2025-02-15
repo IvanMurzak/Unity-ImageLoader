@@ -1,141 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
-
-namespace Extensions.Unity.ImageLoader
+﻿namespace Extensions.Unity.ImageLoader
 {
     public abstract partial class Future<T>
     {
-        internal static volatile Dictionary<string, T> memoryCache = new Dictionary<string, T>();
-
-#if UNITY_EDITOR && UNITY_2019_3_OR_NEWER
-        [UnityEditor.InitializeOnEnterPlayMode]
-        internal static void ClearMemoryCacheOnEnterPlayMode()
-        {
-            // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
-            // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
-            // filled with destroyed sprites when the user reenters play mode.
-            lock (memoryCache) memoryCache.Clear();
-            Reference<T>.Clear();
-        }
-#endif
-
-        /// <summary>
-        /// Check the Memory cache contains sprite for the given url
-        /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns true if Sprite exists in Memory cache</returns>
-        public static bool MemoryCacheContains(string url)
-        {
-            lock (memoryCache)
-                return memoryCache.ContainsKey(url);
-        }
         /// <summary>
         /// Save sprite to Memory cache directly. Should be used for overloading cache system
         /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
         /// <param name="obj">sprite which should be saved</param>
         /// <param name="replace">replace existed cached sprite if any</param>
-        public static void SaveToMemoryCache(string url, T obj, bool replace = false)
-        {
-            lock (memoryCache)
-            {
-                if (!replace && memoryCache.ContainsKey(url))
-                {
-                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                        Debug.LogError($"[ImageLoader] Memory cache already contains key: {url}");
-                    return;
-                }
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Save to memory cache: {url}");
-                memoryCache[url] = obj;
-            }
-        }
-        /// <summary>
-        /// Loads directly from Memory cache if exists and allowed
-        /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Reference<T> LoadFromMemoryCacheRef(string url)
-        {
-            T obj;
-
-            lock (memoryCache)
-                obj = memoryCache.GetValueOrDefault(url);
-
-            if (obj == null)
-                return null;
-
-            return new Reference<T>(url, obj);
-        }
-        /// <summary>
-        /// Loads directly from Memory cache if exists and allowed
-        /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static T LoadFromMemoryCache(string url)
-        {
-            lock (memoryCache)
-                return memoryCache.GetValueOrDefault(url);
-        }
+        protected virtual void SaveToMemoryCache(T obj, bool replace = false) => SaveToMemoryCache(Url, obj, replace);
         /// <summary>
         /// Loads directly from Memory cache if exists and allowed
         /// </summary>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public T LoadFromMemoryCache()
-        {
-            lock (memoryCache)
-                return memoryCache.GetValueOrDefault(Url);
-        }
+        protected virtual T LoadFromMemoryCache() => LoadFromMemoryCache(Url);
         /// <summary>
         /// Clear Memory cache for the given url
         /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
-        public void ClearMemoryCache() => ClearMemoryCache(Url, ReleaseMemory);
-        public static void ClearMemoryCache(string url, Action<T> releaseMemory)
-        {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clearing Memory cache: {url}");
-
-            var refCount = Reference<T>.Counter(url);
-            if (refCount > 0)
-                throw new Exception($"[ImageLoader] There are {refCount} references to the sprite, clear them first. URL={url}");
-
-            lock (memoryCache)
-            {
-                if (memoryCache.Remove(url, out var cache))
-                {
-                    releaseMemory(cache);
-                }
-            }
-        }
+        protected virtual void ClearMemoryCache() => ClearMemoryCache(Url, ReleaseMemory);
         /// <summary>
         /// Clear Memory cache for all urls
         /// </summary>
-        /// <param name="url">URL to the picture, web or local</param>
-        public void ClearMemoryCacheAll() => ClearMemoryCacheAll(ReleaseMemory);
-        public static void ClearMemoryCacheAll(Action<T> releaseMemory)
-        {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clearing Memory cache All");
-
-            lock (memoryCache)
-            {
-                foreach (var keyValue in memoryCache)
-                {
-                    var url = keyValue.Key;
-                    var refCount = Reference<T>.Counter(url);
-                    if (refCount > 0)
-                        throw new Exception($"[ImageLoader] There are {refCount} references to the sprite, clear them first. URL={url}");
-
-                    var cache = keyValue.Value;
-                    releaseMemory(cache);
-                }
-                memoryCache.Clear();
-            }
-        }
+        protected virtual void ClearMemoryCacheAll() => ClearMemoryCacheAll(ReleaseMemory);
 
         protected abstract void ReleaseMemory(T obj);
     }

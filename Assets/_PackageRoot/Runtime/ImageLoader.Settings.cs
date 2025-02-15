@@ -22,6 +22,7 @@ namespace Extensions.Unity.ImageLoader
 
     public enum DebugLevel
     {
+        Trace       = -1,
         Log         = 0,
         Warning     = 1,
         Error       = 2,

@@ -19,9 +19,12 @@ namespace Extensions.Unity.ImageLoader
         CancellationToken CancellationToken { get; }
         void Cancel();
     }
+    internal static class FutureMetadata
+    {
+        public static volatile int idCounter = 0;
+    }
     public partial class Future<T> : IFuture, IDisposable
     {
-        private static int idCounter = 0;
 
         public string Url { get; }
 
@@ -38,7 +41,7 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
 
-        internal readonly int id = idCounter++;
+        internal readonly int id = FutureMetadata.idCounter++;
 
         private TimeSpan timeout;
         private List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
@@ -69,6 +72,9 @@ namespace Extensions.Unity.ImageLoader
 
         protected Future(string url, CancellationToken cancellationToken)
         {
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={id}] Created\n{url}");
+
             Url = url;
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             UseDiskCache = ImageLoader.settings.useDiskCache;
@@ -82,6 +88,9 @@ namespace Extensions.Unity.ImageLoader
 
         internal Future<T> PassEvents(Future<T> to, bool passCancelled = true, bool passDisposed = false)
         {
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events\n{Url}");
+
             LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
             LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
@@ -99,6 +108,9 @@ namespace Extensions.Unity.ImageLoader
         }
         internal Future<T> PassEvents<T2>(Future<T2> to, Func<T, T2> convert, bool passCancelled = true, bool passDisposed = false)
         {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
+
             LoadedFromMemoryCache((v) => to.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
             LoadedFromDiskCache  ((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
@@ -119,7 +131,7 @@ namespace Extensions.Unity.ImageLoader
             if (cleared || IsCancelled) return;
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder: {Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder:\n{Url}");
 
             // UniTask.ReturnToMainThread()
             // if (UnityMainThreadDispatcher.IsMainThread)
@@ -175,9 +187,9 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loading: {Url}, from: {loadingFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loading: from: {loadingFrom}\n{Url}");
 
-            Safe.Run(onLoadingEvent, LogLevel);;
+            Safe.Run(onLoadingEvent, LogLevel);
         }
         internal void Loaded(T value, FutureLoadedFrom loadedFrom)
         {
@@ -205,7 +217,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loaded: {Url}, from: {loadedFrom}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loaded: from: {loadedFrom}\n{Url}");
 
             Safe.Run(onLoadedEvent, value, LogLevel);
             Safe.Run(OnLoaded, value, LogLevel);

@@ -29,26 +29,7 @@ namespace Extensions.Unity.ImageLoader
             var future = new FutureSprite(url, cancellationToken);
             var futureRef = future.AsReference(DebugLevel.None);
 
-            future.StartLoading(
-                createWebRequest: requestUrl =>
-                {
-                    var webRequest = UnityWebRequestTexture.GetTexture(requestUrl);
-                    webRequest.downloadHandler = new DownloadHandlerTexture(true);
-                    return webRequest;
-                },
-                parseBytes: bytes =>
-                {
-                    var texture = new Texture2D(2, 2, textureFormat, true);
-                    if (texture.LoadImage(bytes))
-                        return ToSprite(texture, pivot);
-                    return null;
-                },
-                parseWebRequest: webRequest =>
-                {
-                    var texture = ((DownloadHandlerTexture)webRequest.downloadHandler).texture;
-                    return ToSprite(texture, pivot);
-                },
-                ignoreImageNotFoundError);
+            future.StartLoading(ignoreImageNotFoundError);
 
             return futureRef;
         }

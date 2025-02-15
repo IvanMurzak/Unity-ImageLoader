@@ -141,7 +141,7 @@ namespace Extensions.Unity.ImageLoader
             if (IsCancelled)
             {
                 if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Canceled: {Url}");
+                    Debug.Log($"[ImageLoader] Future[id={id}] Canceled\n{Url}");
                 Safe.Run(action, LogLevel);
                 return this;
             }
@@ -159,7 +159,7 @@ namespace Extensions.Unity.ImageLoader
             if (Status == FutureStatus.Disposed)
             {
                 if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
+                    Debug.Log($"[ImageLoader] Future[id={id}] Disposed\n{Url}");
                 Safe.Run(action, this, LogLevel);
                 return this;
             }
@@ -168,13 +168,13 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// Cancel image loading process
+        /// Cancel loading process
         /// </summary>
         public void Cancel()
         {
             if (cleared || IsCancelled) return;
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Cancel: {Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Cancel\n{Url}");
             Status = FutureStatus.Canceled;
             if (!cts.IsCancellationRequested)
             {
@@ -207,8 +207,8 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.Disposed) return;
 
-            if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Disposed: {Url}");
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={id}] Disposed\n{Url}");
 
             if (!cts.IsCancellationRequested)
             {
@@ -286,9 +286,9 @@ namespace Extensions.Unity.ImageLoader
         {
             var tcs = new TaskCompletionSource<T>();
 
-            // Then(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Then {Url}"));
-            // Failed(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Failed {Url}"));
-            // Canceled(() => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Canceled {Url}"));
+            // Then(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Then\n{Url}"));
+            // Failed(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Failed\n{Url}"));
+            // Canceled(() => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Canceled\n{Url}"));
 
             Then(tcs.SetResult);
             Failed(tcs.SetException);

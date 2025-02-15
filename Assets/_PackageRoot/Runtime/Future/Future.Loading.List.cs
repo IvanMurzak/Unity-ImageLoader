@@ -2,8 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
@@ -11,26 +9,37 @@ namespace Extensions.Unity.ImageLoader
     public partial class Future<T>
     {
         private static ConcurrentDictionary<string, Future<T>> loadingInProcess = new ConcurrentDictionary<string, Future<T>>();
-        private static void AddLoading(Future<T> future)
+        private static bool RegisterLoading(Future<T> future, out Future<T> anotherLoadingFuture)
         {
-            if (!loadingInProcess.TryAdd(future.Url, future))
-                throw new Exception($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url} already loading");
+            lock (loadingInProcess)
+            {
+                if (loadingInProcess.TryGetValue(future.Url, out anotherLoadingFuture))
+                    return false;
 
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
+                if (!loadingInProcess.TryAdd(future.Url, future))
+                    throw new Exception($"[ImageLoader] Future[id={future.id}] Can't start new loading. Because loading is in progress\n{future.Url}");
+
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Future[id={future.id}] Loading. Total {loadingInProcess.Count} loading tasks\n{future.Url}");
+
+                return true;
+            }
         }
         private static void RemoveLoading(Future<T> future) => RemoveLoading(future.Url);
         private static void RemoveLoading(string url)
         {
-            if (loadingInProcess.TryRemove(url, out var future))
+            lock (loadingInProcess)
             {
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
-            }
-            else
-            {
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url} not found in loading tasks");
+                if (loadingInProcess.TryRemove(url, out var future))
+                {
+                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
+                        Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: left {loadingInProcess.Count} loading tasks\n{url}");
+                }
+                else
+                {
+                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
+                        Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: not found in loading tasks\n{url}");
+                }
             }
         }
 
@@ -45,7 +54,10 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         /// </summary>
         /// <returns>Returns current loading Future or null if none</returns>
-        public static Future<T> GetLoadingFuture(string url) => loadingInProcess.TryGetValue(url, out var future) ? future : null;
+        public static Future<T> GetLoadingFuture(string url)
+            => loadingInProcess.TryGetValue(url, out var future)
+                ? future
+                : null;
 
         /// <summary>
         /// Return all current loading Futures

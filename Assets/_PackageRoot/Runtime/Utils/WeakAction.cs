@@ -42,7 +42,7 @@ namespace Extensions.Unity.ImageLoader.Utils
                 foreach (var subscriber in subscribers)
                 {
                     if (subscriber.alive)
-                        Safe.Run(subscriber.action.Invoke, data, DebugLevel.Exception);
+                        Safe.Run(subscriber.action, data, DebugLevel.Exception);
                     else
                         isAnyExpired = true;
                 }
@@ -102,7 +102,7 @@ namespace Extensions.Unity.ImageLoader.Utils
                 foreach (var subscriber in subscribers)
                 {
                     if (subscriber.alive)
-                        Safe.Run(subscriber.action.Invoke, DebugLevel.Exception);
+                        Safe.Run(subscriber.action, DebugLevel.Exception);
                     else
                         isAnyExpired = true;
                 }

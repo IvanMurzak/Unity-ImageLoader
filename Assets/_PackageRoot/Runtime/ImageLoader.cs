@@ -13,10 +13,10 @@ namespace Extensions.Unity.ImageLoader
         private static void AddLoading(Future<Sprite> future)
         {
             if (!loadingInProcess.TryAdd(future.Url, future))
-                throw new Exception($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url} already loading");
+                throw new Exception($"[ImageLoader] Future[id={future.id}] AddLoading: already loading\n{future.Url}");
 
             if (settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
+                Debug.Log($"[ImageLoader] Future[id={future.id}] AddLoading: total {loadingInProcess.Count} loading tasks\n{future.Url}");
         }
         private static void RemoveLoading(Future<Sprite> future) => RemoveLoading(future.Url);
         private static void RemoveLoading(string url)
@@ -24,12 +24,12 @@ namespace Extensions.Unity.ImageLoader
             if (loadingInProcess.TryRemove(url, out var future))
             {
                 if (settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
+                    Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: left {loadingInProcess.Count} loading tasks\n{url}");
             }
             else
             {
                 if (settings.debugLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url} not found in loading tasks");
+                    Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: not found in loading tasks\n{url}");
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
@@ -33,8 +32,8 @@ namespace Extensions.Unity.ImageLoader
             lock (referenceCounters)
             {
                 referenceCounters.AddOrUpdate(url, 1, (key, oldValue) => oldValue + 1);
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference created [{referenceCounters[url]}] URL={url}");
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference created [{referenceCounters[url]}]\nURL={url}");
             }
         }
         private void OnClearUrl(string url)
@@ -68,17 +67,17 @@ namespace Extensions.Unity.ImageLoader
                 referenceCounters.AddOrUpdate(Url, 0, (key, oldValue) => oldValue - 1);
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error) && referenceCounters.GetValueOrDefault(Url) < 0)
-                    Debug.LogError($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] has negative counter URL={Url}");
+                    Debug.LogError($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] has negative counter\nURL={Url}");
 
                 if (Keep)
                 {
-                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                        Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] URL={Url} Ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory.");
+                    if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] Ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory.\nURL={Url}");
                     return;
                 }
 
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] URL={Url}");
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}]\nURL={Url}");
 
                 if (referenceCounters.GetValueOrDefault(Url) == 0)
                     ImageLoader.ClearMemoryCache(Url);
