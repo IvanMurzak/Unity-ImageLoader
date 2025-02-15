@@ -9,17 +9,14 @@ namespace Extensions.Unity.ImageLoader
     {
         internal static volatile Dictionary<string, T> memoryCache = new Dictionary<string, T>();
 
-#if UNITY_EDITOR && UNITY_2019_3_OR_NEWER
-        [UnityEditor.InitializeOnEnterPlayMode]
-        internal static void ClearMemoryCacheOnEnterPlayMode()
-        {
-            // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
-            // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
-            // filled with destroyed sprites when the user reenters play mode.
-            lock (memoryCache) memoryCache.Clear();
-            Reference<T>.Clear();
-        }
-#endif
+        // internal static void ClearMemoryCache()
+        // {
+        //     // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
+        //     // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
+        //     // filled with destroyed sprites when the user reenters play mode.
+        //     lock (memoryCache) memoryCache.Clear();
+        //         Reference<T>.Clear();
+        // }
 
         /// <summary>
         /// Check the Memory cache contains sprite for the given url

@@ -6,8 +6,12 @@ namespace Extensions.Unity.ImageLoader
     public static partial class ImageLoader
     {
 #if UNITY_EDITOR && UNITY_2019_3_OR_NEWER
+        // Support for turning off domain reload in Project Settings/Editor/Enter Play Mode Settings
+        // Sprites created with Sprite.Create gets destroyed when exiting play mode, so we need to clear the sprite cache, as otherwise the cache will be
+        // filled with destroyed sprites when the user reenters play mode.
         [UnityEditor.InitializeOnEnterPlayMode]
-        private static void ClearMemoryCacheOnEnterPlayMode() => FutureTexture.ClearMemoryCacheOnEnterPlayMode();
+        private static void ClearMemoryCacheOnEnterPlayMode()
+            => FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture);
 #endif
 
         /// <summary>
