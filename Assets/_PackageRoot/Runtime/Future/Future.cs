@@ -216,7 +216,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loaded from: {loadedFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loaded from {loadedFrom}\n{Url}");
 
             Safe.Run(onLoadedEvent, value, LogLevel);
             Safe.Run(OnLoaded, value, LogLevel);

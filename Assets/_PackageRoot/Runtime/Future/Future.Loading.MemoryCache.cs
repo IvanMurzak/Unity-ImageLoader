@@ -1,4 +1,6 @@
-﻿namespace Extensions.Unity.ImageLoader
+﻿using UnityEngine;
+
+namespace Extensions.Unity.ImageLoader
 {
     public abstract partial class Future<T>
     {
@@ -7,7 +9,12 @@
         /// </summary>
         /// <param name="obj">sprite which should be saved</param>
         /// <param name="replace">replace existed cached sprite if any</param>
-        protected virtual void SaveToMemoryCache(T obj, bool replace = false) => SaveToMemoryCache(Url, obj, replace);
+        protected virtual void SaveToMemoryCache(T obj, bool replace = false)
+        {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] Save to Memory cache ({typeof(T).Name})\n{Url}");
+            SaveToMemoryCache(Url, obj, replace);
+        }
         /// <summary>
         /// Loads directly from Memory cache if exists and allowed
         /// </summary>

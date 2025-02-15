@@ -28,7 +28,7 @@ namespace Extensions.Unity.ImageLoader
         }
         protected static Task SaveDiskAsync(string url, byte[] data)
         {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"[ImageLoader] Save to Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => SaveDisk(url, data));
         }

@@ -46,7 +46,7 @@ namespace Extensions.Unity.ImageLoader
                         Debug.LogError($"[ImageLoader] Can't set to Memory cache ({typeof(T).Name}), because it already contains the key. Use 'replace = true' to replace\n{url}");
                     return;
                 }
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
                     Debug.Log($"[ImageLoader] Save to Memory cache ({typeof(T).Name})\n{url}");
                 memoryCache[url] = obj;
             }

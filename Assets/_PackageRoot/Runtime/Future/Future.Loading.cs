@@ -111,27 +111,36 @@ namespace Extensions.Unity.ImageLoader
                     if (IsCancelled || Status == FutureStatus.FailedToLoad)
                         return;
 
-                    if (LogLevel.IsActive(DebugLevel.Log))
+                    if (LogLevel.IsActive(DebugLevel.Trace))
                         Debug.Log($"[ImageLoader] Future[id={id}] Creating UnityWebRequest for loading from Source\n{Url}");
-
 
                     var asyncOperation = SetWebRequest(CreateWebRequest(Url))
                         .SendWebRequest();
 
                     await UniTask.WaitUntil(() => asyncOperation.isDone || IsCancelled);
+
+                    if (LogLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Future[id={id}] Completed UnityWebRequest for loading from Source\n{Url}");
                 }
                 catch (OperationCanceledException)
                 {
+                    if (LogLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Future[id={id}] Canceled UnityWebRequest for loading from Source\n{Url}");
                     Cancel();
                 }
                 catch (TimeoutException e)
                 {
+                    if (LogLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Future[id={id}] Timeout of UnityWebRequest for loading from Source\n{Url}");
                     RemoveLoading(); // LOADING REMOVED
                     FailToLoad(e);
                     return;
                 }
                 catch (Exception e)
                 {
+                    if (LogLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Future[id={id}] Exception in UnityWebRequest for loading from Source\n{Url}");
+
                     if (LogLevel.IsActive(DebugLevel.Exception) && !ignoreImageNotFoundError)
                         Debug.LogException(e);
                 }
@@ -160,7 +169,7 @@ namespace Extensions.Unity.ImageLoader
             if (WebRequest == null)
             {
                 RemoveLoading(); // LOADING REMOVED
-                FailToLoad(new Exception($"[ImageLoader] Future[id={id}] UnityWebRequest is null: url={Url}"));
+                FailToLoad(new Exception($"[ImageLoader] Future[id={id}] UnityWebRequest is null. URL={Url}"));
                 return;
             }
 
@@ -172,15 +181,18 @@ namespace Extensions.Unity.ImageLoader
             if (isError)
             {
 #if UNITY_2020_1_OR_NEWER
-                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.result} {WebRequest.error}: url={Url}";
+                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.result} {WebRequest.error}. URL={Url}";
 #else
-                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.error}: url={Url}";
+                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.error}. URL={Url}";
 #endif
                 RemoveLoading(); // LOADING REMOVED
                 FailToLoad(new Exception(errorMessage));
             }
             else
             {
+                if (LogLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Future[id={id}] Loaded from Source. Processing...\n{Url}");
+
                 if (UseDiskCache)
                     await SaveDiskAsync(WebRequest.downloadHandler.data);
 
@@ -189,10 +201,14 @@ namespace Extensions.Unity.ImageLoader
                     RemoveLoading(); // LOADING REMOVED
                     return;
                 }
+                if (LogLevel.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[ImageLoader] Future[id={id}] Parsing UnityWebRequest response\n{Url}");
                 var obj = ParseWebRequest(WebRequest);
+
                 if (UseMemoryCache)
                     SaveToMemoryCache(obj, replace: true);
                 RemoveLoading(); // LOADING REMOVED
+
                 Loaded(obj, FutureLoadedFrom.Source);
             }
         }
