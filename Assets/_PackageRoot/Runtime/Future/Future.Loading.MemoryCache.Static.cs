@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
@@ -45,11 +43,11 @@ namespace Extensions.Unity.ImageLoader
                 if (!replace && memoryCache.ContainsKey(url))
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                        Debug.LogError($"[ImageLoader] Memory cache already contains key\n{url}");
+                        Debug.LogError($"[ImageLoader] Can't set to Memory cache ({typeof(T).Name}), because it already contains the key. Use 'replace = true' to replace\n{url}");
                     return;
                 }
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Save to memory cache\n{url}");
+                    Debug.Log($"[ImageLoader] Save to Memory cache ({typeof(T).Name})\n{url}");
                 memoryCache[url] = obj;
             }
         }
@@ -87,7 +85,7 @@ namespace Extensions.Unity.ImageLoader
         public static void ClearMemoryCache(string url, Action<T> releaseMemory)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clearing Memory cache {typeof(T).Name}\n{url}");
+                Debug.Log($"[ImageLoader] Clearing Memory cache ({typeof(T).Name})\n{url}");
 
             var refCount = Reference<T>.Counter(url);
             if (refCount > 0)
@@ -108,7 +106,7 @@ namespace Extensions.Unity.ImageLoader
         public static void ClearMemoryCacheAll(Action<T> releaseMemory)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clearing Memory cache {typeof(T).Name} All");
+                Debug.Log($"[ImageLoader] Clearing Memory cache ({typeof(T).Name}) All");
 
             lock (memoryCache)
             {

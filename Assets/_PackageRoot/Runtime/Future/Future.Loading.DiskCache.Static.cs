@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
+﻿using System.IO;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
@@ -27,13 +23,13 @@ namespace Extensions.Unity.ImageLoader
                 return null;
 
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Load from disk cache\n{url}");
+                Debug.Log($"[ImageLoader] Load from Disk cache ({typeof(T).Name})\n{url}");
             return File.ReadAllBytes(DiskCachePath(url));
         }
         protected static Task SaveDiskAsync(string url, byte[] data)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Save to disk cache\n{url}");
+                Debug.Log($"[ImageLoader] Save to Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => SaveDisk(url, data));
         }
         protected static Task<byte[]> LoadDiskAsync(string url)
@@ -65,7 +61,7 @@ namespace Extensions.Unity.ImageLoader
         public static Task ClearDiskCache()
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clear disk cache All");
+                Debug.Log($"[ImageLoader] Clear Disk cache ({typeof(T).Name}) All");
             return diskTaskFactory.StartNew(() =>
             {
                 if (Directory.Exists(DiskCacheFolderPath))
@@ -80,7 +76,7 @@ namespace Extensions.Unity.ImageLoader
         public static Task ClearDiskCache(string url)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Clear disk cache\n{url}");
+                Debug.Log($"[ImageLoader] Clear Disk cache ({typeof(T).Name})\n{url}");
             var diskPath = DiskCachePath(url);
             return diskTaskFactory.StartNew(() =>
             {
