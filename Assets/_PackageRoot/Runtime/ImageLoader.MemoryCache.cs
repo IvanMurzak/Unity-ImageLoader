@@ -11,7 +11,10 @@ namespace Extensions.Unity.ImageLoader
         // filled with destroyed sprites when the user reenters play mode.
         [UnityEditor.InitializeOnEnterPlayMode]
         private static void ClearMemoryCacheOnEnterPlayMode()
-            => FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture);
+        {
+            FutureSprite.ClearMemoryCacheAll(FutureSprite.ReleaseMemorySprite);
+            FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture);
+        }
 #endif
 
         /// <summary>
