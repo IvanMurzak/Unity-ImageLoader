@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Extensions.Unity.ImageLoader.Utils;
@@ -69,17 +69,17 @@ namespace Extensions.Unity.ImageLoader
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
         public CancellationToken CancellationToken => cts.Token;
 
-        protected Future(string url, CancellationToken cancellationToken)
+        protected Future(string url, CancellationToken cancellationToken = default)
         {
-            if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] Created\n{url}");
-
             Url = url;
-            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             UseDiskCache = ImageLoader.settings.useDiskCache;
             UseMemoryCache = ImageLoader.settings.useMemoryCache;
             timeout = ImageLoader.settings.timeout;
             LogLevel = ImageLoader.settings.debugLevel;
+            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={id}] Created ({typeof(T).Name})\n{url}");
 
             cancellationToken.Register(Cancel);
         }
@@ -158,27 +158,15 @@ namespace Extensions.Unity.ImageLoader
         {
             if (cleared || IsCancelled) return;
 
-            switch(loadingFrom)
-            {
-                case FutureLoadingFrom.DiskCache:
-                    Status = FutureStatus.LoadingFromDiskCache;
-                    Safe.Run(OnLoadingFromDiskCache, LogLevel);
-                    break;
-                case FutureLoadingFrom.Source:
-                    Status = FutureStatus.LoadingFromSource;
-                    Safe.Run(OnLoadingFromSource, LogLevel);;
-                    break;
-                default:
-                    throw new ArgumentException($"Unsupported FutureLoadingFrom with value = '{loadingFrom}' in LoadingFrom");
-            }
-
             Action onLoadingEvent;
             switch (loadingFrom)
             {
                 case FutureLoadingFrom.DiskCache:
+                    Status = FutureStatus.LoadingFromDiskCache;
                     onLoadingEvent = OnLoadingFromDiskCache;
                     break;
                 case FutureLoadingFrom.Source:
+                    Status = FutureStatus.LoadingFromSource;
                     onLoadingEvent = OnLoadingFromSource;
                     break;
                 default:
