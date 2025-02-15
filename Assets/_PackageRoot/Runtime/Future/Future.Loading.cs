@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -166,7 +165,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
 #if UNITY_2020_1_OR_NEWER
-            var isError = WebRequest.result != UnityWebRequest.Result.Success;
+            var isError = WebRequest.result != UnityEngine.Networking.UnityWebRequest.Result.Success;
 #else
             var isError = WebRequest.isNetworkError || WebRequest.isHttpError;
 #endif
