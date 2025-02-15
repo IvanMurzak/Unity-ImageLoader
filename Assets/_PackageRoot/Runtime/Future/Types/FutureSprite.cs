@@ -34,13 +34,13 @@ namespace Extensions.Unity.ImageLoader
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={id}] Load from Disk cache ({typeof(Texture2D).Name} -> {typeof(Sprite).Name})\n{Url}");
-            return FutureTexture.LoadDiskAsync(Url);
+            return FutureTexture.LoadDiskAsync(Url, suppressMessage: true);
         }
         protected override Task SaveDiskAsync(byte[] data)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={id}] Save to Disk cache ({typeof(Texture2D).Name} <- {typeof(Sprite).Name})\n{Url}");
-            return FutureTexture.SaveDiskAsync(Url, data);
+            return FutureTexture.SaveDiskAsync(Url, data, suppressMessage: true);
         }
 
         // --- Memory Cache ---
@@ -62,7 +62,7 @@ namespace Extensions.Unity.ImageLoader
         }
         protected override void SaveToMemoryCache(Sprite obj, bool replace = false)
         {
-            FutureTexture.SaveToMemoryCache(Url, obj.texture, replace);
+            FutureTexture.SaveToMemoryCache(Url, obj.texture, replace, suppressMessage: true);
             base.SaveToMemoryCache(obj, replace);
         }
         protected override void ReleaseMemory(Sprite obj) => ReleaseMemorySprite(obj);

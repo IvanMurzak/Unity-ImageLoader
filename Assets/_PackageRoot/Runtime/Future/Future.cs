@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using Extensions.Unity.ImageLoader.Utils;
@@ -35,7 +35,8 @@ namespace Extensions.Unity.ImageLoader
         private event Action<T>           OnLoaded;
         private event Action<Exception>   OnFailedToLoad;
         private event Action<bool>        OnCompleted;
-        private event Action              OnCanceled;
+        private       WeakAction          OnCanceled = new WeakAction();
+        // private event Action              OnCanceled;
         private event Action<Future<T>>   OnDispose;
 
         private readonly CancellationTokenSource cts;

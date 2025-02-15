@@ -184,18 +184,56 @@ namespace Extensions.Unity.ImageLoader
             Clear();
         }
 
-        public Future<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.None)
+        /// <summary>
+        /// Convert the Future<typeparamref name="T"/> instance to a Future<Reference<typeparamref name="T"/>> instance
+        /// </summary>
+        /// <returns>Returns Future<Reference<T>></returns>
+        public Future<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace)
         {
             var futureRef = new FutureReference<T>(Url, cts.Token).SetLogLevel(logLevel);
+            var weakReference = new WeakReference<Future<Reference<T>>>(futureRef);
 
-            LoadedFromMemoryCache(obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.MemoryCache));
-            LoadingFromDiskCache (() =>  futureRef.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache  (obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.DiskCache));
-            LoadingFromSource    (() =>  futureRef.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource     (obj => futureRef.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.Source));
-            Failed               (futureRef.FailToLoad);
+            LoadedFromMemoryCache(obj =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.MemoryCache);
+            });
+            LoadingFromDiskCache(() =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Loading(FutureLoadingFrom.DiskCache);
+            });
+            LoadedFromDiskCache(obj =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.DiskCache);
+            });
+            LoadingFromSource(() =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Loading(FutureLoadingFrom.Source);
+            });
+            LoadedFromSource(obj =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.Source);
+            });
+            Failed(e =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.FailToLoad(e);
+            });
+            Canceled(() =>
+            {
+                if (weakReference.TryGetTarget(out var reference))
+                    reference.Cancel();
+            });
 
+            // WARNING: It creates cross reference between two Future instances
+            // Which doesn't let to dispose non of them until the other one is disposed explicitly
+            // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
             futureRef.Canceled(Cancel);
+            futureRef.Disposed(f => Dispose());
 
             return futureRef;
         }
@@ -285,10 +323,6 @@ namespace Extensions.Unity.ImageLoader
         public FutureAwaiter GetAwaiter()
         {
             var tcs = new TaskCompletionSource<T>();
-
-            // Then(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Then\n{Url}"));
-            // Failed(x => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Failed\n{Url}"));
-            // Canceled(() => Debug.Log($"[ImageLoader] Future[id={id}] GetAwaiter: Canceled\n{Url}"));
 
             Then(tcs.SetResult);
             Failed(tcs.SetException);

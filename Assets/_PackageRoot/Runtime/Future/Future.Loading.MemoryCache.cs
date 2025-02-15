@@ -13,7 +13,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={id}] Save to Memory cache ({typeof(T).Name})\n{Url}");
-            SaveToMemoryCache(Url, obj, replace);
+            SaveToMemoryCache(Url, obj, replace, suppressMessage: true);
         }
         /// <summary>
         /// Loads directly from Memory cache if exists and allowed

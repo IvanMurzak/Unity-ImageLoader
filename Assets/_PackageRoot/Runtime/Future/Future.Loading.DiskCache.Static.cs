@@ -21,19 +21,18 @@ namespace Extensions.Unity.ImageLoader
             Directory.CreateDirectory(Path.GetDirectoryName(DiskCachePath(url)));
             if (!DiskCacheContains(url))
                 return null;
-
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Load from Disk cache ({typeof(T).Name})\n{url}");
             return File.ReadAllBytes(DiskCachePath(url));
         }
-        protected static Task SaveDiskAsync(string url, byte[] data)
+        protected static Task SaveDiskAsync(string url, byte[] data, bool suppressMessage = false)
         {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace) && !suppressMessage)
                 Debug.Log($"[ImageLoader] Save to Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => SaveDisk(url, data));
         }
-        protected static Task<byte[]> LoadDiskAsync(string url)
+        protected static Task<byte[]> LoadDiskAsync(string url, bool suppressMessage = false)
         {
+            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace) && !suppressMessage)
+                Debug.Log($"[ImageLoader] Load from Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => LoadDisk(url));
         }
 

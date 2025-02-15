@@ -37,7 +37,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         /// <param name="obj">sprite which should be saved</param>
         /// <param name="replace">replace existed cached sprite if any</param>
-        public static void SaveToMemoryCache(string url, T obj, bool replace = false)
+        public static void SaveToMemoryCache(string url, T obj, bool replace = false, bool suppressMessage = false)
         {
             lock (memoryCache)
             {
@@ -47,7 +47,7 @@ namespace Extensions.Unity.ImageLoader
                         Debug.LogError($"[ImageLoader] Can't set to Memory cache ({typeof(T).Name}), because it already contains the key. Use 'replace = true' to replace\n{url}");
                     return;
                 }
-                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
+                if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace) && !suppressMessage)
                     Debug.Log($"[ImageLoader] Save to Memory cache ({typeof(T).Name})\n{url}");
                 memoryCache[url] = obj;
             }
