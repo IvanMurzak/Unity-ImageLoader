@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using Extensions.Unity.ImageLoader.Utils;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -131,7 +130,7 @@ namespace Extensions.Unity.ImageLoader
             if (cleared || IsCancelled) return;
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder:\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder\n{Url}");
 
             // UniTask.ReturnToMainThread()
             // if (UnityMainThreadDispatcher.IsMainThread)
@@ -187,7 +186,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loading: from: {loadingFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loading from: {loadingFrom}\n{Url}");
 
             Safe.Run(onLoadingEvent, LogLevel);
         }
@@ -217,7 +216,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loaded: from: {loadedFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={id}] Loaded from: {loadedFrom}\n{Url}");
 
             Safe.Run(onLoadedEvent, value, LogLevel);
             Safe.Run(OnLoaded, value, LogLevel);

@@ -33,7 +33,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 referenceCounters.AddOrUpdate(url, 1, (key, oldValue) => oldValue + 1);
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference created [{referenceCounters[url]}]\nURL={url}");
+                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference created [{referenceCounters[url]}]\n{Url}");
             }
         }
         private void OnClearUrl(string url)
@@ -67,17 +67,17 @@ namespace Extensions.Unity.ImageLoader
                 referenceCounters.AddOrUpdate(Url, 0, (key, oldValue) => oldValue - 1);
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error) && referenceCounters.GetValueOrDefault(Url) < 0)
-                    Debug.LogError($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] has negative counter\nURL={Url}");
+                    Debug.LogError($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] has negative counter\n{Url}");
 
                 if (Keep)
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] Ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory.\nURL={Url}");
+                        Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}] Ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory.\n{Url}");
                     return;
                 }
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}]\nURL={Url}");
+                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference dispose [{referenceCounters[Url]}]\n{Url}");
 
                 if (referenceCounters.GetValueOrDefault(Url) == 0)
                     ImageLoader.ClearMemoryCache(Url);

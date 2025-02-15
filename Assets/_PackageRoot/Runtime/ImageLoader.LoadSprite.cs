@@ -10,9 +10,10 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
+        /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static Future<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, bool mipChain = true, CancellationToken cancellationToken = default)
+        public static Future<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
             => LoadSprite(url, new Vector2(0.5f, 0.5f), textureFormat, ignoreImageNotFoundError, mipChain, cancellationToken);
 
         /// <summary>
@@ -21,6 +22,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         /// <param name="pivot">Pivot of created Sprite</param>
         /// <param name="textureFormat">TextureFormat for the Texture2D creation</param>
+        /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
         public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
