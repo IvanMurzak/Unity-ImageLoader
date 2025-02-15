@@ -21,7 +21,7 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Clear Disk cache for all urls
         /// </summary>
-        public static Task ClearDiskCache() => FutureTexture.ClearDiskCache();
+        public static Task ClearDiskCacheAll() => FutureTexture.ClearDiskCache();
 
         /// <summary>
         /// Clear Disk cache for the given url

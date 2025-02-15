@@ -61,7 +61,7 @@ namespace Extensions.Unity.ImageLoader
         /// Clear Memory cache for all urls
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        public static void ClearMemoryCache()
+        public static void ClearMemoryCacheAll()
         {
             FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture);
             FutureSprite.ClearMemoryCacheAll(FutureSprite.ReleaseMemorySprite);

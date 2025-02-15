@@ -21,7 +21,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Log;
+            ImageLoader.settings.debugLevel = DebugLevel.Trace;
         }
         [UnityTearDown] public IEnumerator TearDown()
         {
@@ -128,7 +128,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             var ref0 = task1.Result;
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 
-            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache());
+            LogAssert.Expect(LogType.Error, $"[ImageLoader] There are 1 references to the object, clear them first. URL={url1}");
+            ImageLoader.ClearMemoryCacheAll();
+
             Assert.IsNotNull(ref0.Value);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 
@@ -176,7 +178,6 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(count - i - 1, Reference<Sprite>.Counter(url1));
             }
         }
-
 
         [UnityTest] public IEnumerator KeepReferenceButDisposeFutureNoLogs()
         {

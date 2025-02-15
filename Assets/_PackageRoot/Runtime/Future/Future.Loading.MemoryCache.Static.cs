@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Extensions.Unity.ImageLoader.Utils;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
@@ -95,7 +96,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (memoryCache.Remove(url, out var cache))
                 {
-                    releaseMemory(cache);
+                    releaseMemory?.Invoke(cache);
                 }
             }
         }
@@ -110,17 +111,30 @@ namespace Extensions.Unity.ImageLoader
 
             lock (memoryCache)
             {
+                var toKeep = new List<KeyValuePair<string, T>>();
                 foreach (var keyValue in memoryCache)
                 {
                     var url = keyValue.Key;
                     var refCount = Reference<T>.Counter(url);
                     if (refCount > 0)
-                        throw new Exception($"[ImageLoader] There are {refCount} references to the sprite, clear them first. URL={url}");
+                    {
+                        if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error))
+                            Debug.LogError($"[ImageLoader] There are {refCount} references to the object, clear them first. URL={url}");
+                        toKeep.Add(keyValue);
+                        continue;
+                    }
 
                     var cache = keyValue.Value;
-                    releaseMemory(cache);
+                    Safe.Run(releaseMemory, cache, DebugLevel.Exception);
                 }
                 memoryCache.Clear();
+
+                // Restoring not released references
+                if (toKeep.Count > 0)
+                {
+                    foreach (var keyValue in toKeep)
+                        memoryCache[keyValue.Key] = keyValue.Value;
+                }
             }
         }
     }

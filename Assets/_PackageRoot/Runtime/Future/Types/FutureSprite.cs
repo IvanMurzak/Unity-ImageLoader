@@ -30,8 +30,18 @@ namespace Extensions.Unity.ImageLoader
 
         // --- Disc Cache ---
         protected override bool DiskCacheContains() => FutureTexture.DiskCacheContains(Url);
-        protected override Task<byte[]> LoadDiskAsync() => FutureTexture.LoadDiskAsync(Url);
-        protected override Task SaveDiskAsync(byte[] data) => FutureTexture.SaveDiskAsync(Url, data);
+        protected override Task<byte[]> LoadDiskAsync()
+        {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] Load from Disk cache ({typeof(Texture2D).Name} -> {typeof(Sprite).Name})\n{Url}");
+            return FutureTexture.LoadDiskAsync(Url);
+        }
+        protected override Task SaveDiskAsync(byte[] data)
+        {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] Save to Disk cache ({typeof(Texture2D).Name} <- {typeof(Sprite).Name})\n{Url}");
+            return FutureTexture.SaveDiskAsync(Url, data);
+        }
 
         // --- Memory Cache ---
         protected override Sprite LoadFromMemoryCache()

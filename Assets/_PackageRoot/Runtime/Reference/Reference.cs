@@ -23,9 +23,6 @@ namespace Extensions.Unity.ImageLoader
             Url = url;
             Value = value;
 
-            // WARNING: It is a reference from outside to this object.
-            // The object will not be disposed automatically. Explicit call Dispose() required.
-            // TODO: To avoid the reference to let the object be disposed automatically.
             EventOnClearUrl += OnClearUrl;
             EventOnClearAll += OnClearAll;
 
@@ -41,11 +38,13 @@ namespace Extensions.Unity.ImageLoader
             if (Url == url)
                 Dispose();
         }
-        private void OnClearAll()
-        {
-            Dispose();
-        }
+        private void OnClearAll() => Dispose();
 
+        /// <summary>
+        /// Set 'Keep' property to True or False
+        /// True: Keep the texture in memory, you are responsible to release the memory.
+        /// False: Release memory automatically when the Reference.Dispose executed.
+        /// </summary>
         public Reference<T> SetKeep(bool value = true)
         {
             Keep = value;

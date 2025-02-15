@@ -65,10 +65,10 @@ namespace Extensions.Unity.ImageLoader
         /// Clear cache from Memory and Disk layers for all urls
         /// </summary>
         /// <returns>Returns task of the disk cache clearing process</returns>
-        public static Task ClearCache()
+        public static Task ClearCacheAll()
         {
-            ClearMemoryCache();
-            return ClearDiskCache();
+            ClearMemoryCacheAll();
+            return ClearDiskCacheAll();
         }
 
         /// <summary>

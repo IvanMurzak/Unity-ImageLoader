@@ -1,5 +1,6 @@
 
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -15,9 +16,21 @@ namespace Extensions.Unity.ImageLoader
             this.textureFormat = textureFormat;
         }
 
-        protected override Texture2D ParseWebRequest(UnityWebRequest webRequest)
-            => DownloadHandlerTexture.GetContent(webRequest);
+        // --- Disc Cache ---
+        protected override Task<byte[]> LoadDiskAsync()
+        {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] Load from Disk cache ({typeof(Texture2D).Name})\n{Url}");
+            return base.LoadDiskAsync();
+        }
+        protected override Task SaveDiskAsync(byte[] data)
+        {
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={id}] Save to Disk cache ({typeof(Texture2D).Name})\n{Url}");
+            return base.SaveDiskAsync(data);
+        }
 
+        // --- Memory Cache ---
         protected override void ReleaseMemory(Texture2D obj) => ReleaseMemoryTexture(obj);
 
         public static void ReleaseMemoryTexture(Texture2D obj)
@@ -26,6 +39,11 @@ namespace Extensions.Unity.ImageLoader
                 UnityEngine.Object.DestroyImmediate(obj);
         }
 
+        // --- Web Request ---
+        protected override UnityWebRequest CreateWebRequest(string url)
+            => UnityWebRequestTexture.GetTexture(url);
+        protected override Texture2D ParseWebRequest(UnityWebRequest webRequest)
+            => DownloadHandlerTexture.GetContent(webRequest);
         protected override Texture2D ParseBytes(byte[] bytes)
             => ParseBytesToTexture(bytes, textureFormat, mipChain);
 
@@ -36,8 +54,5 @@ namespace Extensions.Unity.ImageLoader
                 return texture;
             return null;
         }
-
-        protected override UnityWebRequest CreateWebRequest(string url)
-            => UnityWebRequestTexture.GetTexture(url);
     }
 }
