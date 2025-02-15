@@ -20,7 +20,7 @@ namespace Extensions.Unity.ImageLoader
                     throw new Exception($"[ImageLoader] Future[id={future.id}] Can't start new loading. Because loading is in progress\n{future.Url}");
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={future.id}] Loading. Total {loadingInProcess.Count} loading tasks\n{future.Url}");
+                    Debug.Log($"[ImageLoader] Future[id={future.id}] Loading Registered. Total {loadingInProcess.Count} loading tasks\n{future.Url}");
 
                 return true;
             }
@@ -33,12 +33,12 @@ namespace Extensions.Unity.ImageLoader
                 if (loadingInProcess.TryRemove(url, out var future))
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                        Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: left {loadingInProcess.Count} loading tasks\n{url}");
+                        Debug.Log($"[ImageLoader] Future[id={future.id}] Removed loading. Total {loadingInProcess.Count} loading tasks\n{url}");
                 }
                 else
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                        Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: not found in loading tasks\n{url}");
+                        Debug.LogWarning($"[ImageLoader] Future[id={future.id}] Wasn't able to remove loading, not found in loading tasks\n{url}");
                 }
             }
         }

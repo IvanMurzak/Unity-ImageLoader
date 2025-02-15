@@ -20,7 +20,7 @@ namespace Extensions.Unity.ImageLoader
     }
     internal static class FutureMetadata
     {
-        public static volatile int idCounter = 0;
+        public static volatile uint idCounter = 0;
     }
     public partial class Future<T> : IFuture, IDisposable
     {
@@ -40,7 +40,7 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
 
-        internal readonly int id = FutureMetadata.idCounter++;
+        internal readonly uint id = FutureMetadata.idCounter++;
 
         private TimeSpan timeout;
         private List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
