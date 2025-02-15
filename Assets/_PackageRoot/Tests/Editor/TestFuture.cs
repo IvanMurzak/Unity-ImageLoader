@@ -4,6 +4,7 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
+using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -713,6 +714,55 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
                 future.Dispose();
             }
+        }
+        [UnityTest] public IEnumerator EventsOrderWhenClearNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventsOrderWhenClear();
+        }
+        [UnityTest] public IEnumerator EventsOrderWhenClear()
+        {
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url = ImageURLs[0];
+            var completed = false;
+            var cancelled = false;
+            var startTime = DateTime.Now;
+            var consumer = new FakeConsumer<Sprite>();
+            var future = ImageLoader.LoadSprite(url)
+                .LoadingFromSource(() => Debug.Log("LoadingFromSource"))
+                .LoadedFromSource(x => Debug.Log("LoadedFromSource"))
+                .Then(x => Debug.Log("Then"))
+                .ThenSet(FakeConsumer<Sprite>.Setter, consumer)
+                //.Loaded
+                .Completed(success => completed = true)
+                .Canceled(() => cancelled = true);
+
+            Assert.IsFalse(completed);
+            Assert.IsFalse(cancelled);
+            var task1 = future.AsTask();
+            future.Cancel();
+            var task2 = future.AsTask();
+
+            Assert.IsFalse(completed);
+            Assert.IsTrue(cancelled);
+
+            while (!task1.IsCompleted)
+            {
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                yield return null;
+            }
+            while (!task2.IsCompleted)
+            {
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                yield return null;
+            }
+
+            Assert.IsFalse(completed);
+            Assert.IsTrue(cancelled);
+            yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
+            future.Dispose();
         }
     }
 }
