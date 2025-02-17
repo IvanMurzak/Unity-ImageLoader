@@ -7,22 +7,11 @@ using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public interface IFuture
-    {
-        string Url { get; }
-        bool IsCancelled { get; }
-        bool IsLoaded { get; }
-        bool IsCompleted { get; }
-        bool IsInProgress { get; }
-        FutureStatus Status { get; }
-        CancellationToken CancellationToken { get; }
-        void Cancel();
-    }
     internal static class FutureMetadata
     {
         public static volatile uint idCounter = 0;
     }
-    public partial class Future<T> : IFuture, IDisposable
+    public partial class Future<T> : IFuture, IFuture<T>, IDisposable
     {
 
         public string Url { get; }
@@ -41,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
 
         private readonly CancellationTokenSource cts;
 
-        internal readonly uint id = FutureMetadata.idCounter++;
+        public uint Id { get; } = FutureMetadata.idCounter++;
 
         private TimeSpan timeout;
         private List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
@@ -80,23 +69,25 @@ namespace Extensions.Unity.ImageLoader
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] Created ({typeof(T).Name})\n{url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Created ({typeof(T).Name})\n{url}");
 
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
 
-        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true, bool passDisposed = false)
+        public IFuture<T> PassEvents(IFuture<T> to, bool passCancelled = true, bool passDisposed = false)
         {
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events\n{Url}");
 
-            LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
-            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
-            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource     ((v) => to.Loaded(v, FutureLoadedFrom.Source));
-            Failed               (to.FailToLoad);
+            var internalTo = (IFutureInternal<T>)to;
+
+            LoadedFromMemoryCache((v) => internalTo.Loaded(v, FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (( ) => internalTo.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  ((v) => internalTo.Loaded(v, FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (( ) => internalTo.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     ((v) => internalTo.Loaded(v, FutureLoadedFrom.Source));
+            Failed               (internalTo.FailToLoad);
 
             if (passCancelled)
                 Canceled(to.Cancel);
@@ -106,17 +97,19 @@ namespace Extensions.Unity.ImageLoader
 
             return this;
         }
-        internal Future<T> PassEvents<T2>(Future<T2> to, Func<T, T2> convert, bool passCancelled = true, bool passDisposed = false)
+        public IFuture<T> PassEvents<T2>(IFuture<T2> to, Func<T, T2> convert, bool passCancelled = true, bool passDisposed = false)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
 
-            LoadedFromMemoryCache((v) => to.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
-            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache  ((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
-            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource     ((v) => to.Loaded(convert(v), FutureLoadedFrom.Source));
-            Failed               (to.FailToLoad);
+            var internalTo = (IFutureInternal<T2>)to;
+
+            LoadedFromMemoryCache((v) => internalTo.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
+            LoadingFromDiskCache (( ) => internalTo.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache  ((v) => internalTo.Loaded(convert(v), FutureLoadedFrom.DiskCache));
+            LoadingFromSource    (( ) => internalTo.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource     ((v) => internalTo.Loaded(convert(v), FutureLoadedFrom.Source));
+            Failed               (internalTo.FailToLoad);
 
             if (passCancelled)
                 Canceled(to.Cancel);
@@ -131,7 +124,7 @@ namespace Extensions.Unity.ImageLoader
             if (cleared || IsCancelled) return;
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Placeholder\n{Url}");
 
             // UniTask.ReturnToMainThread()
             // if (UnityMainThreadDispatcher.IsMainThread)
@@ -175,7 +168,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loading from: {loadingFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loading from: {loadingFrom}\n{Url}");
 
             Safe.Run(onLoadingEvent, LogLevel);
         }
@@ -205,7 +198,7 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loaded from {loadedFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from {loadedFrom}\n{Url}");
 
             Safe.Run(onLoadedEvent, value, LogLevel);
             Safe.Run(OnLoaded, value, LogLevel);

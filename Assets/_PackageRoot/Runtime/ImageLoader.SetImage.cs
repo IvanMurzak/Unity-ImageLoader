@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, Image image, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static IFuture<Sprite> SetSprite(string url, Image image, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
             => SetSprite(url, image, Vector2.one * 0.5f, textureFormat, ignoreImageNotFoundError);
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, Image image, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
+        public static IFuture<Sprite> SetSprite(string url, Image image, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false)
             => LoadSprite(url, pivot, textureFormat, ignoreImageNotFoundError).ThenSet(image);
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Image components from Unity UI</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, params Image[] images)
+        public static IFuture<Sprite> SetSprite(string url, params Image[] images)
             => SetSprite(url, Vector2.one * 0.5f, TextureFormat.ARGB32, false, images);
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Image components from Unity UI</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, TextureFormat textureFormat, params Image[] images)
+        public static IFuture<Sprite> SetSprite(string url, TextureFormat textureFormat, params Image[] images)
             => SetSprite(url, Vector2.one * 0.5f, textureFormat, false, images);
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Image components from Unity UI</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, bool ignoreImageNotFoundError, params Image[] images)
+        public static IFuture<Sprite> SetSprite(string url, bool ignoreImageNotFoundError, params Image[] images)
             => SetSprite(url, Vector2.one * 0.5f, TextureFormat.ARGB32, ignoreImageNotFoundError, images);
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Image components from Unity UI</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, TextureFormat textureFormat, bool ignoreImageNotFoundError, params Image[] images)
+        public static IFuture<Sprite> SetSprite(string url, TextureFormat textureFormat, bool ignoreImageNotFoundError, params Image[] images)
             => SetSprite(url, Vector2.one * 0.5f, textureFormat, ignoreImageNotFoundError, images);
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Image components from Unity UI</param>
         /// <returns>Returns async task</returns>
         [Obsolete("SetSprite is obsolete. Please use 'ImageLoader.LoadSprite(...).ThenSet(target)' instead")]
-        public static Future<Sprite> SetSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, params Image[] images)
+        public static IFuture<Sprite> SetSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool ignoreImageNotFoundError = false, params Image[] images)
             => LoadSprite(url, pivot, textureFormat, ignoreImageNotFoundError).ThenSet(images);
     }
 }

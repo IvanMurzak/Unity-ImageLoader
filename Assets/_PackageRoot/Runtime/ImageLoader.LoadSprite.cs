@@ -13,7 +13,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static Future<Sprite> LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
+        public static FutureSprite LoadSprite(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
             => LoadSprite(url, new Vector2(0.5f, 0.5f), textureFormat, ignoreImageNotFoundError, mipChain, cancellationToken);
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static Future<Sprite> LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
+        public static FutureSprite LoadSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new FutureSprite(url, pivot, textureFormat, mipChain, cancellationToken);
             future.StartLoading(ignoreImageNotFoundError);

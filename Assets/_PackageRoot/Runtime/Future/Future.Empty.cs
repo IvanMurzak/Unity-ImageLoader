@@ -8,40 +8,40 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Create and return empty Future<T> instance with loading status
         /// </summary>
-        public static Future<T> EmptyLoading(string url = null, FutureLoadingFrom from = FutureLoadingFrom.Source, T value = default)
+        public static IFuture<T> EmptyLoading(string url = null, FutureLoadingFrom from = FutureLoadingFrom.Source, T value = default)
         {
             var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
-                future.Loading(from);
+            ((IFutureInternal<T>)future).Loading(from);
             return future;
         }
 
         /// <summary>
         /// Create and return empty Future<T> instance with loaded status
         /// </summary>
-        public static Future<T> EmptyLoaded(string url = null, FutureLoadedFrom from = FutureLoadedFrom.Source, T value = default)
+        public static IFuture<T> EmptyLoaded(string url = null, FutureLoadedFrom from = FutureLoadedFrom.Source, T value = default)
         {
             var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
-                future.Loaded(value, from);
+            ((IFutureInternal<T>)future).Loaded(value, from);
             return future;
         }
 
         /// <summary>
         /// Create and return empty Future<T> instance with failed to load status
         /// </summary>
-        public static Future<T> EmptyFailedToLoad(string url = null, Exception exception = null)
+        public static IFuture<T> EmptyFailedToLoad(string url = null, Exception exception = null)
         {
             var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
-                future.FailToLoad(exception);
+            ((IFutureInternal<T>)future).FailToLoad(exception);
             return future;
         }
 
         /// <summary>
         /// Create and return empty Future<T> instance with canceled status
         /// </summary>
-        public static Future<T> EmptyCanceled(string url = null)
+        public static IFuture<T> EmptyCanceled(string url = null)
         {
             var future = new FutureEmpty<T>(url, CancellationToken.None).SetLogLevel(DebugLevel.None);
-                future.Cancel();
+            future.Cancel();
             return future;
         }
     }

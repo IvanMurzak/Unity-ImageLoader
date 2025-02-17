@@ -20,10 +20,10 @@ namespace Extensions.Unity.ImageLoader
         internal UnityWebRequestAsyncOperation SendWebRequest()
         {
             if (WebRequest == null)
-                throw new Exception($"[ImageLoader] Future[id={id}] UnityWebRequest is not set. Use SetWebRequest method before calling SendWebRequest.");
+                throw new Exception($"[ImageLoader] Future[id={Id}] UnityWebRequest is not set. Use SetWebRequest method before calling SendWebRequest.");
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] Send UnityWebRequest for loading from Source\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Send UnityWebRequest for loading from Source\n{Url}");
 
             return WebRequest.SendWebRequest();
         }

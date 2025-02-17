@@ -17,10 +17,10 @@ namespace Extensions.Unity.ImageLoader
                     return false;
 
                 if (!loadingInProcess.TryAdd(future.Url, future))
-                    throw new Exception($"[ImageLoader] Future[id={future.id}] Loading registration failed!\n{future.Url}");
+                    throw new Exception($"[ImageLoader] Future[id={future.Id}] Loading registration failed!\n{future.Url}");
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={future.id}] Loading registered. Total {loadingInProcess.Count} loading tasks\n{future.Url}");
+                    Debug.Log($"[ImageLoader] Future[id={future.Id}] Loading registered. Total {loadingInProcess.Count} loading tasks\n{future.Url}");
 
                 return true;
             }
@@ -33,12 +33,12 @@ namespace Extensions.Unity.ImageLoader
                 if (loadingInProcess.TryRemove(url, out var future))
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
-                        Debug.Log($"[ImageLoader] Future[id={future.id}] Loading registration removed. Total {loadingInProcess.Count} loading tasks\n{url}");
+                        Debug.Log($"[ImageLoader] Future[id={future.Id}] Loading registration removed. Total {loadingInProcess.Count} loading tasks\n{url}");
                 }
                 else
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                        Debug.LogWarning($"[ImageLoader] Future[id={future.id}] Wasn't able to remove loading registration, not found in loading tasks\n{url}");
+                        Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] Wasn't able to remove loading registration, not found in loading tasks\n{url}");
                 }
             }
         }
