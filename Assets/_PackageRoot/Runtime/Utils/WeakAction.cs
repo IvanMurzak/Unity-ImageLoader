@@ -14,7 +14,7 @@ namespace Extensions.Unity.ImageLoader.Utils
                 return;
 
             lock (listeners)
-                listeners.Add(new WeakReference<Action<T>>(handler));
+                listeners.Add(new WeakReference<Action<T>>(handler, trackResurrection: false));
         }
 
         public void RemoveListener(Action<T> handler)
@@ -74,7 +74,7 @@ namespace Extensions.Unity.ImageLoader.Utils
                 return;
 
             lock (listeners)
-                listeners.Add(new WeakReference<Action>(handler));
+                listeners.Add(new WeakReference<Action>(handler, trackResurrection: false));
         }
 
         public void RemoveListener(Action handler)

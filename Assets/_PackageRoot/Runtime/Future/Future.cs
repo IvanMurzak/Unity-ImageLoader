@@ -66,7 +66,7 @@ namespace Extensions.Unity.ImageLoader
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={Id}] Created future ({typeof(T).Name})\n{url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Created future<{typeof(T).Name}>\n{url}");
 
             cancellationToken.Register(Cancel);
         }
@@ -187,8 +187,8 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from {loadedFrom}\n{Url}");
 
-            Safe.Run(onLoadedEvent, value, LogLevel);
-            Safe.Run(OnLoaded, value, LogLevel);
+            Safe.Run(onLoadedEvent, this.value, LogLevel);
+            Safe.Run(OnLoaded, this.value, LogLevel);
             Safe.Run(OnCompleted, true, LogLevel);
             Clear();
         }

@@ -28,7 +28,7 @@ namespace Extensions.Unity.ImageLoader
         public static IFuture<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new FutureSprite(url, pivot, textureFormat, mipChain, cancellationToken);
-            var futureRef = future.AsReference(DebugLevel.Error);
+            var futureRef = future.AsReference(settings.debugLevel);
 
             future.StartLoading(ignoreImageNotFoundError);
 

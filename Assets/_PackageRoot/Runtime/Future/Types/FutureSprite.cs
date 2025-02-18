@@ -1,6 +1,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -73,7 +74,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (logLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
-                FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel);
+                UniTask.Post(() => FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel));
             }
         }
 

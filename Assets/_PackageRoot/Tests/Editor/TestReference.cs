@@ -77,6 +77,35 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.NotNull(reference);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
+            task = null;
+            reference = null;
+
+            yield return null;
+            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
+            GC.WaitForPendingFinalizers();
+            yield return null;
+
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+        }
+
+        [UnityTest] public IEnumerator DisposeOnOutOfScope2()
+        {
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url = ImageURLs[0];
+
+            var futureRef = ImageLoader.LoadSpriteRef(url);
+            while (futureRef.IsInProgress)
+                yield return null;
+
+            var reference = futureRef.Value;
+            Assert.NotNull(reference);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+
+            futureRef = null;
+            reference = null;
+
             yield return null;
             GC.Collect(100, GCCollectionMode.Forced, blocking: true);
             GC.WaitForPendingFinalizers();

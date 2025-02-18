@@ -193,7 +193,7 @@ namespace Extensions.Unity.ImageLoader
         {
             var url = Url;
             var futureRef = new FutureReference<T>(url, cts.Token, logLevel);
-            var weakReference = new WeakReference<IFutureInternal<Reference<T>>>(futureRef);
+            var weakReference = new WeakReference<IFutureInternal<Reference<T>>>(futureRef, trackResurrection: false);
 
             LoadedFromMemoryCache(obj =>
             {
@@ -235,8 +235,6 @@ namespace Extensions.Unity.ImageLoader
             // Which doesn't let to dispose non of them until the other one is disposed explicitly
             // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
             futureRef.Canceled(Cancel);
-            //futureRef.Disposed(f => Dispose());
-
 
             return futureRef;
         }

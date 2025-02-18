@@ -15,7 +15,7 @@ namespace Extensions.Unity.ImageLoader
         public T Value { get; private set; }
         public readonly string Url;
 
-        private volatile bool disposed;
+        private bool disposed;
         internal readonly uint id = idCounter++;
 
         internal Reference(string url, T value)

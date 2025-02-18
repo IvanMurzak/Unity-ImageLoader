@@ -1,6 +1,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -39,7 +40,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (logLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Release memory Texture2D");
-                UnityEngine.Object.DestroyImmediate(obj);
+                UniTask.Post(() => UnityEngine.Object.DestroyImmediate(obj));
             }
         }
 
