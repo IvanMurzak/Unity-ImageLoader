@@ -180,7 +180,7 @@ namespace Extensions.Unity.ImageLoader
             if (isError)
             {
 #if UNITY_2020_1_OR_NEWER
-                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.result} {WebRequest.error}. URL={Url}";
+                var errorMessage = $"[ImageLoader] Future[id={Id}] {WebRequest.result} {WebRequest.error}. URL={Url}";
 #else
                 var errorMessage = $"[ImageLoader] Future[id={Id}] {WebRequest.error}. URL={Url}";
 #endif

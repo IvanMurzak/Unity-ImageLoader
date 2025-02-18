@@ -16,7 +16,7 @@ namespace Extensions.Unity.ImageLoader
         public readonly string Url;
 
         private bool disposed;
-        internal readonly uint id = idCounter++;
+        public uint Id { get; } = idCounter++;
 
         internal Reference(string url, T value)
         {
@@ -30,7 +30,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 referenceCounters.AddOrUpdate(url, 1, (key, oldValue) => oldValue + 1);
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference created. Total {referenceCounters[url]} references to the object\n{Url}");
+                    Debug.Log($"[ImageLoader] Ref[id={Id}] Reference created. Total {referenceCounters[url]} references to the object\n{Url}");
             }
         }
         private void OnClearUrl(string url)
@@ -66,17 +66,17 @@ namespace Extensions.Unity.ImageLoader
                 referenceCounters.AddOrUpdate(Url, 0, (key, oldValue) => oldValue - 1);
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Error) && referenceCounters.GetValueOrDefault(Url) < 0)
-                    Debug.LogError($"[ImageLoader] Ref[id={id}] Reference disposed. Total {referenceCounters[Url]} references to the object. CAN'T BE NEGATIVE!\n{Url}");
+                    Debug.LogError($"[ImageLoader] Ref[id={Id}] Reference disposed. Total {referenceCounters[Url]} references to the object. CAN'T BE NEGATIVE!\n{Url}");
 
                 if (Keep)
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Ref[id={id}] Reference disposed. Total {referenceCounters[Url]} references to the object. Counter change ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory\n{Url}");
+                        Debug.Log($"[ImageLoader] Ref[id={Id}] Reference disposed. Total {referenceCounters[Url]} references to the object. Counter change ignored. Because 'Keep' is True. Please make sure you release the memory in time to avoid usage of too much memory\n{Url}");
                     return;
                 }
 
                 if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Ref[id={id}] Reference disposed. Total {referenceCounters[Url]} references to the object\n{Url}");
+                    Debug.Log($"[ImageLoader] Ref[id={Id}] Reference disposed. Total {referenceCounters[Url]} references to the object\n{Url}");
 
                 if (referenceCounters.GetValueOrDefault(Url) == 0)
                     ImageLoader.ClearMemoryCache(Url);
