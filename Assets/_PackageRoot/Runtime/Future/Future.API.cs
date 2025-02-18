@@ -191,13 +191,14 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns Future<Reference<T>></returns>
         public IFuture<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace)
         {
-            var futureRef = new FutureReference<T>(Url, cts.Token).SetLogLevel(logLevel);
-            var weakReference = new WeakReference<IFutureInternal<Reference<T>>>(futureRef as IFutureInternal<Reference<T>>);
+            var url = Url;
+            var futureRef = new FutureReference<T>(url, cts.Token, logLevel);
+            var weakReference = new WeakReference<IFutureInternal<Reference<T>>>(futureRef);
 
             LoadedFromMemoryCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.MemoryCache);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
             });
             LoadingFromDiskCache(() =>
             {
@@ -207,7 +208,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromDiskCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.DiskCache);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
             });
             LoadingFromSource(() =>
             {
@@ -217,7 +218,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromSource(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.Source);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
             });
             Failed(e =>
             {
@@ -235,6 +236,7 @@ namespace Extensions.Unity.ImageLoader
             // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
             futureRef.Canceled(Cancel);
             //futureRef.Disposed(f => Dispose());
+
 
             return futureRef;
         }

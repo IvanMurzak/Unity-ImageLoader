@@ -65,12 +65,16 @@ namespace Extensions.Unity.ImageLoader
             FutureTexture.SaveToMemoryCache(Url, obj.texture, replace, suppressMessage: true);
             base.SaveToMemoryCache(obj, replace);
         }
-        protected override void ReleaseMemory(Sprite obj) => ReleaseMemorySprite(obj);
+        protected override void ReleaseMemory(Sprite obj, DebugLevel logLevel = DebugLevel.Log) => ReleaseMemorySprite(obj, logLevel);
 
-        public static void ReleaseMemorySprite(Sprite obj)
+        public static void ReleaseMemorySprite(Sprite obj, DebugLevel logLevel = DebugLevel.Log)
         {
             if (!ReferenceEquals(obj, null) && obj != null)
-                FutureTexture.ReleaseMemoryTexture(obj.texture);
+            {
+                if (logLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
+                FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel);
+            }
         }
 
         // --- Web Request ---

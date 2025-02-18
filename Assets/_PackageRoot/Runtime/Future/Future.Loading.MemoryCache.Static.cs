@@ -80,7 +80,7 @@ namespace Extensions.Unity.ImageLoader
         /// Clear Memory cache for the given url
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        public static void ClearMemoryCache(string url, Action<T> releaseMemory)
+        public static void ClearMemoryCache(string url, Action<T, DebugLevel> releaseMemory, DebugLevel logLevel = DebugLevel.Log)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Clearing Memory cache ({typeof(T).Name})\n{url}");
@@ -93,7 +93,7 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (memoryCache.Remove(url, out var cache))
                 {
-                    releaseMemory?.Invoke(cache);
+                    Safe.Run(releaseMemory, cache, logLevel, logLevel);
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace Extensions.Unity.ImageLoader
         /// Clear Memory cache for all urls
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        public static void ClearMemoryCacheAll(Action<T> releaseMemory)
+        public static void ClearMemoryCacheAll(Action<T, DebugLevel> releaseMemory, DebugLevel logLevel = DebugLevel.Log)
         {
             if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Clearing Memory cache ({typeof(T).Name}) All");
@@ -122,7 +122,7 @@ namespace Extensions.Unity.ImageLoader
                     }
 
                     var cache = keyValue.Value;
-                    Safe.Run(releaseMemory, cache, DebugLevel.Exception);
+                    Safe.Run(releaseMemory, cache, logLevel, logLevel);
                 }
                 memoryCache.Clear();
 

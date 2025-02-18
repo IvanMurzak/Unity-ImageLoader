@@ -31,12 +31,16 @@ namespace Extensions.Unity.ImageLoader
         }
 
         // --- Memory Cache ---
-        protected override void ReleaseMemory(Texture2D obj) => ReleaseMemoryTexture(obj);
+        protected override void ReleaseMemory(Texture2D obj, DebugLevel logLevel = DebugLevel.Log) => ReleaseMemoryTexture(obj, logLevel);
 
-        public static void ReleaseMemoryTexture(Texture2D obj)
+        public static void ReleaseMemoryTexture(Texture2D obj, DebugLevel logLevel = DebugLevel.Log)
         {
             if (!ReferenceEquals(obj, null) && obj != null)
+            {
+                if (logLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Release memory Texture2D");
                 UnityEngine.Object.DestroyImmediate(obj);
+            }
         }
 
         // --- Web Request ---

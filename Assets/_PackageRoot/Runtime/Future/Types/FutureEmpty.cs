@@ -18,6 +18,6 @@ namespace Extensions.Unity.ImageLoader
 
         protected override T ParseWebRequest(UnityWebRequest webRequest) => default;
 
-        protected override void ReleaseMemory(T obj) { }
+        protected override void ReleaseMemory(T obj, DebugLevel logLevel = DebugLevel.Log) { }
     }
 }
