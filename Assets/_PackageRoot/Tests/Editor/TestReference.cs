@@ -11,13 +11,6 @@ namespace Extensions.Unity.ImageLoader.Tests
 {
     public class TestReference
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -39,7 +32,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -67,7 +60,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
             var task = ImageLoader.LoadSpriteRef(url).AsTask();
             while (!task.IsCompleted)
@@ -93,7 +86,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
             var futureRef = ImageLoader.LoadSpriteRef(url);
             while (futureRef.IsInProgress)
@@ -124,7 +117,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var task = ImageLoader.LoadSpriteRef(url).AsTask();
                 while (!task.IsCompleted)
@@ -140,7 +133,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             GC.WaitForPendingFinalizers();
             yield return null;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlockNoLogs()
@@ -153,7 +146,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var task = ImageLoader.LoadSpriteRef(url).AsTask();
                 while (!task.IsCompleted)
@@ -165,7 +158,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
@@ -181,7 +174,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -211,7 +204,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -251,7 +244,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var future = ImageLoader.LoadSpriteRef(url1);
             var task1 = future.AsTask();
@@ -281,7 +274,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var future = ImageLoader.LoadSpriteRef(url1);
             var task1 = future.AsTask();
@@ -323,7 +316,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -366,7 +359,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -427,8 +420,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
-            var url2 = ImageURLs[1];
+            var url1 = TestUtils.ImageURLs[0];
+            var url2 = TestUtils.ImageURLs[1];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)

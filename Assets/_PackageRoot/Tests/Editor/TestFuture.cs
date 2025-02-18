@@ -4,20 +4,11 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
-using System.Text.RegularExpressions;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
     public class TestFuture
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -59,7 +50,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
@@ -85,7 +76,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
             var startTime = DateTime.Now;
 
             var future1 = ImageLoader.LoadSpriteRef(url1);
@@ -118,7 +109,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             var task2 = ImageLoader.LoadSpriteRef(url1).AsTask();
@@ -157,7 +148,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var future1 = ImageLoader.LoadSpriteRef(url1);
             Assert.IsNotNull(future1);
@@ -186,7 +177,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
@@ -200,7 +191,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
@@ -215,7 +206,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
@@ -228,7 +219,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 ref1.Dispose();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
@@ -243,7 +234,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
@@ -266,7 +257,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
@@ -281,7 +272,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -312,7 +303,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -343,7 +334,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -374,7 +365,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -405,7 +396,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -436,7 +427,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -467,7 +458,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
@@ -500,7 +491,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
@@ -535,7 +526,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var called = false;
                 var startTime = DateTime.Now;
@@ -567,7 +558,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var called = false;
                 var startTime = DateTime.Now;
@@ -599,7 +590,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future1 = ImageLoader.LoadSprite(url)
@@ -613,7 +604,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task1 = future1.AsTask();
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsNotNull(exception);
-            // LogAssert.Expect(LogType.Warning, new Regex("Can't cancel"));
+
             future1.Cancel(); // expected warning
             LogAssert.ignoreFailingMessages = false;
             yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
@@ -629,7 +620,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future1 = ImageLoader.LoadSprite(url)
@@ -659,7 +650,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var completed = false;
                 yield return ImageLoader.LoadSprite(url)
@@ -681,7 +672,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
             LogAssert.ignoreFailingMessages = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var completed = false;
                 var cancelled = false;

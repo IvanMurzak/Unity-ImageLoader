@@ -7,13 +7,6 @@ namespace Extensions.Unity.ImageLoader.Tests
 {
     public class TestLoading
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -41,7 +34,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryNoLogs()
@@ -54,7 +47,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
         [UnityTest] public IEnumerator LoadSpritesCacheDiskNoLogs()
@@ -67,7 +60,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
         [UnityTest] public IEnumerator LoadSpritesNoCacheNoLogs()
@@ -80,7 +73,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
     }

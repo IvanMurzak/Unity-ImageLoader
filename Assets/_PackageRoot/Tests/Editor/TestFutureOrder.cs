@@ -9,16 +9,8 @@ using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFutureMoq
+    public class TestFutureOrder
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -29,17 +21,17 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.Zero(ImageLoader.GetLoadingFutures().Count);
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
-        [UnityTest] public IEnumerator EventsOrderWhenClearNoLogs()
+        [UnityTest] public IEnumerator EventsLoadedWhenClearNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventsOrderWhenClear();
+            yield return EventsLoadedWhenClear();
         }
-        [UnityTest] public IEnumerator EventsOrderWhenClear()
+        [UnityTest] public IEnumerator EventsLoadedWhenClear()
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
             var startTime = DateTime.Now;
 
             var future = new FutureSprite(url);
@@ -69,6 +61,46 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task2 = future.AsTask();
             Assert.True(task2.IsCompleted);
             Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
+
+            future.Dispose();
+        }
+        [UnityTest] public IEnumerator EventsFailedWhenClearNoLogs()
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return EventsFailedWhenClear();
+        }
+        [UnityTest] public IEnumerator EventsFailedWhenClear()
+        {
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            var url = TestUtils.ImageURLs[0];
+            var startTime = DateTime.Now;
+
+            var future = new FutureSprite(url);
+            var futureListener = new FutureListener<Sprite>(future);
+            var task = future.StartLoading().AsTask();
+            yield return new WaitUntil(() => task.IsCompleted);
+
+            futureListener.Assert_Events_Equals(new List<EventName>
+            {
+                EventName.LoadingFromSource,
+                EventName.Failed,
+                EventName.Completed
+            });
+            futureListener.Assert_Events_Value(EventName.Completed, success => ((bool)success) == false);
+            futureListener.Assert_Events_NotContains(EventName.Canceled);
+
+            var task1 = future.AsTask();
+            Assert.True(task1.IsCompleted);
+            Assert.AreEqual(FutureStatus.FailedToLoad, future.Status);
+
+            future.Cancel();
+            Assert.AreEqual(FutureStatus.FailedToLoad, future.Status);
+
+            var task2 = future.AsTask();
+            Assert.True(task2.IsCompleted);
+            Assert.AreEqual(FutureStatus.FailedToLoad, future.Status);
 
             future.Dispose();
         }

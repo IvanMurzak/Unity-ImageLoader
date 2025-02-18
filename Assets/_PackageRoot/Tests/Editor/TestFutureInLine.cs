@@ -9,14 +9,6 @@ namespace Extensions.Unity.ImageLoader.Tests
 {
     public class TestFutureInLine
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -38,7 +30,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -71,7 +63,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -104,7 +96,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -137,7 +129,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -170,7 +162,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -203,7 +195,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var sprite = default(Sprite);
                 var startTime = DateTime.Now;
@@ -235,7 +227,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
@@ -272,7 +264,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
                 var called = false;
@@ -309,7 +301,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var called = false;
                 var startTime = DateTime.Now;
@@ -344,7 +336,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = false;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var called = false;
                 var startTime = DateTime.Now;
@@ -378,7 +370,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future0 = ImageLoader.LoadSprite(url);
@@ -407,7 +399,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future0 = ImageLoader.LoadSprite(url);
