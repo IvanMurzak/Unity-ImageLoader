@@ -5,8 +5,6 @@ using System.Collections;
 using UnityEngine;
 using System;
 using Extensions.Unity.ImageLoader.Tests.Utils;
-using System.Threading;
-using NSubstitute;
 using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader.Tests
