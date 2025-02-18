@@ -322,8 +322,26 @@ namespace Extensions.Unity.ImageLoader
                 });
             }
         }
-        public async UniTask<T> AsUniTask() => await this;
-        public async Task<T> AsTask() => await this;
+        public UniTask<T> AsUniTask()
+        {
+            var uts = new UniTaskCompletionSource<T>();
+
+            Then(value => uts.TrySetResult(value));
+            Failed(exception => uts.TrySetException(exception));
+            Canceled(() => uts.TrySetCanceled());
+
+            return uts.Task;
+        }
+        public Task<T> AsTask()
+        {
+            var tcs = new TaskCompletionSource<T>();
+
+            Then(tcs.SetResult);
+            Failed(tcs.SetException);
+            Canceled(tcs.SetCanceled);
+
+            return tcs.Task;
+        }
         public FutureAwaiter<T> GetAwaiter()
         {
             var tcs = new TaskCompletionSource<T>();
