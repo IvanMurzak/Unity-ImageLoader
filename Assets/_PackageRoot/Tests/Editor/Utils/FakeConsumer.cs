@@ -1,5 +1,3 @@
-
-
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public interface IConsumer<T>

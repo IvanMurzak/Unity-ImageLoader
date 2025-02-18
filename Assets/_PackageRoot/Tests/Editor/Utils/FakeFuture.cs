@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    public partial class FakeFuture<T>// : IFuture<T>, IFutureInternal<T>
+    public partial class FakeFuture<T>
     {
         List<EventData> events = new List<EventData>();
         List<Action> cancelEvents = new List<Action>();
@@ -28,19 +28,13 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             LogLevel = localLogLevel;
             if (LogLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"FakeFuture[id={Id}] created");
-            // Subscribe();
+            Subscribe();
         }
 
         protected void Clear()
         {
             // ignore
         }
-        // public override void Cancel()
-        // {
-        //     base.Cancel();
-        //     lock (events)
-        //         events.Add(new EventData { name = EventName.OnCanceled });
-        // }
 
         protected UnityWebRequest CreateWebRequest(string url) => throw new NotImplementedException();
         protected T ParseBytes(byte[] bytes) => throw new NotImplementedException();
