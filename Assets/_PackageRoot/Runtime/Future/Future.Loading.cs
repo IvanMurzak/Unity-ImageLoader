@@ -7,7 +7,7 @@ namespace Extensions.Unity.ImageLoader
     public partial class Future<T>
     {
         private bool isLoadingStarted = false;
-        public UniTaskVoid StartLoading(bool ignoreImageNotFoundError = false)
+        public UniTask StartLoading(bool ignoreImageNotFoundError = false)
         {
             if (isLoadingStarted)
                 return default;
@@ -15,23 +15,23 @@ namespace Extensions.Unity.ImageLoader
             isLoadingStarted = true;
             return InternalLoading(ignoreImageNotFoundError);
         }
-        internal async UniTaskVoid InternalLoading(bool ignoreImageNotFoundError = false)
+        internal async UniTask InternalLoading(bool ignoreImageNotFoundError = false)
         {
             if (IsCancelled || Status == FutureStatus.Disposed)
                 return;
 
             if (string.IsNullOrEmpty(Url))
             {
-                FailToLoad(new Exception($"[ImageLoader] Future[id={id}] Empty url. Image could not be loaded!"));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] Empty url. Image could not be loaded!"));
                 return;
             }
 
             if (UseMemoryCache && MemoryCacheContains(Url))
             {
-                var obj = LoadFromMemoryCache(Url);
-                if (obj != null)
+                var cachedObj = LoadFromMemoryCache(Url);
+                if (cachedObj != null)
                 {
-                    Loaded(obj, FutureLoadedFrom.MemoryCache);
+                    ((IFutureInternal<T>)this).Loaded(cachedObj, FutureLoadedFrom.MemoryCache);
                     return;
                 }
             }
@@ -39,7 +39,7 @@ namespace Extensions.Unity.ImageLoader
             if (!RegisterLoading(out var anotherLoadingFuture)) // LOADING ADDED
             {
                 if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Waiting while another task is loading\n{Url}");
+                    Debug.Log($"[ImageLoader] Future[id={Id}] Waiting while another task is loading\n{Url}");
 
                 anotherLoadingFuture.PassEvents(this, passCancelled: false).Forget();
                 await UniTask.WaitWhile(() => IsLoading(Url) && !IsCancelled);
@@ -47,10 +47,10 @@ namespace Extensions.Unity.ImageLoader
                 if (LogLevel.IsActive(DebugLevel.Log))
                 {
                     Debug.Log(IsCancelled
-                        ? $"[ImageLoader] Future[id={id}] Cancelled\n{Url}"
+                        ? $"[ImageLoader] Future[id={Id}] Cancelled\n{Url}"
                         : Status == FutureStatus.FailedToLoad
-                            ? $"[ImageLoader] Future[id={id}] Another task. Failed to load\n{Url}"
-                            : $"[ImageLoader] Future[id={id}] Another task. Complete waiting for another task to load\n{Url}");
+                            ? $"[ImageLoader] Future[id={Id}] Another task. Failed to load\n{Url}"
+                            : $"[ImageLoader] Future[id={Id}] Another task. Complete waiting for another task to load\n{Url}");
                 }
 
                 if (IsCancelled || Status == FutureStatus.FailedToLoad)
@@ -62,7 +62,7 @@ namespace Extensions.Unity.ImageLoader
 
             if (UseDiskCache && DiskCacheContains())
             {
-                Loading(FutureLoadingFrom.DiskCache);
+                ((IFutureInternal<T>)this).Loading(FutureLoadingFrom.DiskCache);
                 try
                 {
                     var bytes = await LoadDiskAsync();
@@ -74,16 +74,16 @@ namespace Extensions.Unity.ImageLoader
                             RemoveLoading(); // LOADING REMOVED
                             return;
                         }
-                        var obj = ParseBytes(bytes);
-                        if (obj != null)
+                        var loadedObj = ParseBytes(bytes);
+                        if (loadedObj != null)
                         {
                             if (UseMemoryCache)
-                                SaveToMemoryCache(obj, replace: true);
+                                SaveToMemoryCache(loadedObj, replace: true);
 
                             RemoveLoading(); // LOADING REMOVED
                             if (IsCancelled || Status == FutureStatus.FailedToLoad)
                                 return;
-                            Loaded(obj, FutureLoadedFrom.DiskCache);
+                            ((IFutureInternal<T>)this).Loaded(loadedObj, FutureLoadedFrom.DiskCache);
                             return;
                         }
                     }
@@ -101,7 +101,7 @@ namespace Extensions.Unity.ImageLoader
                 }
             }
 
-            Loading(FutureLoadingFrom.Source);
+            ((IFutureInternal<T>)this).Loading(FutureLoadingFrom.Source);
 
             var finished = false;
             UniTask.Post(async () =>
@@ -112,7 +112,7 @@ namespace Extensions.Unity.ImageLoader
                         return;
 
                     if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={id}] Creating UnityWebRequest for loading from Source\n{Url}");
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Creating UnityWebRequest for loading from Source\n{Url}");
 
                     var asyncOperation = SetWebRequest(CreateWebRequest(Url))
                         .SendWebRequest();
@@ -120,26 +120,25 @@ namespace Extensions.Unity.ImageLoader
                     await UniTask.WaitUntil(() => asyncOperation.isDone || IsCancelled);
 
                     if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={id}] Completed UnityWebRequest for loading from Source\n{Url}");
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Completed UnityWebRequest for loading from Source\n{Url}");
                 }
                 catch (OperationCanceledException)
                 {
                     if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={id}] Canceled UnityWebRequest for loading from Source\n{Url}");
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Canceled UnityWebRequest for loading from Source\n{Url}");
                     Cancel();
                 }
                 catch (TimeoutException e)
                 {
                     if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={id}] Timeout of UnityWebRequest for loading from Source\n{Url}");
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Timeout of UnityWebRequest for loading from Source\n{Url}");
                     RemoveLoading(); // LOADING REMOVED
-                    FailToLoad(e);
-                    return;
+                    ((IFutureInternal<T>)this).FailToLoad(e);
                 }
                 catch (Exception e)
                 {
                     if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={id}] Exception in UnityWebRequest for loading from Source\n{Url}");
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Exception in UnityWebRequest for loading from Source\n{Url}");
 
                     if (LogLevel.IsActive(DebugLevel.Exception) && !ignoreImageNotFoundError)
                         Debug.LogException(e);
@@ -169,7 +168,7 @@ namespace Extensions.Unity.ImageLoader
             if (WebRequest == null)
             {
                 RemoveLoading(); // LOADING REMOVED
-                FailToLoad(new Exception($"[ImageLoader] Future[id={id}] UnityWebRequest is null. URL={Url}"));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] UnityWebRequest is null. URL={Url}"));
                 return;
             }
 
@@ -183,34 +182,33 @@ namespace Extensions.Unity.ImageLoader
 #if UNITY_2020_1_OR_NEWER
                 var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.result} {WebRequest.error}. URL={Url}";
 #else
-                var errorMessage = $"[ImageLoader] Future[id={id}] {WebRequest.error}. URL={Url}";
+                var errorMessage = $"[ImageLoader] Future[id={Id}] {WebRequest.error}. URL={Url}";
 #endif
                 RemoveLoading(); // LOADING REMOVED
-                FailToLoad(new Exception(errorMessage));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception(errorMessage));
+                return;
             }
-            else
+
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from Source. Processing...\n{Url}");
+
+            if (UseDiskCache)
+                await SaveDiskAsync(WebRequest.downloadHandler.data);
+
+            if (IsCancelled || Status == FutureStatus.FailedToLoad)
             {
-                if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Loaded from Source. Processing...\n{Url}");
-
-                if (UseDiskCache)
-                    await SaveDiskAsync(WebRequest.downloadHandler.data);
-
-                if (IsCancelled || Status == FutureStatus.FailedToLoad)
-                {
-                    RemoveLoading(); // LOADING REMOVED
-                    return;
-                }
-                if (LogLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Parsing UnityWebRequest response\n{Url}");
-                var obj = ParseWebRequest(WebRequest);
-
-                if (UseMemoryCache)
-                    SaveToMemoryCache(obj, replace: true);
                 RemoveLoading(); // LOADING REMOVED
-
-                Loaded(obj, FutureLoadedFrom.Source);
+                return;
             }
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Parsing UnityWebRequest response\n{Url}");
+            var downloadedObj = ParseWebRequest(WebRequest);
+
+            if (UseMemoryCache)
+                SaveToMemoryCache(downloadedObj, replace: true);
+            RemoveLoading(); // LOADING REMOVED
+
+            ((IFutureInternal<T>)this).Loaded(downloadedObj, FutureLoadedFrom.Source);
         }
 
         protected virtual bool RegisterLoading(out Future<T> anotherLoadingFuture)

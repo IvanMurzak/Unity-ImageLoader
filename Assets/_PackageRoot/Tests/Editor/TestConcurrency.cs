@@ -11,13 +11,6 @@ namespace Extensions.Unity.ImageLoader.Tests
 {
     public class TestConcurrency
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-
         [UnitySetUp] public IEnumerator SetUp()
         {
             yield return TestUtils.ClearEverything("<b>Test Start </b>");
@@ -70,7 +63,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var cts = new System.Threading.CancellationTokenSource();
             cts.CancelAfterSlim(TimeSpan.FromSeconds(25) + TimeSpan.FromMilliseconds(5 * count));
@@ -123,7 +116,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url1 = TestUtils.ImageURLs[0];
 
             var future = ImageLoader.LoadSpriteRef(url1);
             var task1 = future.AsTask();

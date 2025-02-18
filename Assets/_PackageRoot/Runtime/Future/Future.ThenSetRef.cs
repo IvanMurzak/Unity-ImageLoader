@@ -14,15 +14,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="setter">Setter function that gets Target instance and Reference<Sprite> instance, it should set the Sprite value into Target instance</param>
         /// <param name="targets">Array of generic Target instances</param>
         /// <returns>Returns async Future</returns>
-        public static Future<Reference<Sprite>> ThenSet<T>(this Future<Reference<Sprite>> future, Action<T, Reference<Sprite>> setter, params T[] targets)
-        {
-            if ((targets?.Length ?? 0) == 0)
-            {
-                future.FailToLoad(new Exception("No targets to set image"));
-                return future;
-            }
-
-            return future.Then(reference =>
+        public static IFuture<Reference<Sprite>> ThenSet<T>(this IFuture<Reference<Sprite>> future, Action<T, Reference<Sprite>> setter, params T[] targets)
+            => future.Then(reference =>
             {
                 UniTask.Post(() => // using only MainThread to set any images to any targets
                 {
@@ -31,7 +24,7 @@ namespace Extensions.Unity.ImageLoader
                         if (target == null)
                         {
                             if (future.LogLevel.IsActive(DebugLevel.Warning))
-                                Debug.LogWarning($"[ImageLoader] Future[id={future.id}] The target is null. Can't set image into it. Skipping.");
+                                Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] The target is null. Can't set image into it. Skipping.");
                             continue;
                         }
                         if (target is UIBehaviour uiBehaviour)
@@ -51,14 +44,13 @@ namespace Extensions.Unity.ImageLoader
                     }
                 });
             });
-        }
 
         /// <summary>
         /// Set image into array of Images
         /// </summary>
         /// <param name="images">Array of Images</param>
         /// <returns>Returns async Future</returns>
-        public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params Image[] images)
+        public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params Image[] images)
             => future.ThenSet((target, reference) => target.sprite = reference?.Value, images);
 
         /// <summary>
@@ -66,7 +58,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="images">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
-        public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params RawImage[] rawImages)
+        public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params RawImage[] rawImages)
             => future.ThenSet((target, reference) => target.texture = reference?.Value?.texture, rawImages);
 
         /// <summary>
@@ -74,7 +66,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="images">Array of SpriteRenderers</param>
         /// <returns>Returns async Future</returns>
-        public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, params SpriteRenderer[] spriteRenderers)
+        public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params SpriteRenderer[] spriteRenderers)
             => future.ThenSet((target, reference) => target.sprite = reference?.Value, spriteRenderers);
 
         /// <summary>
@@ -82,7 +74,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="images">Array of Materials</param>
         /// <returns>Returns async Future</returns>
-        public static Future<Reference<Sprite>> ThenSet(this Future<Reference<Sprite>> future, string propertyName = "_MainTex", params Material[] materials)
+        public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, string propertyName = "_MainTex", params Material[] materials)
             => future.ThenSet((target, reference) => target.SetTexture(propertyName, reference?.Value?.texture), materials);
     }
 }

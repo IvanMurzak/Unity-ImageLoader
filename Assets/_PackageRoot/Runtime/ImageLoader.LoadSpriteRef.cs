@@ -13,7 +13,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously </returns>
-        public static Future<Reference<Sprite>> LoadSpriteRef(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
+        public static IFuture<Reference<Sprite>> LoadSpriteRef(string url, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
             => LoadSpriteRef(url, new Vector2(0.5f, 0.5f), textureFormat, mipChain, ignoreImageNotFoundError, cancellationToken);
 
         /// <summary>
@@ -25,10 +25,10 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="mipChain">Specifies whether mipmaps should be generated for the texture</param>
         /// <param name="ignoreImageNotFoundError">Ignore error if the image was not found by specified url</param>
         /// <returns>Returns sprite asynchronously</returns>
-        public static Future<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
+        public static IFuture<Reference<Sprite>> LoadSpriteRef(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, bool ignoreImageNotFoundError = false, CancellationToken cancellationToken = default)
         {
             var future = new FutureSprite(url, pivot, textureFormat, mipChain, cancellationToken);
-            var futureRef = future.AsReference(DebugLevel.Trace);
+            var futureRef = future.AsReference(settings.debugLevel);
 
             future.StartLoading(ignoreImageNotFoundError);
 

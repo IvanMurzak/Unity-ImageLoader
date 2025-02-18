@@ -12,7 +12,7 @@ namespace Extensions.Unity.ImageLoader
         protected virtual void SaveToMemoryCache(T obj, bool replace = false)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Save to Memory cache ({typeof(T).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Save to Memory cache ({typeof(T).Name})\n{Url}");
             SaveToMemoryCache(Url, obj, replace, suppressMessage: true);
         }
         /// <summary>
@@ -23,12 +23,12 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Clear Memory cache for the given url
         /// </summary>
-        protected virtual void ClearMemoryCache() => ClearMemoryCache(Url, ReleaseMemory);
+        protected virtual void ClearMemoryCache() => ClearMemoryCache(Url, ReleaseMemory, LogLevel);
         /// <summary>
         /// Clear Memory cache for all urls
         /// </summary>
-        protected virtual void ClearMemoryCacheAll() => ClearMemoryCacheAll(ReleaseMemory);
+        protected virtual void ClearMemoryCacheAll() => ClearMemoryCacheAll(ReleaseMemory, LogLevel);
 
-        protected abstract void ReleaseMemory(T obj);
+        protected abstract void ReleaseMemory(T obj, DebugLevel logLevel = DebugLevel.Log);
     }
 }

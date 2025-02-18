@@ -8,6 +8,14 @@ namespace Extensions.Unity.ImageLoader.Tests
 {
     internal static class TestUtils
     {
+        public static readonly string[] ImageURLs =
+        {
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
+        };
+        public static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
+
         public static IEnumerator ClearEverything(string message)
         {
             Debug.Log(message.PadRight(50, '-'));

@@ -14,7 +14,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> Then(Action<T> action)
+        public IFuture<T> Then(Action<T> action)
         {
             if (IsLoaded)
             {
@@ -26,11 +26,27 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
+        /// When the image is loaded successfully from any source
+        /// </summary>
+        /// <param name="action">action to execute on the event</param>
+        /// <returns>Returns the Future instance</returns>
+        // public IFuture<T> ThenSet<C>(Action<C, T> action, C consumer)
+        // {
+        //     if (IsLoaded)
+        //     {
+        //         action(consumer, value);
+        //         return this;
+        //     }
+        //     OnLoaded += action;
+        //     return this;
+        // }
+
+        /// <summary>
         /// When the image is failed to load from any source
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> Failed(Action<Exception> action)
+        public IFuture<T> Failed(Action<Exception> action)
         {
             if (Status == FutureStatus.FailedToLoad)
             {
@@ -46,7 +62,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event, the bool value represents success (true means loaded, false means not loaded)</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> Completed(Action<bool> action)
+        public IFuture<T> Completed(Action<bool> action)
         {
             if (IsCompleted)
             {
@@ -56,7 +72,7 @@ namespace Extensions.Unity.ImageLoader
             OnCompleted += action;
             return this;
         }
-        public Future<T> LoadedFromMemoryCache(Action<T> action)
+        public IFuture<T> LoadedFromMemoryCache(Action<T> action)
         {
             if (Status == FutureStatus.LoadedFromMemoryCache)
             {
@@ -72,7 +88,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> LoadingFromDiskCache(Action action)
+        public IFuture<T> LoadingFromDiskCache(Action action)
         {
             if (Status == FutureStatus.LoadingFromDiskCache || Status == FutureStatus.LoadedFromDiskCache)
             {
@@ -88,7 +104,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> LoadedFromDiskCache(Action<T> action)
+        public IFuture<T> LoadedFromDiskCache(Action<T> action)
         {
             if (Status == FutureStatus.LoadedFromDiskCache)
             {
@@ -104,7 +120,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> LoadingFromSource(Action action)
+        public IFuture<T> LoadingFromSource(Action action)
         {
             if (Status == FutureStatus.LoadingFromSource || Status == FutureStatus.LoadedFromSource)
             {
@@ -120,7 +136,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> LoadedFromSource(Action<T> action)
+        public IFuture<T> LoadedFromSource(Action<T> action)
         {
             if (Status == FutureStatus.LoadedFromSource)
             {
@@ -136,51 +152,36 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> Canceled(Action action)
+        public IFuture<T> Canceled(Action action)
         {
             if (IsCancelled)
             {
                 if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Canceled\n{Url}");
+                    Debug.Log($"[ImageLoader] Future[id={Id}] Canceled\n{Url}");
                 Safe.Run(action, LogLevel);
                 return this;
             }
-            OnCanceled += action;
-            return this;
-        }
-
-        /// <summary>
-        /// When the Future is going to be disposed
-        /// </summary>
-        /// <param name="action">action to execute on the event</param>
-        /// <returns>Returns the Future instance</returns>
-        public Future<T> Disposed(Action<Future<T>> action)
-        {
-            if (Status == FutureStatus.Disposed)
-            {
-                if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={id}] Disposed\n{Url}");
-                Safe.Run(action, this, LogLevel);
-                return this;
-            }
-            OnDispose += action;
+            if (OnCanceled != null)
+                OnCanceled += action;
             return this;
         }
 
         /// <summary>
         /// Cancel loading process
         /// </summary>
-        public void Cancel()
+        public virtual void Cancel()
         {
-            if (cleared || IsCancelled) return;
-            if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Cancel\n{Url}");
-            Status = FutureStatus.Canceled;
-            if (!cts.IsCancellationRequested)
+            if (cleared || IsCancelled)
             {
-                Safe.Run(cts.Cancel, LogLevel);
-                Safe.Run(OnCanceled, LogLevel);
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared of canceled\n{Url}");
+                return;
             }
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Cancel\n{Url}");
+            Status = FutureStatus.Canceled;
+            if (Safe.RunCancel(cts, LogLevel))
+                Safe.Run(OnCanceled, LogLevel);
             Clear();
         }
 
@@ -188,15 +189,16 @@ namespace Extensions.Unity.ImageLoader
         /// Convert the Future<typeparamref name="T"/> instance to a Future<Reference<typeparamref name="T"/>> instance
         /// </summary>
         /// <returns>Returns Future<Reference<T>></returns>
-        public Future<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace)
+        public IFuture<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace)
         {
-            var futureRef = new FutureReference<T>(Url, cts.Token).SetLogLevel(logLevel);
-            var weakReference = new WeakReference<Future<Reference<T>>>(futureRef);
+            var url = Url;
+            var futureRef = new FutureReference<T>(url, cts.Token, logLevel);
+            var weakReference = new WeakReference<IFutureInternal<Reference<T>>>(futureRef, trackResurrection: false);
 
             LoadedFromMemoryCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.MemoryCache);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
             });
             LoadingFromDiskCache(() =>
             {
@@ -206,7 +208,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromDiskCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.DiskCache);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
             });
             LoadingFromSource(() =>
             {
@@ -216,7 +218,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromSource(obj =>
             {
                 if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(Url, obj), FutureLoadedFrom.Source);
+                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
             });
             Failed(e =>
             {
@@ -233,7 +235,6 @@ namespace Extensions.Unity.ImageLoader
             // Which doesn't let to dispose non of them until the other one is disposed explicitly
             // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
             futureRef.Canceled(Cancel);
-            futureRef.Disposed(f => Dispose());
 
             return futureRef;
         }
@@ -246,18 +247,18 @@ namespace Extensions.Unity.ImageLoader
             if (Status == FutureStatus.Disposed) return;
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] Disposed\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Disposing\n{Url}");
 
-            if (!cts.IsCancellationRequested)
+            if (!cleared && !IsCancelled)
             {
-                cts.Cancel();
-                Safe.Run(OnCanceled, LogLevel);
-                OnCanceled = null;
+                if (Safe.RunCancel(cts, LogLevel))
+                    Safe.Run(OnCanceled, LogLevel);
             }
+            OnCanceled = null;
             Status = FutureStatus.Disposed;
-            Safe.Run(OnDispose, this, LogLevel);
-            OnDispose = null;
-            Clear();
+
+            if (!cleared)
+                Clear();
 
             if (disposeValue && value is IDisposable disposable)
                 disposable?.Dispose();
@@ -268,6 +269,9 @@ namespace Extensions.Unity.ImageLoader
             Safe.Run(cts.Dispose, LogLevel);
             WebRequest?.Dispose();
             WebRequest = null;
+
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Disposed\n{Url}");
         }
 
         /// <summary>
@@ -318,9 +322,17 @@ namespace Extensions.Unity.ImageLoader
                 });
             }
         }
-        public async UniTask<T> AsUniTask() => await this;
-        public async Task<T> AsTask() => await this;
-        public FutureAwaiter GetAwaiter()
+        public UniTask<T> AsUniTask()
+        {
+            var uts = new UniTaskCompletionSource<T>();
+
+            Then(value => uts.TrySetResult(value));
+            Failed(exception => uts.TrySetException(exception));
+            Canceled(() => uts.TrySetCanceled());
+
+            return uts.Task;
+        }
+        public Task<T> AsTask()
         {
             var tcs = new TaskCompletionSource<T>();
 
@@ -328,15 +340,17 @@ namespace Extensions.Unity.ImageLoader
             Failed(tcs.SetException);
             Canceled(tcs.SetCanceled);
 
-            return new FutureAwaiter(tcs.Task.GetAwaiter());
+            return tcs.Task;
         }
-        public class FutureAwaiter : INotifyCompletion
+        public FutureAwaiter<T> GetAwaiter()
         {
-            private readonly TaskAwaiter<T> _awaiter;
-            public FutureAwaiter(TaskAwaiter<T> awaiter) { _awaiter = awaiter; }
-            public bool IsCompleted => _awaiter.IsCompleted;
-            public T GetResult() => _awaiter.GetResult();
-            public void OnCompleted(Action continuation) => _awaiter.OnCompleted(continuation);
+            var tcs = new TaskCompletionSource<T>();
+
+            Then(tcs.SetResult);
+            Failed(tcs.SetException);
+            Canceled(tcs.SetCanceled);
+
+            return new FutureAwaiter<T>(tcs.Task.GetAwaiter());
         }
     }
 }

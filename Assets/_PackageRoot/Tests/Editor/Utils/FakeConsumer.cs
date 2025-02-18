@@ -1,16 +1,16 @@
-
-
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    public class FakeConsumer<T>
+    public interface IConsumer<T>
     {
-        T value;
+        T Value { get; }
+        void Consume(T value);
+    }
+    public class FakeConsumer<T> : IConsumer<T>
+    {
+        public T Value { get; private set; }
 
-        public void Set(T value)
-        {
-            this.value = value;
-        }
+        public void Consume(T value) => Value = value;
 
-        public static void Setter(FakeConsumer<T> consumer, T value) => consumer.Set(value);
+        public static void Setter(FakeConsumer<T> consumer, T value) => consumer.Consume(value);
     }
 }

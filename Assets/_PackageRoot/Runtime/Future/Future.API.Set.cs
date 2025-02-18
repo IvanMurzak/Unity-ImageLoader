@@ -9,7 +9,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="value">new value</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> SetUseDiskCache(bool value = true)
+        public IFuture<T> SetUseDiskCache(bool value = true)
         {
             UseDiskCache = value;
             return this;
@@ -20,7 +20,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="value">new value</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> SetUseMemoryCache(bool value = true)
+        public IFuture<T> SetUseMemoryCache(bool value = true)
         {
             UseMemoryCache = value;
             return this;
@@ -31,7 +31,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="value">new value</param>
         /// <returns>Returns the Future instance</returns>
-        public Future<T> SetLogLevel(DebugLevel value)
+        public IFuture<T> SetLogLevel(DebugLevel value)
         {
             LogLevel = value;
             return this;

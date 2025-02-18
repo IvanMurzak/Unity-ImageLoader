@@ -1,6 +1,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -33,13 +34,13 @@ namespace Extensions.Unity.ImageLoader
         protected override Task<byte[]> LoadDiskAsync()
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Load from Disk cache ({typeof(Texture2D).Name} -> {typeof(Sprite).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Load from Disk cache ({typeof(Texture2D).Name} -> {typeof(Sprite).Name})\n{Url}");
             return FutureTexture.LoadDiskAsync(Url, suppressMessage: true);
         }
         protected override Task SaveDiskAsync(byte[] data)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Save to Disk cache ({typeof(Texture2D).Name} <- {typeof(Sprite).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Save to Disk cache ({typeof(Texture2D).Name} <- {typeof(Sprite).Name})\n{Url}");
             return FutureTexture.SaveDiskAsync(Url, data, suppressMessage: true);
         }
 
@@ -65,12 +66,16 @@ namespace Extensions.Unity.ImageLoader
             FutureTexture.SaveToMemoryCache(Url, obj.texture, replace, suppressMessage: true);
             base.SaveToMemoryCache(obj, replace);
         }
-        protected override void ReleaseMemory(Sprite obj) => ReleaseMemorySprite(obj);
+        protected override void ReleaseMemory(Sprite obj, DebugLevel logLevel = DebugLevel.Log) => ReleaseMemorySprite(obj, logLevel);
 
-        public static void ReleaseMemorySprite(Sprite obj)
+        public static void ReleaseMemorySprite(Sprite obj, DebugLevel logLevel = DebugLevel.Log)
         {
             if (!ReferenceEquals(obj, null) && obj != null)
-                FutureTexture.ReleaseMemoryTexture(obj.texture);
+            {
+                if (logLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
+                UniTask.Post(() => FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel));
+            }
         }
 
         // --- Web Request ---

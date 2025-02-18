@@ -7,48 +7,34 @@ using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public interface IFuture
-    {
-        string Url { get; }
-        bool IsCancelled { get; }
-        bool IsLoaded { get; }
-        bool IsCompleted { get; }
-        bool IsInProgress { get; }
-        FutureStatus Status { get; }
-        CancellationToken CancellationToken { get; }
-        void Cancel();
-    }
     internal static class FutureMetadata
     {
         public static volatile uint idCounter = 0;
     }
-    public partial class Future<T> : IFuture, IDisposable
+    public partial class Future<T> : IFuture, IFuture<T>, IFutureInternal<T>, IDisposable
     {
-
         public string Url { get; }
 
-        private event Action<T>           OnLoadedFromMemoryCache;
-        private event Action              OnLoadingFromDiskCache;
-        private event Action<T>           OnLoadedFromDiskCache;
-        private event Action              OnLoadingFromSource;
-        private event Action<T>           OnLoadedFromSource;
-        private event Action<T>           OnLoaded;
-        private event Action<Exception>   OnFailedToLoad;
-        private event Action<bool>        OnCompleted;
-        private       WeakAction          OnCanceled = new WeakAction();
-        // private event Action              OnCanceled;
-        private event Action<Future<T>>   OnDispose;
+        protected event Action<T>           OnLoadedFromMemoryCache;
+        protected event Action              OnLoadingFromDiskCache;
+        protected event Action<T>           OnLoadedFromDiskCache;
+        protected event Action              OnLoadingFromSource;
+        protected event Action<T>           OnLoadedFromSource;
+        protected event Action<T>           OnLoaded;
+        protected event Action<Exception>   OnFailedToLoad;
+        protected event Action<bool>        OnCompleted;
+        protected       WeakAction          OnCanceled = new WeakAction();
 
-        private readonly CancellationTokenSource cts;
+        protected readonly CancellationTokenSource cts;
 
-        internal readonly uint id = FutureMetadata.idCounter++;
+        public uint Id { get; } = FutureMetadata.idCounter++;
 
-        private TimeSpan timeout;
-        private List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
-        private bool cleared = false;
-        private bool disposeValue = false;
-        private T value = default;
-        private Exception exception = default;
+        protected TimeSpan timeout;
+        protected List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
+        protected bool cleared = false;
+        protected bool disposeValue = false;
+        protected T value = default;
+        protected Exception exception = default;
 
         public DebugLevel LogLevel { get; private set; }
         public bool UseDiskCache { get; private set; }
@@ -70,59 +56,53 @@ namespace Extensions.Unity.ImageLoader
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
         public CancellationToken CancellationToken => cts.Token;
 
-        protected Future(string url, CancellationToken cancellationToken = default)
+        protected Future(string url, CancellationToken cancellationToken = default, DebugLevel? logLevel = null)
         {
             Url = url;
             UseDiskCache = ImageLoader.settings.useDiskCache;
             UseMemoryCache = ImageLoader.settings.useMemoryCache;
             timeout = ImageLoader.settings.timeout;
-            LogLevel = ImageLoader.settings.debugLevel;
+            LogLevel = logLevel ?? ImageLoader.settings.debugLevel;
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] Created ({typeof(T).Name})\n{url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Created future<{typeof(T).Name}>\n{url}");
 
             cancellationToken.Register(Cancel);
         }
         ~Future() => Dispose();
 
-        internal Future<T> PassEvents(Future<T> to, bool passCancelled = true, bool passDisposed = false)
+        public IFuture<T> PassEvents(IFutureInternal<T> to, bool passCancelled = true)
         {
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events\n{Url}");
 
             LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
-            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache  ((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
-            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource     ((v) => to.Loaded(v, FutureLoadedFrom.Source));
-            Failed               (to.FailToLoad);
+            LoadingFromDiskCache(( ) => to.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
+            LoadingFromSource(( ) => to.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource((v) => to.Loaded(v, FutureLoadedFrom.Source));
+            Failed(to.FailToLoad);
 
             if (passCancelled)
                 Canceled(to.Cancel);
-
-            if (passDisposed)
-                Disposed(future => to.Dispose());
 
             return this;
         }
-        internal Future<T> PassEvents<T2>(Future<T2> to, Func<T, T2> convert, bool passCancelled = true, bool passDisposed = false)
+        public IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] -> Future[id={to.id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
 
             LoadedFromMemoryCache((v) => to.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
-            LoadingFromDiskCache (( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache  ((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
-            LoadingFromSource    (( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource     ((v) => to.Loaded(convert(v), FutureLoadedFrom.Source));
-            Failed               (to.FailToLoad);
+            LoadingFromDiskCache(( ) => to.Loading(FutureLoadingFrom.DiskCache));
+            LoadedFromDiskCache((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
+            LoadingFromSource(( ) => to.Loading(FutureLoadingFrom.Source));
+            LoadedFromSource((v) => to.Loaded(convert(v), FutureLoadedFrom.Source));
+            Failed(to.FailToLoad);
 
             if (passCancelled)
                 Canceled(to.Cancel);
-
-            if (passDisposed)
-                Disposed(future => to.Dispose());
 
             return this;
         }
@@ -131,7 +111,7 @@ namespace Extensions.Unity.ImageLoader
             if (cleared || IsCancelled) return;
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Placeholder\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Placeholder\n{Url}");
 
             // UniTask.ReturnToMainThread()
             // if (UnityMainThreadDispatcher.IsMainThread)
@@ -155,7 +135,7 @@ namespace Extensions.Unity.ImageLoader
             OnLoadingFromSource += ( ) => { };
             OnLoadedFromSource += (v) => { };
         }
-        internal void Loading(FutureLoadingFrom loadingFrom)
+        void IFutureInternal<T>.Loading(FutureLoadingFrom loadingFrom)
         {
             if (cleared || IsCancelled) return;
 
@@ -175,11 +155,11 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loading from: {loadingFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loading from: {loadingFrom}\n{Url}");
 
             Safe.Run(onLoadingEvent, LogLevel);
         }
-        internal void Loaded(T value, FutureLoadedFrom loadedFrom)
+        void IFutureInternal<T>.Loaded(T value, FutureLoadedFrom loadedFrom)
         {
             if (cleared || IsCancelled) return;
 
@@ -205,14 +185,14 @@ namespace Extensions.Unity.ImageLoader
             }
 
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Loaded from {loadedFrom}\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from {loadedFrom}\n{Url}");
 
-            Safe.Run(onLoadedEvent, value, LogLevel);
-            Safe.Run(OnLoaded, value, LogLevel);
-            Safe.Run(OnCompleted, true, LogLevel);;
+            Safe.Run(onLoadedEvent, this.value, LogLevel);
+            Safe.Run(OnLoaded, this.value, LogLevel);
+            Safe.Run(OnCompleted, true, LogLevel);
             Clear();
         }
-        internal void FailToLoad(Exception exception)
+        void IFutureInternal<T>.FailToLoad(Exception exception)
         {
             if (cleared || IsCancelled) return;
             if (IsCompleted || Status == FutureStatus.FailedToLoad) return;
@@ -224,12 +204,14 @@ namespace Extensions.Unity.ImageLoader
 
             Safe.Run(OnFailedToLoad, exception, LogLevel); // 2 Original order
             Safe.Run(OnCompleted, false, LogLevel);;       // 3 Original order
-            Safe.Run(cts.Cancel, LogLevel);                // 1 Original order
+            // Safe.RunCancel(cts, LogLevel);                 // 1 Original order
             Clear();
         }
 
-        private void Clear()
+        protected virtual void Clear()
         {
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Cleared\n{Url}");
             cleared = true;
 
             OnLoadedFromMemoryCache = null;

@@ -1,6 +1,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -20,23 +21,27 @@ namespace Extensions.Unity.ImageLoader
         protected override Task<byte[]> LoadDiskAsync()
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Load from Disk cache ({typeof(Texture2D).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Load from Disk cache ({typeof(Texture2D).Name})\n{Url}");
             return base.LoadDiskAsync();
         }
         protected override Task SaveDiskAsync(byte[] data)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={id}] Save to Disk cache ({typeof(Texture2D).Name})\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Save to Disk cache ({typeof(Texture2D).Name})\n{Url}");
             return base.SaveDiskAsync(data);
         }
 
         // --- Memory Cache ---
-        protected override void ReleaseMemory(Texture2D obj) => ReleaseMemoryTexture(obj);
+        protected override void ReleaseMemory(Texture2D obj, DebugLevel logLevel = DebugLevel.Log) => ReleaseMemoryTexture(obj, logLevel);
 
-        public static void ReleaseMemoryTexture(Texture2D obj)
+        public static void ReleaseMemoryTexture(Texture2D obj, DebugLevel logLevel = DebugLevel.Log)
         {
             if (!ReferenceEquals(obj, null) && obj != null)
-                UnityEngine.Object.DestroyImmediate(obj);
+            {
+                if (logLevel.IsActive(DebugLevel.Log))
+                    Debug.Log($"[ImageLoader] Release memory Texture2D");
+                UniTask.Post(() => UnityEngine.Object.DestroyImmediate(obj));
+            }
         }
 
         // --- Web Request ---
