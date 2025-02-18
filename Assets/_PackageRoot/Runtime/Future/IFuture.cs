@@ -33,21 +33,22 @@ namespace Extensions.Unity.ImageLoader
         IFuture<T> LoadingFromSource(Action action);
         IFuture<T> LoadedFromSource(Action<T> action);
         IFuture<T> Canceled(Action action);
-        IFuture<T> Disposed(Action<IFuture<T>> action);
 
         IFuture<T> SetUseDiskCache(bool value = true);
         IFuture<T> SetUseMemoryCache(bool value = true);
         IFuture<T> SetLogLevel(DebugLevel value);
 
+        IFuture<T> PassEvents(IFutureInternal<T> to, bool passCancelled = true);
+        IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true);
+
         IFuture<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace);
         UniTask<T> AsUniTask();
         Task<T> AsTask();
 
-
         FutureAwaiter<T> GetAwaiter();
     }
 
-    internal interface IFutureInternal<T> : IFuture<T>
+    public interface IFutureInternal<T> : IFuture<T>
     {
         void FailToLoad(Exception exception);
         void Loading(FutureLoadingFrom loadingFrom);

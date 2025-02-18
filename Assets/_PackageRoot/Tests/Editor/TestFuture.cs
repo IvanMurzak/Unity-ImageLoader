@@ -4,9 +4,7 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
-using Moq;
-using Extensions.Unity.ImageLoader.Tests.Utils;
-using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -615,6 +613,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task1 = future1.AsTask();
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsNotNull(exception);
+            LogAssert.Expect(LogType.Warning, new Regex("Can't cancel"));
             future1.Cancel();
             LogAssert.ignoreFailingMessages = false;
             yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();

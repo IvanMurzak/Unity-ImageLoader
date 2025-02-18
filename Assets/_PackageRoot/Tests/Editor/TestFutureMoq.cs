@@ -4,9 +4,10 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
-using Moq;
 using Extensions.Unity.ImageLoader.Tests.Utils;
 using System.Threading;
+using NSubstitute;
+using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -41,63 +42,36 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             var url = ImageURLs[0];
-            var completed = false;
-            var cancelled = false;
             var startTime = DateTime.Now;
-            var consumer = new FakeConsumer<Sprite>();
 
-            // Setup
-            var mockFuture = new Mock<IFuture<Sprite>>();
-            var sequence = new MockSequence();
-            mockFuture.InSequence(sequence).Setup(f => f.LoadingFromSource(It.IsAny<Action>())).Callback<Action>(callback => callback());
-            mockFuture.InSequence(sequence).Setup(f => f.LoadedFromSource(It.IsAny<Action<Sprite>>())).Callback<Action<Sprite>>(callback => callback(null));
-            mockFuture.InSequence(sequence).Setup(f => f.Then(It.IsAny<Action<Sprite>>())).Callback<Action<Sprite>>(callback => callback(null));
-            mockFuture.InSequence(sequence).Setup(f => f.Completed(It.IsAny<Action<bool>>())).Callback<Action<bool>>(callback => callback(true));
-
-            var mockObject = mockFuture.Object;
-
-            // Act
-            var future = new FutureSprite(url)
-                .PassEvents(mockObject, passCancelled: true)
-                .LoadingFromSource(() => Debug.Log("LoadingFromSource"))
-                .LoadedFromSource(x => Debug.Log("LoadedFromSource"))
-                .Then(x => Debug.Log("Then"))
-                .ThenSet(FakeConsumer<Sprite>.Setter, consumer)
-                .Completed(success => completed = true);
-
+            var future = new FutureSprite(url);
+            var futureListener = new FutureListener<Sprite>(future);
             var task = future.StartLoading().AsTask();
             yield return new WaitUntil(() => task.IsCompleted);
 
-            // Assert
-            mockFuture.Verify(f => f.LoadingFromSource(It.IsAny<Action>()), Times.Once);
-            mockFuture.Verify(f => f.LoadedFromSource(consumer.Consume), Times.Once);
-            mockFuture.Verify(f => f.Then(It.IsAny<Action<Sprite>>()), Times.Once);
-            mockFuture.Verify(f => f.Completed(It.IsAny<Action<bool>>()), Times.Once);
+            futureListener.Assert_Events_Equals(new List<EventName>
+            {
+                EventName.LoadingFromSource,
+                EventName.LoadedFromSource,
+                EventName.Then,
+                EventName.Completed
+            });
+            futureListener.Assert_Events_Value(EventName.LoadedFromSource, sprite => sprite != null);
+            futureListener.Assert_Events_Value(EventName.Then, sprite => sprite != null);
+            futureListener.Assert_Events_Value(EventName.Completed, success => ((bool)success) == true);
+            futureListener.Assert_Events_NotContains(EventName.Canceled);
 
-
-            Assert.IsFalse(completed);
-            Assert.IsFalse(cancelled);
             var task1 = future.AsTask();
+            Assert.True(task1.IsCompleted);
+            Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
+
             future.Cancel();
+            Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
+
             var task2 = future.AsTask();
+            Assert.True(task2.IsCompleted);
+            Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
 
-            Assert.IsFalse(completed);
-            Assert.IsTrue(cancelled);
-
-            while (!task1.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                yield return null;
-            }
-            while (!task2.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                yield return null;
-            }
-
-            Assert.IsFalse(completed);
-            Assert.IsTrue(cancelled);
-            yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
             future.Dispose();
         }
     }

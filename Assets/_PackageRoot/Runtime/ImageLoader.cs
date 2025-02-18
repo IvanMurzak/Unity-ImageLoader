@@ -59,7 +59,7 @@ namespace Extensions.Unity.ImageLoader
         /// Return all current loading Futures
         /// </summary>
         /// <returns>Returns read only list of all current loading Futures</returns>
-        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values.ToArray();
+        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values.ToList().AsReadOnly();
 
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls

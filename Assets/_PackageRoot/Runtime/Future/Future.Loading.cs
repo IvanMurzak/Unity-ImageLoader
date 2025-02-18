@@ -22,16 +22,16 @@ namespace Extensions.Unity.ImageLoader
 
             if (string.IsNullOrEmpty(Url))
             {
-                FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] Empty url. Image could not be loaded!"));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] Empty url. Image could not be loaded!"));
                 return;
             }
 
             if (UseMemoryCache && MemoryCacheContains(Url))
             {
-                var obj = LoadFromMemoryCache(Url);
-                if (obj != null)
+                var cachedObj = LoadFromMemoryCache(Url);
+                if (cachedObj != null)
                 {
-                    Loaded(obj, FutureLoadedFrom.MemoryCache);
+                    ((IFutureInternal<T>)this).Loaded(cachedObj, FutureLoadedFrom.MemoryCache);
                     return;
                 }
             }
@@ -62,7 +62,7 @@ namespace Extensions.Unity.ImageLoader
 
             if (UseDiskCache && DiskCacheContains())
             {
-                Loading(FutureLoadingFrom.DiskCache);
+                ((IFutureInternal<T>)this).Loading(FutureLoadingFrom.DiskCache);
                 try
                 {
                     var bytes = await LoadDiskAsync();
@@ -74,16 +74,16 @@ namespace Extensions.Unity.ImageLoader
                             RemoveLoading(); // LOADING REMOVED
                             return;
                         }
-                        var obj = ParseBytes(bytes);
-                        if (obj != null)
+                        var loadedObj = ParseBytes(bytes);
+                        if (loadedObj != null)
                         {
                             if (UseMemoryCache)
-                                SaveToMemoryCache(obj, replace: true);
+                                SaveToMemoryCache(loadedObj, replace: true);
 
                             RemoveLoading(); // LOADING REMOVED
                             if (IsCancelled || Status == FutureStatus.FailedToLoad)
                                 return;
-                            Loaded(obj, FutureLoadedFrom.DiskCache);
+                            ((IFutureInternal<T>)this).Loaded(loadedObj, FutureLoadedFrom.DiskCache);
                             return;
                         }
                     }
@@ -101,7 +101,7 @@ namespace Extensions.Unity.ImageLoader
                 }
             }
 
-            Loading(FutureLoadingFrom.Source);
+            ((IFutureInternal<T>)this).Loading(FutureLoadingFrom.Source);
 
             var finished = false;
             UniTask.Post(async () =>
@@ -133,8 +133,7 @@ namespace Extensions.Unity.ImageLoader
                     if (LogLevel.IsActive(DebugLevel.Trace))
                         Debug.Log($"[ImageLoader] Future[id={Id}] Timeout of UnityWebRequest for loading from Source\n{Url}");
                     RemoveLoading(); // LOADING REMOVED
-                    FailToLoad(e);
-                    return;
+                    ((IFutureInternal<T>)this).FailToLoad(e);
                 }
                 catch (Exception e)
                 {
@@ -169,7 +168,7 @@ namespace Extensions.Unity.ImageLoader
             if (WebRequest == null)
             {
                 RemoveLoading(); // LOADING REMOVED
-                FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] UnityWebRequest is null. URL={Url}"));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception($"[ImageLoader] Future[id={Id}] UnityWebRequest is null. URL={Url}"));
                 return;
             }
 
@@ -186,31 +185,30 @@ namespace Extensions.Unity.ImageLoader
                 var errorMessage = $"[ImageLoader] Future[id={Id}] {WebRequest.error}. URL={Url}";
 #endif
                 RemoveLoading(); // LOADING REMOVED
-                FailToLoad(new Exception(errorMessage));
+                ((IFutureInternal<T>)this).FailToLoad(new Exception(errorMessage));
+                return;
             }
-            else
+
+            if (LogLevel.IsActive(DebugLevel.Log))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from Source. Processing...\n{Url}");
+
+            if (UseDiskCache)
+                await SaveDiskAsync(WebRequest.downloadHandler.data);
+
+            if (IsCancelled || Status == FutureStatus.FailedToLoad)
             {
-                if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={Id}] Loaded from Source. Processing...\n{Url}");
-
-                if (UseDiskCache)
-                    await SaveDiskAsync(WebRequest.downloadHandler.data);
-
-                if (IsCancelled || Status == FutureStatus.FailedToLoad)
-                {
-                    RemoveLoading(); // LOADING REMOVED
-                    return;
-                }
-                if (LogLevel.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[ImageLoader] Future[id={Id}] Parsing UnityWebRequest response\n{Url}");
-                var obj = ParseWebRequest(WebRequest);
-
-                if (UseMemoryCache)
-                    SaveToMemoryCache(obj, replace: true);
                 RemoveLoading(); // LOADING REMOVED
-
-                Loaded(obj, FutureLoadedFrom.Source);
+                return;
             }
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Parsing UnityWebRequest response\n{Url}");
+            var downloadedObj = ParseWebRequest(WebRequest);
+
+            if (UseMemoryCache)
+                SaveToMemoryCache(downloadedObj, replace: true);
+            RemoveLoading(); // LOADING REMOVED
+
+            ((IFutureInternal<T>)this).Loaded(downloadedObj, FutureLoadedFrom.Source);
         }
 
         protected virtual bool RegisterLoading(out Future<T> anotherLoadingFuture)

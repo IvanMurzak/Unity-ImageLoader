@@ -161,42 +161,27 @@ namespace Extensions.Unity.ImageLoader
                 Safe.Run(action, LogLevel);
                 return this;
             }
-            OnCanceled += action;
-            return this;
-        }
-
-        /// <summary>
-        /// When the Future is going to be disposed
-        /// </summary>
-        /// <param name="action">action to execute on the event</param>
-        /// <returns>Returns the Future instance</returns>
-        public IFuture<T> Disposed(Action<IFuture<T>> action)
-        {
-            if (Status == FutureStatus.Disposed)
-            {
-                if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={Id}] Disposed\n{Url}");
-                Safe.Run(action, this, LogLevel);
-                return this;
-            }
-            OnDispose += action;
+            if (OnCanceled != null)
+                OnCanceled += action;
             return this;
         }
 
         /// <summary>
         /// Cancel loading process
         /// </summary>
-        public void Cancel()
+        public virtual void Cancel()
         {
-            if (cleared || IsCancelled) return;
+            if (cleared || IsCancelled)
+            {
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared of canceled\n{Url}");
+                return;
+            }
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Cancel\n{Url}");
             Status = FutureStatus.Canceled;
-            if (!cts.IsCancellationRequested)
-            {
-                Safe.Run(cts.Cancel, LogLevel);
+            if (Safe.RunCancel(cts, LogLevel))
                 Safe.Run(OnCanceled, LogLevel);
-            }
             Clear();
         }
 
@@ -249,7 +234,7 @@ namespace Extensions.Unity.ImageLoader
             // Which doesn't let to dispose non of them until the other one is disposed explicitly
             // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
             futureRef.Canceled(Cancel);
-            futureRef.Disposed(f => Dispose());
+            //futureRef.Disposed(f => Dispose());
 
             return futureRef;
         }
@@ -262,18 +247,18 @@ namespace Extensions.Unity.ImageLoader
             if (Status == FutureStatus.Disposed) return;
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={Id}] Disposed\n{Url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Disposing\n{Url}");
 
-            if (!cts.IsCancellationRequested)
+            if (!cleared && !IsCancelled)
             {
-                cts.Cancel();
-                Safe.Run(OnCanceled, LogLevel);
-                OnCanceled = null;
+                if (Safe.RunCancel(cts, LogLevel))
+                    Safe.Run(OnCanceled, LogLevel);
             }
+            OnCanceled = null;
             Status = FutureStatus.Disposed;
-            Safe.Run(OnDispose, this, LogLevel);
-            OnDispose = null;
-            Clear();
+
+            if (!cleared)
+                Clear();
 
             if (disposeValue && value is IDisposable disposable)
                 disposable?.Dispose();
@@ -284,6 +269,9 @@ namespace Extensions.Unity.ImageLoader
             Safe.Run(cts.Dispose, LogLevel);
             WebRequest?.Dispose();
             WebRequest = null;
+
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] Disposed\n{Url}");
         }
 
         /// <summary>

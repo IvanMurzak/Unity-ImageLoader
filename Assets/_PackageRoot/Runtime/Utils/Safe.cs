@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader.Utils
@@ -70,6 +71,27 @@ namespace Extensions.Unity.ImageLoader.Utils
             try
             {
                 action?.Invoke(value);
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (logLevel.IsActive(DebugLevel.Exception))
+                    Debug.LogException(e);
+
+                return false;
+            }
+        }
+        public static bool RunCancel(CancellationTokenSource cts, DebugLevel logLevel)
+        {
+            try
+            {
+                if (cts == null)
+                    return false;
+
+                if (cts.IsCancellationRequested)
+                    return false;
+
+                cts.Cancel();
                 return true;
             }
             catch (Exception e)
