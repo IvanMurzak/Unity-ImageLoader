@@ -508,10 +508,10 @@ namespace Extensions.Unity.ImageLoader.Tests
                 while (!task1.IsCompleted)
                 {
                     Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
+                    yield return UniTask.Delay(100).ToCoroutine();
                 }
                 Assert.IsTrue(called);
-                yield return UniTask.Delay(1000).ToCoroutine();
+                yield return UniTask.Delay(100).ToCoroutine();
                 Assert.IsTrue(called);
                 future1.Dispose();
             }
@@ -570,12 +570,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var task1 = future1.AsTask();
                 future1.Cancel();
 
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
+                yield return UniTask.WaitUntil(() => task1.IsCompleted)
+                    .Timeout(TimeSpan.FromSeconds(2))
+                    .ToCoroutine();
+
+                yield return UniTask.Delay(100).ToCoroutine();
                 Assert.IsTrue(called);
                 future1.Dispose();
             }
