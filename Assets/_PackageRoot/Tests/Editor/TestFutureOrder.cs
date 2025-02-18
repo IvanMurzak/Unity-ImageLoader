@@ -74,13 +74,16 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = TestUtils.ImageURLs[0];
+            var url = TestUtils.IncorrectImageURL;
             var startTime = DateTime.Now;
 
             var future = new FutureSprite(url);
             var futureListener = new FutureListener<Sprite>(future);
-            var task = future.StartLoading().AsTask();
-            yield return new WaitUntil(() => task.IsCompleted);
+            future.Timeout(TimeSpan.FromMilliseconds(100));
+
+            LogAssert.ignoreFailingMessages = true;
+            yield return future.StartLoading().ToCoroutine();
+            LogAssert.ignoreFailingMessages = false;
 
             futureListener.Assert_Events_Equals(new List<EventName>
             {
