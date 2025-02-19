@@ -23,15 +23,15 @@ namespace Extensions.Unity.ImageLoader
                 return null;
             return File.ReadAllBytes(DiskCachePath(url));
         }
-        protected static Task SaveDiskAsync(string url, byte[] data, bool suppressMessage = false)
+        protected static Task SaveDiskAsync(string url, byte[] data, DebugLevel logLevel)
         {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace) && !suppressMessage)
+            if (logLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"[ImageLoader] Save to Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => SaveDisk(url, data));
         }
-        protected static Task<byte[]> LoadDiskAsync(string url, bool suppressMessage = false)
+        protected static Task<byte[]> LoadDiskAsync(string url, DebugLevel logLevel)
         {
-            if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Trace) && !suppressMessage)
+            if (logLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"[ImageLoader] Load from Disk cache ({typeof(T).Name})\n{url}");
             return diskTaskFactory.StartNew(() => LoadDisk(url));
         }
@@ -52,6 +52,23 @@ namespace Extensions.Unity.ImageLoader
         {
             var path = DiskCachePath(url);
             return diskTaskFactory.StartNew(() => File.Exists(path));
+        }
+
+        /// <summary>
+        /// Save sprite to Disk cache directly. Should be used for overloading cache system
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <param name="obj">object which should be saved</param>
+        /// <param name="replace">replace existed cached sprite if any</param>
+        public static Task SaveToDiskCache(string url, byte[] obj, bool replace = false, DebugLevel logLevel = DebugLevel.Error)
+        {
+            if (!replace && DiskCacheContains(url))
+            {
+                if (logLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogError($"[ImageLoader] Can't set to Disk cache ({typeof(T).Name}), because it already contains the key. Use 'replace = true' to replace\n{url}");
+                return Task.CompletedTask;
+            }
+            return SaveDiskAsync(url, obj, logLevel);
         }
 
         /// <summary>

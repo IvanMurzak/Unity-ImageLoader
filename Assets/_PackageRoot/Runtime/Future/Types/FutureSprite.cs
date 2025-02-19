@@ -35,13 +35,13 @@ namespace Extensions.Unity.ImageLoader
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Load from Disk cache ({typeof(Texture2D).Name} -> {typeof(Sprite).Name})\n{Url}");
-            return FutureTexture.LoadDiskAsync(Url, suppressMessage: true);
+            return FutureTexture.LoadDiskAsync(Url, DebugLevel.Error);
         }
         protected override Task SaveDiskAsync(byte[] data)
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Save to Disk cache ({typeof(Texture2D).Name} <- {typeof(Sprite).Name})\n{Url}");
-            return FutureTexture.SaveDiskAsync(Url, data, suppressMessage: true);
+            return FutureTexture.SaveDiskAsync(Url, data, DebugLevel.Error);
         }
 
         // --- Memory Cache ---

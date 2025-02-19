@@ -9,18 +9,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             if (LogLevel.IsActive(DebugLevel.Trace))
                 UnityEngine.Debug.Log($"FakeFuture[id={Id}] Loading from {loadingFrom}");
 
-            EventName eventName;
-            switch (loadingFrom)
-            {
-                case FutureLoadingFrom.DiskCache:
-                    eventName = EventName.LoadingFromDiskCache;
-                    break;
-                case FutureLoadingFrom.Source:
-                    eventName = EventName.LoadingFromSource;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(loadingFrom), loadingFrom, null);
-            };
+            var eventName = loadingFrom.ToEventName();
             lock (events)
                 events.Add(new EventData { name = eventName });
         }
@@ -30,22 +19,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             if (LogLevel.IsActive(DebugLevel.Trace))
                 UnityEngine.Debug.Log($"FakeFuture[id={Id}] Loaded from {loadedFrom}");
 
-            EventName eventName;
-            switch (loadedFrom)
-            {
-                case FutureLoadedFrom.MemoryCache:
-                    eventName = EventName.LoadedFromMemoryCache;
-                    break;
-                case FutureLoadedFrom.DiskCache:
-                    eventName = EventName.LoadedFromDiskCache;
-                    break;
-                case FutureLoadedFrom.Source:
-                    eventName = EventName.LoadedFromSource;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(loadedFrom), loadedFrom, null);
-            };
-
+            var eventName = loadedFrom.ToEventName();
             lock (events)
                 events.Add(new EventData { name = eventName, value = value });
         }

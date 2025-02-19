@@ -21,6 +21,8 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
                 yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source);
+
+            yield return TestUtils.ClearEverything(message: null);
         }
 
         [UnityTest] public IEnumerator LoadFrom_MemoryCache_ThenCancel_NoLogs() => TestUtils.RunNoLogs(LoadFrom_MemoryCache_ThenCancel);

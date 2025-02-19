@@ -92,16 +92,16 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns the Future instance</returns>
         public IFuture<T> LoadingFromDiskCache(Action action, bool ignoreLoaded = false)
         {
-            if (Status == FutureStatus.LoadingFromDiskCache)
-            {
-                Safe.Run(action, LogLevel);
-                return this;
-            }
             if (Status == FutureStatus.LoadedFromDiskCache)
             {
                 if (ignoreLoaded)
                     return this; // ignore event
 
+                Safe.Run(action, LogLevel);
+                return this;
+            }
+            if (loadingFrom == FutureLoadingFrom.DiskCache)
+            {
                 Safe.Run(action, LogLevel);
                 return this;
             }
@@ -133,16 +133,16 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns the Future instance</returns>
         public IFuture<T> LoadingFromSource(Action action, bool ignoreLoaded = false)
         {
-            if (Status == FutureStatus.LoadingFromSource)
-            {
-                Safe.Run(action, LogLevel);
-                return this;
-            }
             if (Status == FutureStatus.LoadedFromSource)
             {
                 if (ignoreLoaded)
                     return this; // ignore event
 
+                Safe.Run(action, LogLevel);
+                return this;
+            }
+            if (loadingFrom == FutureLoadingFrom.Source)
+            {
                 Safe.Run(action, LogLevel);
                 return this;
             }

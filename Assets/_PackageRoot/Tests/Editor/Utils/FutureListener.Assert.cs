@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public partial class FutureListener<T>
     {
+        public FutureListener<T> Assert_Events_Equals(IEnumerable<EventName> eventNames) => Assert_Events_Equals(eventNames.ToList());
         public FutureListener<T> Assert_Events_Equals(params EventName[] eventNames) => Assert_Events_Equals(eventNames.ToList());
         public FutureListener<T> Assert_Events_Equals(IReadOnlyList<EventName> eventNames)
         {
@@ -44,21 +46,20 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             }
             return this;
         }
-        public FutureListener<T> Assert_Events_Contains(EventName eventName)
+        public FutureListener<T> Assert_Events_Contains(params EventName[] eventNames)
         {
             var events = Events;
-            if (!events.Any(x => x.name == eventName))
-            {
-                throw new Exception($"Expected event {eventName}, but it was not found");
-            }
+            foreach (var eventName in eventNames)
+                if (!events.Any(x => x.name == eventName))
+                    throw new Exception($"Expected event {eventName}, but it was not found. Got: {string.Join(", ", events.Select(x => x.name))}");
+
             return this;
         }
-        public FutureListener<T> Assert_Events_NotContains(EventName eventName)
+        public FutureListener<T> Assert_Events_NotContains(params EventName[] eventNames)
         {
-            if (events.Any(x => x.name == eventName))
-            {
-                throw new Exception($"Expected event {eventName}, but it was not found");
-            }
+            foreach (var eventName in eventNames)
+                if (events.Any(x => x.name == eventName))
+                    throw new Exception($"Expected event {eventName}, but it was not found");
             return this;
         }
         public FutureListener<T> Assert_Events_Contains(EventName eventName, object value)
@@ -73,7 +74,12 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public FutureListener<T> Assert_Events_Value(EventName eventName, Func<object, bool> validate)
         {
             var events = Events;
-            if (!events.Any(x => x.name == eventName && validate(x.value)))
+            var eventData = events.FirstOrDefault(x => x.name == eventName);
+            if (eventData == null)
+            {
+                throw new Exception($"Expected event {eventName}, but it was not found");
+            }
+            if (!validate(eventData.value))
             {
                 throw new Exception($"Expected event {eventName} with value that passes the validation, but it was not found");
             }
@@ -82,9 +88,14 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public FutureListener<T> Assert_Events_Value<V>(EventName eventName, Func<V, bool> validate)
         {
             var events = Events;
-            if (!events.Any(x => x.name == eventName && validate(((V)x.value))))
+            var eventData = events.FirstOrDefault(x => x.name == eventName);
+            if (eventData == null)
             {
-                throw new Exception($"Expected event {eventName} with value that passes the validation, but it was not found");
+                throw new Exception($"Expected event {eventName}, but it was not found");
+            }
+            if (!validate((V)eventData.value))
+            {
+                throw new Exception($"Expected event {eventName} found, but validation failed");
             }
             return this;
         }

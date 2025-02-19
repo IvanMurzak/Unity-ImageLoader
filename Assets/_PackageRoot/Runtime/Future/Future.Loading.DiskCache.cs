@@ -15,9 +15,9 @@ namespace Extensions.Unity.ImageLoader
         {
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Save to Disk cache ({typeof(T).Name})\n{Url}");
-            return SaveDiskAsync(Url, data);
+            return SaveDiskAsync(Url, data, LogLevel);
         }
-        protected virtual Task<byte[]> LoadDiskAsync() => LoadDiskAsync(Url);
+        protected virtual Task<byte[]> LoadDiskAsync() => LoadDiskAsync(Url, LogLevel);
         protected abstract T ParseBytes(byte[] bytes);
     }
 }

@@ -21,19 +21,8 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
                 yield return TestUtils.Load(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source);
-        }
 
-        [UnityTest] public IEnumerator LoadFrom_MemoryCache_NoLogs() => TestUtils.RunNoLogs(LoadFrom_MemoryCache);
-        [UnityTest] public IEnumerator LoadFrom_MemoryCache()
-        {
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in TestUtils.ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadFromMemoryCache(url);
-            }
+            yield return TestUtils.ClearEverything(message: null);
         }
 
         [UnityTest] public IEnumerator LoadFrom_DiskCache_NoLogs() => TestUtils.RunNoLogs(LoadFrom_DiskCache);
@@ -46,6 +35,19 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
                 yield return TestUtils.Load(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache);
+            }
+        }
+
+        [UnityTest] public IEnumerator LoadFrom_MemoryCache_NoLogs() => TestUtils.RunNoLogs(LoadFrom_MemoryCache);
+        [UnityTest] public IEnumerator LoadFrom_MemoryCache()
+        {
+            ImageLoader.settings.useDiskCache = true;
+            ImageLoader.settings.useMemoryCache = true;
+
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadFromMemoryCache(url);
             }
         }
     }

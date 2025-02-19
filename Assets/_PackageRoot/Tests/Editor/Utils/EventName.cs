@@ -23,7 +23,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             switch (loadingFrom)
             {
                 case FutureLoadingFrom.DiskCache:
-                    return EventName.LoadedFromMemoryCache;
+                    return EventName.LoadingFromDiskCache;
                 case FutureLoadingFrom.Source:
                     return EventName.LoadingFromSource;
                 default:

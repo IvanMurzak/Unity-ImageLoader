@@ -34,6 +34,7 @@ namespace Extensions.Unity.ImageLoader
         protected bool cleared = false;
         protected bool disposeValue = false;
         protected T value = default;
+        protected FutureLoadingFrom? loadingFrom = null;
         protected Exception exception = default;
 
         public DebugLevel LogLevel { get; private set; }
@@ -66,7 +67,7 @@ namespace Extensions.Unity.ImageLoader
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             if (LogLevel.IsActive(DebugLevel.Trace))
-                Debug.Log($"[ImageLoader] Future[id={Id}] Created future<{typeof(T).Name}>\n{url}");
+                Debug.Log($"[ImageLoader] Future[id={Id}] Created future ({typeof(T).Name})\n{url}");
 
             cancellationToken.Register(Cancel);
         }
@@ -157,6 +158,7 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Loading from: {loadingFrom}\n{Url}");
 
+            this.loadingFrom = loadingFrom;
             Safe.Run(onLoadingEvent, LogLevel);
         }
         void IFutureInternal<T>.Loaded(T value, FutureLoadedFrom loadedFrom)

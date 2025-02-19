@@ -60,6 +60,11 @@ namespace Extensions.Unity.ImageLoader
                 return;
             }
 
+            if (!UseDiskCache)
+                Debug.Log("!!!!!!!!! UseDiskCache is false");
+            if (!DiskCacheContains())
+                Debug.Log("!!!!!!!!! DiskCacheContains is false");
+
             if (UseDiskCache && DiskCacheContains())
             {
                 ((IFutureInternal<T>)this).Loading(FutureLoadingFrom.DiskCache);
