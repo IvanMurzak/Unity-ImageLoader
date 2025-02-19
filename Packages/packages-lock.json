@@ -69,26 +69,6 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
-    "org.nuget.castle.core": {
-      "version": "5.1.1",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {
-        "org.nuget.system.diagnostics.eventlog": "4.7.0",
-        "org.nuget.system.reflection.emit": "4.7.0"
-      },
-      "url": "https://unitynuget-registry.azurewebsites.net"
-    },
-    "org.nuget.moq": {
-      "version": "4.20.72",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "org.nuget.castle.core": "5.1.1",
-        "org.nuget.system.threading.tasks.extensions": "4.5.4"
-      },
-      "url": "https://unitynuget-registry.azurewebsites.net"
-    },
     "org.nuget.scriban": {
       "version": "5.12.1",
       "depth": 0,
@@ -98,51 +78,26 @@
       },
       "url": "https://unitynuget-registry.azurewebsites.net"
     },
-    "org.nuget.system.diagnostics.eventlog": {
-      "version": "4.7.0",
-      "depth": 2,
-      "source": "registry",
-      "dependencies": {
-        "org.nuget.system.security.principal.windows": "4.7.0"
-      },
-      "url": "https://unitynuget-registry.azurewebsites.net"
-    },
-    "org.nuget.system.reflection.emit": {
-      "version": "4.7.0",
-      "depth": 2,
-      "source": "registry",
-      "dependencies": {
-        "org.nuget.system.reflection.emit.ilgeneration": "4.7.0"
-      },
-      "url": "https://unitynuget-registry.azurewebsites.net"
-    },
-    "org.nuget.system.reflection.emit.ilgeneration": {
-      "version": "4.7.0",
-      "depth": 3,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://unitynuget-registry.azurewebsites.net"
-    },
     "org.nuget.system.runtime.compilerservices.unsafe": {
-      "version": "4.5.3",
-      "depth": 2,
+      "version": "4.5.0",
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://unitynuget-registry.azurewebsites.net"
     },
     "org.nuget.system.security.principal.windows": {
-      "version": "4.7.0",
-      "depth": 3,
+      "version": "4.4.0",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://unitynuget-registry.azurewebsites.net"
     },
     "org.nuget.system.threading.tasks.extensions": {
-      "version": "4.5.4",
-      "depth": 1,
+      "version": "4.5.0",
+      "depth": 0,
       "source": "registry",
       "dependencies": {
-        "org.nuget.system.runtime.compilerservices.unsafe": "4.5.3"
+        "org.nuget.system.runtime.compilerservices.unsafe": "4.5.0"
       },
       "url": "https://unitynuget-registry.azurewebsites.net"
     },
