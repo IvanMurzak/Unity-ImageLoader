@@ -632,7 +632,6 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
-            // LogAssert.ignoreFailingMessages = true;
 
             foreach (var url in TestUtils.ImageURLs)
                 yield return LoadAndCancel(url, FutureLoadingFrom.Source);

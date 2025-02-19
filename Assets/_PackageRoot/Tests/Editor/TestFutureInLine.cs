@@ -255,41 +255,20 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediatelyNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediatelyNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheCalledImmediately();
+            yield return EventLoadingFromDiskCacheThenCancel_CalledImmediately();
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediately()
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var url in TestUtils.ImageURLs)
             {
-                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
-                var called = false;
-                var startTime = DateTime.Now;
-                var future0 = ImageLoader.LoadSprite(url);
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromDiskCache(() => called = true);
-
-                Assert.IsTrue(called);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                Assert.IsTrue(called);
-
-                yield return UniTask.WaitUntil(() => task1.IsCompleted)
-                    .Timeout(TimeSpan.FromSeconds(2))
-                    .ToCoroutine();
-
-                Assert.IsTrue(called);
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsTrue(called);
-                future0.Dispose();
-                future1.Dispose();
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestFuture.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledNoLogs()
