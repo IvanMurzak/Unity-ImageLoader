@@ -8,16 +8,12 @@ using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFutureInLine : Test
+    public class TestFutureWaitingAnotherFuture : Test
     {
         [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
         [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromMemoryCacheCalled();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromMemoryCacheCalled);
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -46,11 +42,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromMemoryCacheNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromMemoryCacheNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -79,11 +71,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromDiskCalled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromDiskCalled();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromDiskCalled_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromDiskCalled);
         [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -112,11 +100,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromDiskNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromDiskNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -124,32 +108,12 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
             {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
                 var future0 = ImageLoader.LoadSprite(url);
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromDiskCache(x => sprite = x);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsNull(sprite);
-
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
                 future0.Dispose();
-                future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromSourceCalled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromSourceCalled();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromSourceCalled_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromSourceCalled);
         [UnityTest] public IEnumerator EventLoadedFromSourceCalled()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -157,32 +121,12 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
             {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
                 var future0 = ImageLoader.LoadSprite(url);
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromSource(x => sprite = x);
-
-                var task1 = future1.AsTask();
-
-                while (sprite != null)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
+                yield return TestUtils.Load(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source);
                 future0.Dispose();
-                future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromSourceNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventLoadedFromSourceNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -210,11 +154,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheCalled();
-        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled_NoLogs() => TestUtils.RunNoLogs(EventLoadingFromDiskCacheCalled);
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -247,11 +187,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediately_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheThenCancel_CalledImmediately();
-        }
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediately_NoLogs() => TestUtils.RunNoLogs(EventLoadingFromDiskCacheThenCancel_CalledImmediately);
         [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediately()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -263,11 +199,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromSourceCalled();
-        }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalled_NoLogs() => TestUtils.RunNoLogs(EventLoadingFromSourceCalled);
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
         {
             ImageLoader.settings.useDiskCache = false;
@@ -298,11 +230,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromSourceCalledImmediately();
-        }
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately_NoLogs() => TestUtils.RunNoLogs(EventLoadingFromSourceCalledImmediately);
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
         {
             ImageLoader.settings.useDiskCache = false;
@@ -328,11 +256,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future0.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlAndTimeout();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlAndTimeout);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -357,11 +281,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future0.Dispose();
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
             ImageLoader.settings.useDiskCache = true;
