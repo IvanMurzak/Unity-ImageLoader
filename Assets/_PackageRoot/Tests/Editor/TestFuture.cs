@@ -7,7 +7,7 @@ using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFuture
+    public partial class TestFuture
     {
         [UnitySetUp] public IEnumerator SetUp()
         {
@@ -559,25 +559,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var url in TestUtils.ImageURLs)
-            {
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromSource(() => called = true);
-
-                Assert.IsTrue(called);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                yield return UniTask.WaitUntil(() => task1.IsCompleted)
-                    .Timeout(TimeSpan.FromSeconds(2))
-                    .ToCoroutine();
-
-                yield return UniTask.Delay(100).ToCoroutine();
-                Assert.IsTrue(called);
-                future1.Dispose();
-            }
+                yield return LoadAndCancel(url, FutureLoadingFrom.Source);
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeoutNoLogs()
         {

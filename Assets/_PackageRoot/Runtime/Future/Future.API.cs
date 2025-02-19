@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using Extensions.Unity.ImageLoader.Utils;
 using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -64,7 +65,7 @@ namespace Extensions.Unity.ImageLoader
         /// <returns>Returns the Future instance</returns>
         public IFuture<T> Completed(Action<bool> action)
         {
-            if (IsCompleted)
+            if (IsCompleted || IsCancelled)
             {
                 Safe.Run(action, IsLoaded, LogLevel);
                 return this;
@@ -84,14 +85,23 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// When the image started to load from disk cache
+        /// When the image started to load from disk cache. Also, it will be called when the image is already loaded from disk cache.
         /// </summary>
         /// <param name="action">action to execute on the event</param>
+        /// <param name="ignoreLoaded">Ignore the event if the image is already loaded</param>
         /// <returns>Returns the Future instance</returns>
-        public IFuture<T> LoadingFromDiskCache(Action action)
+        public IFuture<T> LoadingFromDiskCache(Action action, bool ignoreLoaded = false)
         {
-            if (Status == FutureStatus.LoadingFromDiskCache || Status == FutureStatus.LoadedFromDiskCache)
+            if (Status == FutureStatus.LoadingFromDiskCache)
             {
+                Safe.Run(action, LogLevel);
+                return this;
+            }
+            if (Status == FutureStatus.LoadedFromDiskCache)
+            {
+                if (ignoreLoaded)
+                    return this; // ignore event
+
                 Safe.Run(action, LogLevel);
                 return this;
             }
@@ -116,14 +126,23 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// When the image started to load from source
+        /// When the image started to load from source. Also, it will be called when the image is already loaded from source.
         /// </summary>
         /// <param name="action">action to execute on the event</param>
+        /// <param name="ignoreLoaded">Ignore the event if the image is already loaded</param>
         /// <returns>Returns the Future instance</returns>
-        public IFuture<T> LoadingFromSource(Action action)
+        public IFuture<T> LoadingFromSource(Action action, bool ignoreLoaded = false)
         {
-            if (Status == FutureStatus.LoadingFromSource || Status == FutureStatus.LoadedFromSource)
+            if (Status == FutureStatus.LoadingFromSource)
             {
+                Safe.Run(action, LogLevel);
+                return this;
+            }
+            if (Status == FutureStatus.LoadedFromSource)
+            {
+                if (ignoreLoaded)
+                    return this; // ignore event
+
                 Safe.Run(action, LogLevel);
                 return this;
             }
@@ -171,17 +190,32 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         public virtual void Cancel()
         {
-            if (cleared || IsCancelled)
+            if (cleared)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared of canceled\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared\n{Url}");
+                return;
+            }
+            if (IsCancelled)
+            {
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already canceled\n{Url}");
+                return;
+            }
+            if (IsLoaded)
+            {
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already loaded\n{Url}");
                 return;
             }
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Cancel\n{Url}");
             Status = FutureStatus.Canceled;
             if (Safe.RunCancel(cts, LogLevel))
+            {
                 Safe.Run(OnCanceled, LogLevel);
+                Safe.Run(OnCompleted, IsLoaded, LogLevel);
+            }
             Clear();
         }
 
@@ -324,33 +358,26 @@ namespace Extensions.Unity.ImageLoader
         }
         public UniTask<T> AsUniTask()
         {
-            var uts = new UniTaskCompletionSource<T>();
+            var taskCompletionSource = new UniTaskCompletionSource<T>();
 
-            Then(value => uts.TrySetResult(value));
-            Failed(exception => uts.TrySetException(exception));
-            Canceled(() => uts.TrySetCanceled());
+            Then(value => taskCompletionSource.TrySetResult(value));
+            Failed(exception => taskCompletionSource.TrySetException(exception));
+            Canceled(() => taskCompletionSource.TrySetCanceled());
 
-            return uts.Task;
+            return taskCompletionSource.Task;
         }
         public Task<T> AsTask()
         {
-            var tcs = new TaskCompletionSource<T>();
+            var taskCompletionSource = new TaskCompletionSource<T>();
 
-            Then(tcs.SetResult);
-            Failed(tcs.SetException);
-            Canceled(tcs.SetCanceled);
+            Then(taskCompletionSource.SetResult);
+            Failed(taskCompletionSource.SetException);
+            Canceled(taskCompletionSource.SetCanceled);
 
-            return tcs.Task;
+            return taskCompletionSource.Task;
         }
-        public FutureAwaiter<T> GetAwaiter()
-        {
-            var tcs = new TaskCompletionSource<T>();
-
-            Then(tcs.SetResult);
-            Failed(tcs.SetException);
-            Canceled(tcs.SetCanceled);
-
-            return new FutureAwaiter<T>(tcs.Task.GetAwaiter());
-        }
+        public IEnumerator AsCoroutine(Action<T> resultHandler = null, Action<Exception> exceptionHandler = null)
+            => AsUniTask().ToCoroutine(resultHandler, exceptionHandler);
+        public FutureAwaiter<T> GetAwaiter() => new FutureAwaiter<T>(AsTask().GetAwaiter());
     }
 }

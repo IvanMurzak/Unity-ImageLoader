@@ -24,13 +24,12 @@ namespace Extensions.Unity.ImageLoader
         DebugLevel LogLevel { get; }
         UniTask StartLoading(bool ignoreImageNotFoundError = false);
         IFuture<T> Then(Action<T> onCompleted);
-        // Future<T> ThenSet<C>(Action<T, C> setter);
         IFuture<T> Failed(Action<Exception> action);
         IFuture<T> Completed(Action<bool> action);
         IFuture<T> LoadedFromMemoryCache(Action<T> action);
-        IFuture<T> LoadingFromDiskCache(Action action);
+        IFuture<T> LoadingFromDiskCache(Action action, bool ignoreWhenLoaded = false);
         IFuture<T> LoadedFromDiskCache(Action<T> action);
-        IFuture<T> LoadingFromSource(Action action);
+        IFuture<T> LoadingFromSource(Action action, bool ignoreWhenLoaded = false);
         IFuture<T> LoadedFromSource(Action<T> action);
         IFuture<T> Canceled(Action action);
 

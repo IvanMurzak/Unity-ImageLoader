@@ -4,6 +4,7 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
+using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -338,25 +339,22 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
             {
-                var called = false;
-                var startTime = DateTime.Now;
                 var future0 = ImageLoader.LoadSprite(url);
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromSource(() => called = true);
+                var futureListener = future0.ToFutureListener();
+                yield return TestFuture.LoadAndCancel(url, FutureLoadingFrom.Source);
+                yield return future0.AsCoroutine();
+                futureListener.Assert_Events_Equals(EventName.LoadingFromSource, EventName.LoadedFromSource, EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Value<bool>(EventName.Completed, value => value == true);
 
-                Assert.IsTrue(called);
+                future0.ToFutureListener()
+                    .Assert_Events_Equals(EventName.LoadingFromSource, EventName.LoadedFromSource, EventName.Then, EventName.Completed)
+                    .Assert_Events_Value<bool>(EventName.Completed, value => value == true);
 
-                var task1 = future1.AsTask();
-                future1.Cancel();
+                future0.ToFutureListener(ignoreLoadingWhenLoaded: true)
+                    .Assert_Events_Equals(EventName.LoadedFromSource, EventName.Then, EventName.Completed)
+                    .Assert_Events_Value<bool>(EventName.Completed, value => value == true);
 
-                yield return UniTask.WaitUntil(() => task1.IsCompleted)
-                    .Timeout(TimeSpan.FromSeconds(2))
-                    .ToCoroutine();
-
-                // yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsTrue(called);
                 future0.Dispose();
-                future1.Dispose();
             }
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeoutNoLogs()

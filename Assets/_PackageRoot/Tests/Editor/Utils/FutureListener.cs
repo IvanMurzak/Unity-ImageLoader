@@ -19,7 +19,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             }
         }
 
-        public FutureListener(IFuture<T> future, DebugLevel? logLevel = null)
+        public FutureListener(IFuture<T> future, bool ignoreLoadingWhenLoaded = false, DebugLevel? logLevel = null)
         {
             if (logLevel == null)
                 logLevel = ImageLoader.settings.debugLevel;
@@ -39,7 +39,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                     Debug.Log($"[FutureListener] Future[id={future.Id}] LoadingFromDiskCache");
                 lock (events)
                     events.Add(new EventData { name = EventName.LoadingFromDiskCache });
-            });
+            }, ignoreWhenLoaded: ignoreLoadingWhenLoaded);
             future.LoadedFromDiskCache(value =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
@@ -53,7 +53,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                     Debug.Log($"[FutureListener] Future[id={future.Id}] LoadingFromSource");
                 lock (events)
                     events.Add(new EventData { name = EventName.LoadingFromSource });
-            });
+            }, ignoreWhenLoaded: ignoreLoadingWhenLoaded);
             future.LoadedFromSource(value =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
@@ -75,19 +75,19 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 lock (events)
                     events.Add(new EventData { name = EventName.Failed, value = exception });
             });
-            future.Completed(value =>
-            {
-                if (logLevel.Value.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[FutureListener] Future[id={future.Id}] Completed: {value}");
-                lock (events)
-                    events.Add(new EventData { name = EventName.Completed, value = value });
-            });
             future.Canceled(() =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
                     Debug.Log($"[FutureListener] Future[id={future.Id}] Canceled");
                 lock (events)
                     events.Add(new EventData { name = EventName.Canceled });
+            });
+            future.Completed(value =>
+            {
+                if (logLevel.Value.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[FutureListener] Future[id={future.Id}] Completed: {value}");
+                lock (events)
+                    events.Add(new EventData { name = EventName.Completed, value = value });
             });
         }
     }
