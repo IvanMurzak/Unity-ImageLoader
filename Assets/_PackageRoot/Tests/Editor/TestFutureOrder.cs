@@ -9,18 +9,11 @@ using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFutureOrder
+    public class TestFutureOrder : Test
     {
-        [UnitySetUp] public IEnumerator SetUp()
-        {
-            yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Trace;
-        }
-        [UnityTearDown] public IEnumerator TearDown()
-        {
-            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
-            yield return TestUtils.ClearEverything("<b>Test End </b>");
-        }
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
+
         [UnityTest] public IEnumerator EventsLoadedWhenClear_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;

@@ -8,18 +8,10 @@ using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFutureInLine
+    public class TestFutureInLine : Test
     {
-        [UnitySetUp] public IEnumerator SetUp()
-        {
-            yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Trace;
-        }
-        [UnityTearDown] public IEnumerator TearDown()
-        {
-            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
-            yield return TestUtils.ClearEverything("<b>Test End </b>");
-        }
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled_NoLogs()
         {
@@ -268,7 +260,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestFuture.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled_NoLogs()
@@ -320,7 +312,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var future0 = ImageLoader.LoadSprite(url);
                 var futureListener = future0.ToFutureListener();
-                yield return TestFuture.LoadAndCancel(url, FutureLoadingFrom.Source);
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
                 yield return future0.AsCoroutine();
                 futureListener.Assert_Events_Equals(EventName.LoadingFromSource, EventName.LoadedFromSource, EventName.Then, EventName.Completed);
                 futureListener.Assert_Events_Value<bool>(EventName.Completed, value => value == true);

@@ -4,21 +4,14 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
+using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public partial class TestFuture
+    public partial class TestFuture : Test
     {
-        [UnitySetUp] public IEnumerator SetUp()
-        {
-            yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Trace;
-        }
-        [UnityTearDown] public IEnumerator TearDown()
-        {
-            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
-            yield return TestUtils.ClearEverything("<b>Test End </b>");
-        }
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
         [UnityTest] public IEnumerator GetAllLoadingFutures_NoLogs()
         {
@@ -262,6 +255,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
+
         [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
@@ -306,7 +300,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return LoadFromMemoryCacheThenCancel(url);
+                yield return TestUtils.LoadFromMemoryCacheThenCancel(url);
             }
         }
         [UnityTest] public IEnumerator EventLoadedFromDiskCalled_NoLogs()
@@ -479,7 +473,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return LoadAndCancel(url, FutureLoadingFrom.DiskCache);
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalled_NoLogs()
@@ -525,7 +519,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var url in TestUtils.ImageURLs)
-                yield return LoadAndCancel(url, FutureLoadingFrom.Source);
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs()
         {
@@ -619,7 +613,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var url in TestUtils.ImageURLs)
-                yield return LoadAndCancel(url, FutureLoadingFrom.Source);
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
         }
     }
 }

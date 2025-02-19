@@ -6,21 +6,14 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using UnityEngine;
 using System.Threading.Tasks;
+using Extensions.Unity.ImageLoader.Tests.Utils;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestConcurrency
+    public class TestConcurrency : Test
     {
-        [UnitySetUp] public IEnumerator SetUp()
-        {
-            yield return TestUtils.ClearEverything("<b>Test Start </b>");
-            ImageLoader.settings.debugLevel = DebugLevel.Log;
-        }
-        [UnityTearDown] public IEnumerator TearDown()
-        {
-            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
-            yield return TestUtils.ClearEverything("<b>Test End </b>");
-        }
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
         [UnityTest] public IEnumerator Load____1_ReferencesInParallelLateDispose_NoLogs()
         {

@@ -1,12 +1,46 @@
-using NUnit.Framework;
-using Cysharp.Threading.Tasks;
+using System;
 using System.Collections;
-using Extensions.Unity.ImageLoader.Tests.Utils;
+using Cysharp.Threading.Tasks;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
-namespace Extensions.Unity.ImageLoader.Tests
+namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    public partial class TestFuture
+    internal static class TestUtils
     {
+        public static readonly string[] ImageURLs =
+        {
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
+        };
+        public static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
+
+        public static IEnumerator ClearEverything(string message)
+        {
+            Debug.Log(message.PadRight(50, '-'));
+            LogAssert.ignoreFailingMessages = true;
+            UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
+            ImageLoader.ClearRef();
+            yield return ImageLoader.ClearCacheAll().AsUniTask().ToCoroutine();
+
+            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
+            GC.WaitForPendingFinalizers();
+            LogAssert.ignoreFailingMessages = false;
+        }
+        public static IEnumerator WaitForGC(int millisecondsDelay = 100)
+        {
+            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
+            GC.WaitForPendingFinalizers();
+            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+        }
+        public static IEnumerator RunNoLogs(Func<IEnumerator> test)
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            yield return test();
+        }
         public static IEnumerable LoadFromMemoryCache(string url) => Load(url, null, FutureLoadedFrom.MemoryCache);
         public static IEnumerable Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
         {
@@ -101,6 +135,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future1.Dispose();
             yield return UniTask.Yield();
         }
+        public static IEnumerable LoadFromMemoryCacheAndCancel(string url) => LoadAndCancel(url, null);
         public static IEnumerable LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom)
         {
             var future1 = ImageLoader.LoadSprite(url);
