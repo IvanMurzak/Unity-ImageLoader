@@ -28,5 +28,12 @@ namespace Extensions.Unity.ImageLoader.Tests
             GC.WaitForPendingFinalizers();
             LogAssert.ignoreFailingMessages = false;
         }
+        public static IEnumerator WaitForGC(int millisecondsDelay = 100)
+        {
+            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
+            GC.WaitForPendingFinalizers();
+            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+        }
     }
 }

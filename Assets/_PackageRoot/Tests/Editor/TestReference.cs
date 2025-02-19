@@ -61,23 +61,17 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             var url = TestUtils.ImageURLs[0];
+            { // scope
+                var task = ImageLoader.LoadSpriteRef(url).AsTask();
+                while (!task.IsCompleted)
+                    yield return null;
 
-            var task = ImageLoader.LoadSpriteRef(url).AsTask();
-            while (!task.IsCompleted)
-                yield return null;
+                var reference = task.Result;
+                Assert.NotNull(reference);
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url));
+            } // end of scope
 
-            var reference = task.Result;
-            Assert.NotNull(reference);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
-
-            task = null;
-            reference = null;
-
-            yield return null;
-            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
-            GC.WaitForPendingFinalizers();
-            yield return null;
-
+            yield return TestUtils.WaitForGC();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
@@ -99,11 +93,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             futureRef = null;
             reference = null;
 
-            yield return null;
-            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
-            GC.WaitForPendingFinalizers();
-            yield return null;
-
+            yield return TestUtils.WaitForGC();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
@@ -128,10 +118,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             }
 
-            yield return null;
-            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
-            GC.WaitForPendingFinalizers();
-            yield return null;
+            yield return TestUtils.WaitForGC();
 
             foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
