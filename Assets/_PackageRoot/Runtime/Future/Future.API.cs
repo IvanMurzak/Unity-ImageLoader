@@ -186,14 +186,14 @@ namespace Extensions.Unity.ImageLoader
         }
 
         /// <summary>
-        /// Cancel loading process
+        /// Cancel loading process. Ignores if the loading process is already completed or canceled.
         /// </summary>
         public virtual void Cancel()
         {
-            if (cleared)
+            if (IsLoaded)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already loaded\n{Url}");
                 return;
             }
             if (IsCancelled)
@@ -202,10 +202,10 @@ namespace Extensions.Unity.ImageLoader
                     Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already canceled\n{Url}");
                 return;
             }
-            if (IsLoaded)
+            if (cleared)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already loaded\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared\n{Url}");
                 return;
             }
             if (LogLevel.IsActive(DebugLevel.Log))

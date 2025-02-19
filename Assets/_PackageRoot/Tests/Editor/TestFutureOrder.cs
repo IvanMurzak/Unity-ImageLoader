@@ -21,7 +21,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.Zero(ImageLoader.GetLoadingFutures().Count);
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
-        [UnityTest] public IEnumerator EventsLoadedWhenClearNoLogs()
+        [UnityTest] public IEnumerator EventsLoadedWhenClear_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventsLoadedWhenClear();
@@ -64,7 +64,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             future.Dispose();
         }
-        [UnityTest] public IEnumerator EventsFailedWhenClearNoLogs()
+        [UnityTest] public IEnumerator EventsFailedWhenClear_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventsFailedWhenClear();

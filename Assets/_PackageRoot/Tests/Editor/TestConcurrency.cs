@@ -22,7 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
 
-        [UnityTest] public IEnumerator Load____1_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load____1_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load_X_ReferencesInParallelLateDispose(1);
@@ -31,7 +31,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             yield return Load_X_ReferencesInParallelLateDispose(1);
         }
-        [UnityTest] public IEnumerator Load____2_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load____2_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load_X_ReferencesInParallelLateDispose(2);
@@ -40,7 +40,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             yield return Load_X_ReferencesInParallelLateDispose(2);
         }
-        [UnityTest] public IEnumerator Load____5_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load____5_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load_X_ReferencesInParallelLateDispose(5);
@@ -49,7 +49,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             yield return Load_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator Load_1000_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator Load_1000_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load_X_ReferencesInParallelLateDispose(1000);
@@ -93,7 +93,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake____5_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake____5_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadOneMake_X_ReferencesInParallelLateDispose(5);
@@ -102,7 +102,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             yield return LoadOneMake_X_ReferencesInParallelLateDispose(5);
         }
-        [UnityTest] public IEnumerator LoadOneMake_1000_ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake_1000_ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadOneMake_X_ReferencesInParallelLateDispose(100);

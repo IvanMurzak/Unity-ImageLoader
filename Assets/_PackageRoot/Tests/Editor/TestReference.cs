@@ -22,7 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
 
-        [UnityTest] public IEnumerator CleanMemoryCacheNoLogs()
+        [UnityTest] public IEnumerator CleanMemoryCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return CleanMemoryCache();
@@ -50,7 +50,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator DisposeOnOutOfScopeNoLogs()
+        [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return DisposeOnOutOfScope();
@@ -97,7 +97,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
-        [UnityTest] public IEnumerator DisposeOnOutOfScopeAllNoLogs()
+        [UnityTest] public IEnumerator DisposeOnOutOfScopeAll_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return DisposeOnOutOfScopeAll();
@@ -123,7 +123,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlockNoLogs()
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return DisposeOnOutDisposingBlock();
@@ -151,7 +151,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator CleanMemoryCacheAllNoLogs()
+        [UnityTest] public IEnumerator CleanMemoryCacheAll_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return CleanMemoryCacheAll();
@@ -181,7 +181,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadOneMake1000ReferencesLaterDispose();
@@ -221,7 +221,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator KeepReferenceButDisposeFutureNoLogs()
+        [UnityTest] public IEnumerator KeepReferenceButDisposeFuture_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return KeepReferenceButDisposeFuture();
@@ -251,7 +251,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadOneMake1000ReferencesImmediateDispose();
@@ -293,7 +293,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDisposeNoLogs()
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadOneMake1000ReferencesInParallelLateDispose();
@@ -336,7 +336,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCacheNoLogs()
+        [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load1Sprite2TimesAnd2TimesFromCache();
@@ -397,7 +397,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref3.Value);
         }
 
-        [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCacheNoLogs()
+        [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return Load2SpritesTimesAnd2TimesFromCache();

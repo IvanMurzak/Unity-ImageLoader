@@ -21,7 +21,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
 
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalledNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromMemoryCacheCalled();
@@ -54,7 +54,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancelNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromMemoryCacheNotCalledBecauseOfCancel();
@@ -87,7 +87,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromDiskCalledNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromDiskCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromDiskCalled();
@@ -120,7 +120,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancelNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromDiskNotCalledBecauseOfCancel();
@@ -153,7 +153,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromSourceCalledNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromSourceCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromSourceCalled();
@@ -186,7 +186,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancelNoLogs()
+        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadedFromSourceNotCalledBecauseOfCancel();
@@ -218,7 +218,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadingFromDiskCacheCalled();
@@ -255,7 +255,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediatelyNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancel_CalledImmediately_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadingFromDiskCacheThenCancel_CalledImmediately();
@@ -271,7 +271,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 yield return TestFuture.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadingFromSourceCalled();
@@ -306,7 +306,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediatelyNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventLoadingFromSourceCalledImmediately();
@@ -336,7 +336,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future0.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeoutNoLogs()
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventFailedWithIncorrectUrlAndTimeout();
@@ -365,7 +365,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future0.Dispose();
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancelNoLogs()
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return EventFailedWithIncorrectUrlNotCalledBecauseOfCancel();

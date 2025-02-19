@@ -24,7 +24,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(sprite);
         }
 
-        [UnityTest] public IEnumerator LoadingFromMemoryCacheNoLogs()
+        [UnityTest] public IEnumerator LoadingFromMemoryCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadingFromMemoryCache();
@@ -41,7 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator LoadingFromDiskCacheNoLogs()
+        [UnityTest] public IEnumerator LoadingFromDiskCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return LoadingFromDiskCache();
@@ -58,7 +58,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheEnableNoLogs()
+        [UnityTest] public IEnumerator DiskCacheEnable_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return DiskCacheEnable();
@@ -73,7 +73,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheDisableNoLogs()
+        [UnityTest] public IEnumerator DiskCacheDisable_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return DiskCacheDisable();
@@ -88,7 +88,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheEnabledNoLogs()
+        [UnityTest] public IEnumerator MemoryCacheEnabled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return MemoryCacheEnabled();
@@ -103,7 +103,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheDisabledNoLogs()
+        [UnityTest] public IEnumerator MemoryCacheDisabled_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return MemoryCacheDisabled();
@@ -118,7 +118,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCacheNoLogs()
+        [UnityTest] public IEnumerator ClearDiskCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return ClearDiskCache();
@@ -135,7 +135,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearMemoryCacheNoLogs()
+        [UnityTest] public IEnumerator ClearMemoryCache_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return ClearMemoryCache();
@@ -152,7 +152,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCacheAllNoLogs()
+        [UnityTest] public IEnumerator ClearDiskCacheAll_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return ClearDiskCacheAll();
@@ -170,7 +170,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
         }
-        [UnityTest] public IEnumerator ClearMemoryCacheAllNoLogs()
+        [UnityTest] public IEnumerator ClearMemoryCacheAll_NoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return ClearMemoryCacheAll();
