@@ -481,39 +481,20 @@ namespace Extensions.Unity.ImageLoader.Tests
                 future1.Dispose();
             }
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediatelyNoLogs()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancelCalledImmediatelyNoLogs()
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheCalledImmediately();
+            yield return EventLoadingFromDiskCacheThenCancelCalledImmediately();
         }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
+        [UnityTest] public IEnumerator EventLoadingFromDiskCacheThenCancelCalledImmediately()
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var url in TestUtils.ImageURLs)
             {
-                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromDiskCache(() => called = true);
-
-                Assert.IsTrue(called);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                Assert.IsTrue(called);
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return UniTask.Delay(100).ToCoroutine();
-                }
-                Assert.IsTrue(called);
-                yield return UniTask.Delay(100).ToCoroutine();
-                Assert.IsTrue(called);
-                future1.Dispose();
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return LoadAndCancel(url, FutureLoadingFrom.DiskCache);
             }
         }
         [UnityTest] public IEnumerator EventLoadingFromSourceCalledNoLogs()
@@ -575,7 +556,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future1 = ImageLoader.LoadSprite(url)
-                .Timeout(TimeSpan.FromSeconds(0.5f))
+                .Timeout(TimeSpan.FromSeconds(0.1f))
                 .Failed(e => exception = e);
 
             Assert.IsNull(exception);
@@ -651,42 +632,10 @@ namespace Extensions.Unity.ImageLoader.Tests
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
-            LogAssert.ignoreFailingMessages = true;
+            // LogAssert.ignoreFailingMessages = true;
 
             foreach (var url in TestUtils.ImageURLs)
-            {
-                var completed = false;
-                var cancelled = false;
-                var startTime = DateTime.Now;
-                var future = ImageLoader.LoadSprite(url)
-                    .Completed(success => completed = true)
-                    .Canceled(() => cancelled = true);
-
-                Assert.IsFalse(completed);
-                Assert.IsFalse(cancelled);
-                var task1 = future.AsTask();
-                future.Cancel();
-                var task2 = future.AsTask();
-
-                Assert.IsFalse(completed);
-                Assert.IsTrue(cancelled);
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                while (!task2.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                Assert.IsFalse(completed);
-                Assert.IsTrue(cancelled);
-                yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
-                future.Dispose();
-            }
+                yield return LoadAndCancel(url, FutureLoadingFrom.Source);
         }
     }
 }

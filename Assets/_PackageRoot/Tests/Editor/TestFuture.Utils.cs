@@ -16,12 +16,14 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             var task1 = future1.AsTask();
             future1.Cancel();
+            var task2 = future1.AsTask();
 
             futureListener.Assert_Events_Contains(EventName.Canceled);
             futureListener.Assert_Events_Equals(expectedLoadingFrom.ToEventName(), EventName.Canceled, EventName.Completed);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, value => value == false);
 
             Assert.IsTrue(task1.IsCompleted, "Task was not cancelled but Future was cancelled. Probably the OnCancel subscription was cleaned up too early.");
+            Assert.IsTrue(task2.IsCompleted, "Task was not cancelled but Future was cancelled. Probably the OnCancel subscription was cleaned up too early.");
 
             yield return UniTask.Yield();
 
