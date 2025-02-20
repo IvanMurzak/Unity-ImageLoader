@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public interface IFuture
+    public interface IFuture : IDisposable
     {
         uint Id { get; }
         string Url { get; }

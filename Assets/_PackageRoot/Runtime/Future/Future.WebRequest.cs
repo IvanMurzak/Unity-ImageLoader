@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Future<T> : IFuture, IDisposable
+    public partial class Future<T>
     {
         internal Future<T> SetWebRequest(UnityWebRequest webRequest)
         {

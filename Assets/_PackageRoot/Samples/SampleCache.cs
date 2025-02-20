@@ -10,6 +10,11 @@ static class SampleCache
     {
         ImageLoader.settings.diskSaveLocation = Application.persistentDataPath + "/myCustomFolder";
     }
+    static void SetupCacheGlobally()
+    {
+        ImageLoader.settings.useMemoryCache = true;
+        ImageLoader.settings.useDiskCache = true;
+    }
     static void OverrideCache()
     {
         // Override Memory cache for specific image
@@ -17,6 +22,12 @@ static class SampleCache
 
         // Take from Memory cache for specific image if exists
         ImageLoader.LoadSpriteFromMemoryCache(url);
+    }
+    static void OverrideCacheForSingleTask()
+    {
+        ImageLoader.LoadSprite(url)
+            .SetUseDiskCache(false)
+            .SetUseMemoryCache(true);
     }
     static void DoesCacheContainImage()
     {
@@ -31,8 +42,11 @@ static class SampleCache
     }
     static void ClearImage()
     {
-        // Clear memory Memory and Disk cache
+        // Clear memory Memory and Disk cache for all images
         ImageLoader.ClearCacheAll();
+
+        // Clear only Memory and Disk cache for specific image
+        ImageLoader.ClearCache(url);
 
         // Clear only Memory cache for all images
         ImageLoader.ClearMemoryCacheAll();

@@ -65,13 +65,16 @@ await ImageLoader.LoadSprite(imageURL).ThenSet(image);
   - [Cache](#cache)
     - [Setup Cache](#setup-cache)
       - [Change Disk cache folder](#change-disk-cache-folder)
+      - [Override for a specific loading task](#override-for-a-specific-loading-task)
     - [Manually read / write into cache](#manually-read--write-into-cache)
     - [Check cache existence](#check-cache-existence)
     - [Clear cache](#clear-cache)
   - [Texture Memory Management](#texture-memory-management)
-    - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________)
-    - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________-1)
-    - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________-2)
+    - [Manual Memory cache cleaning](#manual-memory-cache-cleaning)
+    - [Automatic Memory cache cleaning](#automatic-memory-cache-cleaning)
+      - [Load Reference](#load-reference)
+      - [Dispose `Reference<T>` on `Component` destroy event](#dispose-referencet-on-component-destroy-event)
+      - [Get references count](#get-references-count)
 - [Other](#other)
   - [Understanding `IFuture<T>`](#understanding-ifuturet)
   - [Understanding `Reference<T>`](#understanding-referencet)
@@ -320,6 +323,16 @@ By default it uses `Application.persistentDataPath + "/ImageLoader"`
 ImageLoader.settings.diskSaveLocation = Application.persistentDataPath + "/myCustomFolder";
 ```
 
+#### Override for a specific loading task
+
+It overrides global `ImageLoader.settings`
+
+``` C#
+ImageLoader.LoadSprite(url)
+    .SetUseDiskCache(false)
+    .SetUseMemoryCache(true);
+```
+
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleCache.cs)
 
 ### Manually read / write into cache
@@ -348,8 +361,11 @@ ImageLoader.DiskCacheContains(url);
 ### Clear cache
 
 ``` C#
-// Clear memory Memory and Disk cache
+// Clear memory Memory and Disk cache for all images
 ImageLoader.ClearCacheAll();
+
+// Clear only Memory and Disk cache for specific image
+ImageLoader.ClearCache(url);
 
 // Clear only Memory cache for all images
 ImageLoader.ClearMemoryCacheAll();
@@ -368,40 +384,71 @@ Memory cache could be cleared automatically if to use `Reference<T>` and the hea
 
 ## Texture Memory Management
 
-ImageLoader can manager memory usage of loaded textures. To use it need to call `ImageLoader.LoadSpriteRef` instead of `ImageLoader.LoadSprite`. It will return `Reference<Sprite>` object which contains `Sprite` and `Url` objects. When `Reference<Sprite>` object is not needed anymore, call `Dispose` method to release memory, or just don't save the reference on it. It is `IDisposable` and it will clean itself automatically. Each new instance of `Reference<Sprite>` increments reference counter of the texture. When the last reference is disposed, the texture will be unloaded from memory. Also the all related References will be automatically disposed if you call `ImageLoader.ClearMemoryCache` or `ImageLoader.ClearCache`.
+Texture2D objects consume a lot of memory. Ignoring it may impact performance or even trigger `OutOfMemory` crash by operation system. To avoid it, let's dig deeper into tools the package provides. We worry less about Disk cache, because it doesn't impact game performance directly. Let's focus on the Memory cache.
+
+### Manual Memory cache cleaning
+
+It is simple, just executing this line of code would release memory of a single Texture2D in the case if no other `Reference` pointing on it exists. Before doing that please make sure that no Unity component is using the texture.
+
+``` C#
+ImageLoader.ClearMemoryCache(url);
+```
+
+Under the hood it calls `UnityEngine.Object.DestroyImmediate(texture)`.
+
+> :warning: Releasing `Texture2D` from memory while any Unity's component uses it may trigger native app crash or even Unity Editor crash
+
+### Automatic Memory cache cleaning
+
+ImageLoader can manager memory releasing of loaded textures. To use it need to call `ImageLoader.LoadSpriteRef` instead of `ImageLoader.LoadSprite`. It returns `Reference<Sprite>` object which contains `Sprite` and `Url`. When `Reference<Sprite>` object is not needed anymore, call `reference.Dispose()` method to release memory, or just don't save the reference on it. It is `IDisposable` and it will be disposed by Garbage Collector. Each new instance of `Reference<Sprite>` increments reference counter of the texture. When the last reference is disposed, the texture memory releases. Also, if any reference is alive, calling `ImageLoader.ClearMemoryCache` or `ImageLoader.ClearCache` would have zero effect for only referenced textures. It prints warning messages about it.
 
 ``` C#
 // Load sprite image and get reference to it
-await ImageLoader.LoadSpriteRef(imageURL);
+var reference = await ImageLoader.LoadSpriteRef(imageURL);
 
 // Take from Memory cache reference for specific image if exists
-ImageLoader.LoadSpriteRefFromMemoryCache(url);
+var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url);
+
+// Dispose `reference` when you don't need the texture anymore
+reference.Dispose();
+
+// You may also nullify the reference to let Garbage Collector at some point to Dispose it for you
+reference = null;
 ```
 
 > :warning: Releasing `Texture2D` from memory while any Unity's component uses it may trigger native app crash or even Unity Editor crash. Please pay enough attention to manage `Reference<T>` instances in a proper way. Or do not use them.
 
-### ____________________
+#### Load Reference
 
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleReferences.cs)
 
+`Reference<T>.ThenSet` has a unique feature to attach the reference to the target consumer if consumer is `UnityEngine.Component`. The reference would be disposed as only the consumer gets destroyed.
+
 ``` C#
-____________________________
+ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
+    .ThenSet(image) // if success set sprite into image, also creates binding to `image`
+    .Forget();
 ```
 
-### ____________________
+#### Dispose `Reference<T>` on `Component` destroy event
 
-> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/______________________.cs)
+It automatically dispose the reference as only `this.gameObject` gets `OnDestroy` callback.
 
 ``` C#
-____________________________
+ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
+    .Then(reference => reference.DisposeOnDestroy(this))
+    .Then(reference =>
+    {
+        var sprite = reference.Value;
+        // use sprite
+    })
+    .Forget();
 ```
 
-### ____________________
-
-> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/______________________.cs)
+#### Get references count
 
 ``` C#
-____________________________
+var count = ImageLoader.GetReferenceCount(imageURL); // get count of references
 ```
 
 # Other

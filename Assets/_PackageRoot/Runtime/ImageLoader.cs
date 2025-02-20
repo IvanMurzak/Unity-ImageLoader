@@ -95,7 +95,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="texture">Texture for creation Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f)
+        public static Sprite ToSprite(this Texture2D texture, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
 
         /// <summary>
@@ -105,7 +105,14 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="pivot">Pivot of created Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f)
+        public static Sprite ToSprite(this Texture2D texture, Vector2 pivot, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), pivot, pixelDensity);
+
+        /// <summary>
+        /// Get reference count of the image
+        /// </summary>
+        /// <param name="url">URL to the image, web or local</param>
+        /// <returns>Returns reference count</returns>
+        public static int GetReferenceCount(string url) => Reference<Texture2D>.Counter(url);
     }
 }

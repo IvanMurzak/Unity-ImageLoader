@@ -22,5 +22,15 @@ namespace Extensions.Unity.ImageLoader
             }
             onTrigger += future.Cancel;
         }
+
+        internal void Register<T>(Reference<T> future)
+        {
+            if (isTriggered)
+            {
+                future.Dispose();
+                return;
+            }
+            onTrigger += future.Dispose;
+        }
     }
 }

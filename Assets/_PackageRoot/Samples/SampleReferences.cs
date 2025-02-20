@@ -1,5 +1,4 @@
 ﻿using Extensions.Unity.ImageLoader;
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +9,19 @@ public class SampleReferences : MonoBehaviour
 
     void Start()
     {
-        ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
-            .Timeout(TimeSpan.FromSeconds(10)) // set timeout duration 10 seconds
+        ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
+            .ThenSet(image) // if success set sprite into image, also creates binding to `image`
             .Forget();
+
+        ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
+            .Then(reference => reference.DisposeOnDestroy(this))
+            .Then(reference =>
+            {
+                var sprite = reference.Value;
+                // use sprite
+            })
+            .Forget();
+
+        var count = ImageLoader.GetReferenceCount(imageURL); // get count of references
     }
 }
