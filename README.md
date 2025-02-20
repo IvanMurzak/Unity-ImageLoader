@@ -8,6 +8,7 @@ Async image loader with two caching layers for Unity. It supports loading images
 ## Features
 
 - ✔️ Async loading from **Web** or **Local** `ImageLoader.LoadSprite(imageURL);`
+- ✔️ Load `Texture2D` and `Sprite`
 - ✔️ **Memory** and **Disk** caching - tries to load from memory first, then from disk
 - ✔️ Dedicated thread for disk operations
 - ✔️ Avoids loading same image multiple times simultaneously, task waits for completion the first and just returns loaded image if at least one cache layer activated
@@ -45,14 +46,21 @@ public class SampleImageLoading : MonoBehaviour
 {
     [SerializeField] string imageURL;
     [SerializeField] Image image;
+    [SerializeField] Material material;
 
     async void Start()
     {
-        // Loading sprite from web, cached for quick load next time
+        // Loading Sprite from web, cached for quick load next time
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
-        // Same loading with auto set to image
+        // Same loading with self inject into image
         await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+
+        // Loading Texture2D from web, cached for quick load next time
+        material.mainTexture = await ImageLoader.LoadTexture(imageURL);
+
+        // Same loading with self inject into material
+        await ImageLoader.LoadTexture(imageURL).ThenSet(material);
     }
 }
 ```
