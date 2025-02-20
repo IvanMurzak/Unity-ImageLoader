@@ -302,7 +302,7 @@ namespace Extensions.Unity.ImageLoader
 
             Safe.Run(cts.Dispose, LogLevel);
             WebRequest?.Dispose();
-            WebRequest = null;
+            webRequest = null;
 
             if (LogLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"[ImageLoader] Future[id={Id}] Disposed\n{Url}");

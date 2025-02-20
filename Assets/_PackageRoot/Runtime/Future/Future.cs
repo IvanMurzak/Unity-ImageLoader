@@ -36,11 +36,24 @@ namespace Extensions.Unity.ImageLoader
         protected T value = default;
         protected FutureLoadingFrom? loadingFrom = null;
         protected Exception exception = default;
+        protected UnityWebRequest webRequest = null;
 
         public DebugLevel LogLevel { get; private set; }
         public bool UseDiskCache { get; private set; }
         public bool UseMemoryCache { get; private set; }
-        internal UnityWebRequest WebRequest { get; private set; }
+
+        UnityWebRequest IFutureInternal<T>.WebRequest => WebRequest;
+        UnityWebRequest WebRequest
+        {
+            get => webRequest;
+            set
+            {
+                if (webRequest != null)
+                    throw new InvalidOperationException($"Future[id={Id}] WebRequest is already set");
+
+                webRequest = value;
+            }
+        }
 
         public T Value => value;
         public bool IsCancelled => Status == FutureStatus.Canceled;
@@ -209,6 +222,7 @@ namespace Extensions.Unity.ImageLoader
             // Safe.RunCancel(cts, LogLevel);                 // 1 Original order
             Clear();
         }
+        void IFutureInternal<T>.SetTimeout(TimeSpan duration) => timeout = duration;
 
         protected virtual void Clear()
         {

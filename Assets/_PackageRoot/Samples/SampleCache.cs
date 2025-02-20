@@ -32,16 +32,16 @@ static class SampleCache
     static void ClearImage()
     {
         // Clear memory Memory and Disk cache
-        ImageLoader.ClearCache();
+        ImageLoader.ClearCacheAll();
 
         // Clear only Memory cache for all images
-        ImageLoader.ClearMemoryCache();
+        ImageLoader.ClearMemoryCacheAll();
 
         // Clear only Memory cache for specific image
         ImageLoader.ClearMemoryCache(url);
 
         // Clear only Disk cache for all images
-        ImageLoader.ClearDiskCache();
+        ImageLoader.ClearDiskCacheAll();
 
         // Clear only Disk cache for specific image
         ImageLoader.ClearDiskCache(url);

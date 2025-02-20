@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader
 {
@@ -49,8 +50,10 @@ namespace Extensions.Unity.ImageLoader
 
     public interface IFutureInternal<T> : IFuture<T>
     {
+        UnityWebRequest WebRequest { get; }
         void FailToLoad(Exception exception);
         void Loading(FutureLoadingFrom loadingFrom);
         void Loaded(T value, FutureLoadedFrom loadedFrom);
+        void SetTimeout(TimeSpan duration);
     }
 }

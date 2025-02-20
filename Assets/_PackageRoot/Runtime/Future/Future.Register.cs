@@ -9,7 +9,7 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="cancellationToken">New cancellation token</param>
         /// <returns>Returns async Future</returns>
-        public static Future<T> Register<T>(this Future<T> future, CancellationToken cancellationToken)
+        public static IFuture<T> Register<T>(this IFuture<T> future, CancellationToken cancellationToken)
         {
             cancellationToken.Register(future.Cancel);
             return future;

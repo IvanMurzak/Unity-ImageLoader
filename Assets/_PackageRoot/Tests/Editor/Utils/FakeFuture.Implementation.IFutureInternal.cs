@@ -1,9 +1,12 @@
 using System;
+using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public partial class FakeFuture<T> : IFutureInternal<T>
     {
+        public UnityWebRequest WebRequest => throw new NotImplementedException();
+
         public void Loading(FutureLoadingFrom loadingFrom)
         {
             if (LogLevel.IsActive(DebugLevel.Trace))
@@ -31,5 +34,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             lock (events)
                 events.Add(new EventData { name = EventName.Failed, value = exception });
         }
+
+        public void SetTimeout(TimeSpan duration) => throw new NotImplementedException();
     }
 }

@@ -14,7 +14,7 @@ namespace Extensions.Unity.ImageLoader
             onTrigger?.Invoke();
             onTrigger = null;
         }
-        internal void Register<T>(Future<T> future)
+        internal void Register<T>(IFuture<T> future)
         {
             if (isTriggered)
             {
