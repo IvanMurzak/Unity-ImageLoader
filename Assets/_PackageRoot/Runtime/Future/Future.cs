@@ -216,9 +216,8 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Error))
                 Debug.LogError(exception.Message);
 
-            Safe.Run(OnFailedToLoad, exception, LogLevel); // 2 Original order
-            Safe.Run(OnCompleted, false, LogLevel);;       // 3 Original order
-            // Safe.RunCancel(cts, LogLevel);                 // 1 Original order
+            Safe.Run(OnFailedToLoad, exception, LogLevel);
+            Safe.Run(OnCompleted, false, LogLevel);
             Clear();
         }
         void IFutureInternal<T>.SetTimeout(TimeSpan duration) => timeout = duration;
