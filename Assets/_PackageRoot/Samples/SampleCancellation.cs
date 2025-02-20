@@ -1,4 +1,5 @@
-﻿using Extensions.Unity.ImageLoader;
+﻿using Cysharp.Threading.Tasks;
+using Extensions.Unity.ImageLoader;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,6 +29,15 @@ public class SampleCancellation : MonoBehaviour
             .Canceled(() => Debug.Log("ImageLoading canceled")) // if cancelled
             .CancelOnDisable(this) // cancel OnDisable event of current gameObject
             .Forget();
+    }
+
+    void DestroyWithMonoBehaviour()
+    {
+        ImageLoader.LoadSprite(imageURL)
+            .ThenSet(image)
+            .CancelOnEnable(this)   // cancel on OnEnable event of current MonoBehaviour
+            .CancelOnDisable(this)  // cancel on OnDisable event of current MonoBehaviour
+            .CancelOnDestroy(this); // cancel on OnDestroy event of current MonoBehaviour
     }
 
     void SimpleCancellation()

@@ -4,20 +4,20 @@ using UnityEngine.UI;
 
 public class SampleErrorHandle : MonoBehaviour
 {
-    [SerializeField] string imageURL;
-    [SerializeField] Image image;
+    [SerializeField] string imageURL; // URL of the image to be loaded
+    [SerializeField] Image image; // UI Image component to display the loaded sprite
 
     void Start()
     {
-        ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
-            .Failed(exception => Debug.LogException(exception)) // if fail print exception
-            .Forget();
+        ImageLoader.LoadSprite(imageURL) // Attempt to load a sprite
+            .ThenSet(image) // If successful, set the sprite to the Image component
+            .Failed(exception => Debug.LogException(exception)) // If an error occurs, log the exception
+            .Forget(); // Forget the task to avoid compilation warning
 
-        ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
-            .Then(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
-            .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
-            .Forget();
+        ImageLoader.LoadSprite(imageURL) // Attempt to load a sprite
+            .ThenSet(image) // If successful, set the sprite to the Image component
+            .Then(sprite => image.gameObject.SetActive(true)) // If successful, activate the GameObject
+            .Failed(exception => image.gameObject.SetActive(false)) // If an error occurs, deactivate the GameObject
+            .Forget(); // Forget the task to avoid compilation warning
     }
 }

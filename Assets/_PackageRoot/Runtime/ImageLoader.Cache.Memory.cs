@@ -44,15 +44,29 @@ namespace Extensions.Unity.ImageLoader
         /// Loads directly from Memory cache if exists and allowed
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
-        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Reference<Sprite> LoadFromMemoryCacheRef(string url) => FutureSprite.LoadFromMemoryCacheRef(url);
+        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Texture2D</returns>
+        public static Reference<Texture2D> LoadTextureRefFromMemoryCache(string url) => FutureTexture.LoadFromMemoryCacheRef(url);
 
         /// <summary>
         /// Loads directly from Memory cache if exists and allowed
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
-        public static Sprite LoadFromMemoryCache(string url) => FutureSprite.LoadFromMemoryCache(url);
+        public static Reference<Sprite> LoadSpriteRefFromMemoryCache(string url) => FutureSprite.LoadFromMemoryCacheRef(url);
+
+        /// <summary>
+        /// Loads directly from Memory cache if exists and allowed
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Texture2D</returns>
+        public static Texture2D LoadTextureFromMemoryCache(string url) => FutureTexture.LoadFromMemoryCache(url);
+
+        /// <summary>
+        /// Loads directly from Memory cache if exists and allowed
+        /// </summary>
+        /// <param name="url">URL to the picture, web or local</param>
+        /// <returns>Returns null if not allowed to use Memory cache or if there is no cached Sprite</returns>
+        public static Sprite LoadSpriteFromMemoryCache(string url) => FutureSprite.LoadFromMemoryCache(url);
 
         /// <summary>
         /// Clear Memory cache for the given url

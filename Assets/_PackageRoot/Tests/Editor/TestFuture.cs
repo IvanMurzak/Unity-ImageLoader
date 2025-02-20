@@ -125,7 +125,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref1.Value);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
 
-            var sprite = ImageLoader.LoadFromMemoryCache(url1);
+            var sprite = ImageLoader.LoadSpriteFromMemoryCache(url1);
             Assert.IsNull(sprite);
 
             ImageLoader.ClearMemoryCache(url1);

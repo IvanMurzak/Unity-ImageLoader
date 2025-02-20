@@ -4,12 +4,12 @@ using UnityEngine.UI;
 
 public class SampleLifecycle : MonoBehaviour
 {
-    [SerializeField] string imageURL;
-    [SerializeField] Image image;
+    [SerializeField] string imageURL; // URL of the image to be loaded
+    [SerializeField] Image image; // UI Image component to display the loaded sprite
 
     void Start()
     {
-        ImageLoader.LoadSprite(imageURL) // load sprite
+        ImageLoader.LoadSprite(imageURL) // loading process started
             // ┌──────────────────────────┬────────────────────────────────────────────────────────────────────────┐
             // │ Loading lifecycle events │                                                                        │
             // └──────────────────────────┘                                                                        │

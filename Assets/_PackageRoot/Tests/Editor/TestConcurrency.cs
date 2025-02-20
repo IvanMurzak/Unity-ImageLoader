@@ -125,7 +125,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var tasks = Enumerable.Range(0, count)
                 .Select(i => Task.Run(() =>
                 {
-                    var ref0 = ImageLoader.LoadFromMemoryCacheRef(url1);
+                    var ref0 = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
                     Assert.NotNull(ref0);
                     return ref0;
                 }))

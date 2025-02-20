@@ -16,7 +16,7 @@ static class SampleCache
         ImageLoader.SaveToMemoryCache(url, sprite);
 
         // Take from Memory cache for specific image if exists
-        ImageLoader.LoadFromMemoryCache(url);
+        ImageLoader.LoadSpriteFromMemoryCache(url);
     }
     static void DoesCacheContainImage()
     {
@@ -26,7 +26,7 @@ static class SampleCache
         // Check if Memory cache contains specific image
         ImageLoader.MemoryCacheContains(url);
 
-        // Check if Memory cache contains specific image
+        // Check if Disk cache contains specific image
         ImageLoader.DiskCacheContains(url);
     }
     static void ClearImage()
