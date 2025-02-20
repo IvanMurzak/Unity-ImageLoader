@@ -1,6 +1,8 @@
+using System.Linq;
 using UnityEngine.TestTools;
 using System.Collections;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -48,6 +50,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
+            // foreach (var url in TestUtils.ImageURLs.SelectMany(x => Enumerable.Repeat(x, 100)).OrderBy(x => Random.value))
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();

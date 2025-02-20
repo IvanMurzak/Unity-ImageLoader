@@ -168,8 +168,13 @@ namespace Extensions.Unity.ImageLoader
                 Safe.Run(action, LogLevel);
                 return this;
             }
-            if (OnCanceled != null)
-                OnCanceled += action;
+            if (cleared)
+            {
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Canceled event is not set because Future is cleared\n{Url}");
+                return this;
+            }
+            OnCanceled += action;
             return this;
         }
 

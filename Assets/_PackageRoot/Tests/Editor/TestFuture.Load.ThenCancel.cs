@@ -9,18 +9,23 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadFrom_Source_ThenCancel_NoLogs() => TestUtils.RunNoLogs(LoadFrom_Source_ThenCancel);
         [UnityTest] public IEnumerator LoadFrom_Source_ThenCancel()
         {
-            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: true);
-            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: false);
-            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: true);
-            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: false);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: true,  useGC: true);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: false, useGC: true);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: true,  useGC: true);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: false, useGC: true);
+
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: true,  useGC: false);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: true,  useMemoryCache: false, useGC: false);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: true,  useGC: false);
+            yield return LoadFrom_Source_ThenCancel(useDiskCache: false, useMemoryCache: false, useGC: false);
         }
-        IEnumerator LoadFrom_Source_ThenCancel(bool useDiskCache, bool useMemoryCache)
+        IEnumerator LoadFrom_Source_ThenCancel(bool useDiskCache, bool useMemoryCache, bool useGC)
         {
             ImageLoader.settings.useDiskCache = useDiskCache;
             ImageLoader.settings.useMemoryCache = useMemoryCache;
 
             foreach (var url in TestUtils.ImageURLs)
-                yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source);
+                yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source, useGC);
 
             yield return TestUtils.ClearEverything(message: null);
         }
@@ -34,7 +39,14 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadFromMemoryCacheThenCancel(url);
+                yield return TestUtils.LoadFromMemoryCacheThenCancel(url, useGC: true);
+            }
+            // TODO: remove code duplicate
+            yield return TestUtils.ClearEverything(message: null);
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadFromMemoryCacheThenCancel(url, useGC: false);
             }
         }
 
@@ -47,7 +59,14 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache);
+                yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache, useGC: true);
+            }
+            // TODO: remove code duplicate
+            yield return TestUtils.ClearEverything(message: null);
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadThenCancel(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache, useGC: false);
             }
         }
     }

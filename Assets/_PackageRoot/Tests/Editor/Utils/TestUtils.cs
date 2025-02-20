@@ -30,15 +30,18 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             ImageLoader.ClearTextureRef();
             yield return ImageLoader.ClearCacheAll().AsUniTask().ToCoroutine();
 
+            WaitForGCFast();
+            LogAssert.ignoreFailingMessages = false;
+        }
+        public static void WaitForGCFast()
+        {
             GC.Collect(100, GCCollectionMode.Forced, blocking: true);
             GC.WaitForPendingFinalizers();
-            LogAssert.ignoreFailingMessages = false;
         }
         public static IEnumerator WaitForGC(int millisecondsDelay = 100)
         {
             yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
-            GC.Collect(100, GCCollectionMode.Forced, blocking: true);
-            GC.WaitForPendingFinalizers();
+            WaitForGCFast();
             yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
         }
         public static IEnumerator RunNoLogs(Func<IEnumerator> test)

@@ -22,7 +22,14 @@ namespace Extensions.Unity.ImageLoader
         protected event Action<T>           OnLoaded;
         protected event Action<Exception>   OnFailedToLoad;
         protected event Action<bool>        OnCompleted;
-        protected       WeakAction          OnCanceled = new WeakAction();
+
+        // ┌─────────────────────┬────────────────────────────────────────────────┐
+        // │ Memory Leak Warning │ Subscription on OnCanceled cross references    │
+        // └─────────────────────┘ with another Future                            │
+        //                                                                        │
+        protected event Action              OnCanceled;                        // │
+        // protected       WeakAction       OnCanceled = new WeakAction();     // │
+        // ───────────────────────────────────────────────────────────────────────┘
 
         protected readonly CancellationTokenSource cts;
 

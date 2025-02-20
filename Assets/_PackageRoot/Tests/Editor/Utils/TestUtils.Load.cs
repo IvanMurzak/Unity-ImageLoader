@@ -56,8 +56,14 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             future1.Dispose();
             yield return UniTask.Yield();
         }
-        public static IEnumerator LoadFromMemoryCacheThenCancel(string url) => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache);
-        public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
+        public static IEnumerator LoadFromMemoryCacheThenCancel(string url, bool useGC) => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache, useGC);
+
+        // public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
+        // {
+        //     yield return LoadThenCancel(url, expectedLoadingFrom, expectedLoadedFrom, useGC: true);
+        //     yield return LoadThenCancel(url, expectedLoadingFrom, expectedLoadedFrom, useGC: false);
+        // }
+        public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool useGC)
         {
             var future1 = ImageLoader.LoadSprite(url);
             var futureListener = future1.ToFutureListener();
@@ -70,6 +76,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             var task2 = future1.AsTask();
 
             futureListener.Assert_Events_NotContains(EventName.Canceled);
+
+            if (useGC)
+                TestUtils.WaitForGCFast();
 
             future1.Cancel();
 
@@ -107,6 +116,11 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerator LoadFromMemoryCacheAndCancel(string url) => LoadAndCancel(url, null);
         public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom)
         {
+            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: true);
+            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: false);
+        }
+        public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool useGC)
+        {
             var future1 = ImageLoader.LoadSprite(url);
             var futureListener = future1.ToFutureListener();
             var shouldLoadFromMemoryCache = !expectedLoadingFrom.HasValue;
@@ -114,6 +128,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Contains(expectedLoadingFrom.HasValue
                 ? expectedLoadingFrom.Value.ToEventName()
                 : EventName.LoadedFromMemoryCache);
+
+            if (useGC)
+                TestUtils.WaitForGCFast();
 
             var task1 = future1.AsTask();
             future1.Cancel();
