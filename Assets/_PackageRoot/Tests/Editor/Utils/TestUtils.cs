@@ -26,7 +26,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 Debug.Log(message.PadRight(50, '-'));
             LogAssert.ignoreFailingMessages = true;
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
-            ImageLoader.ClearRef();
+            ImageLoader.ClearSpriteRef();
+            ImageLoader.ClearTextureRef();
             yield return ImageLoader.ClearCacheAll().AsUniTask().ToCoroutine();
 
             GC.Collect(100, GCCollectionMode.Forced, blocking: true);
