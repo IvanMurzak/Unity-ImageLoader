@@ -14,11 +14,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(texture);
         }
 
-        [UnityTest] public IEnumerator LoadTextureTexturesCacheMemoryDisk_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadTextureTexturesCacheMemoryDisk();
-        }
+        [UnityTest] public IEnumerator LoadTextureTexturesCacheMemoryDisk_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesCacheMemoryDisk);
         [UnityTest] public IEnumerator LoadTextureTexturesCacheMemoryDisk()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -27,11 +23,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadTextureTexture(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadTextureTexturesCacheMemory_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadTextureTexturesCacheMemory();
-        }
+        [UnityTest] public IEnumerator LoadTextureTexturesCacheMemory_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesCacheMemory);
         [UnityTest] public IEnumerator LoadTextureTexturesCacheMemory()
         {
             ImageLoader.settings.useDiskCache = false;
@@ -40,11 +32,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadTextureTexture(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadTextureTexturesCacheDisk_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadTextureTexturesCacheDisk();
-        }
+        [UnityTest] public IEnumerator LoadTextureTexturesCacheDisk_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesCacheDisk);
         [UnityTest] public IEnumerator LoadTextureTexturesCacheDisk()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -53,11 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadTextureTexture(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadTextureTexturesNoCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadTextureTexturesNoCache();
-        }
+        [UnityTest] public IEnumerator LoadTextureTexturesNoCache_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesNoCache);
         [UnityTest] public IEnumerator LoadTextureTexturesNoCache()
         {
             ImageLoader.settings.useDiskCache = false;

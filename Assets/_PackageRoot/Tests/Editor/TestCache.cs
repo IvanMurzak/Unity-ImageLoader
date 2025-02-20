@@ -17,11 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(sprite);
         }
 
-        [UnityTest] public IEnumerator LoadingFromMemoryCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingFromMemoryCache();
-        }
+        [UnityTest] public IEnumerator LoadingFromMemoryCache_NoLogs() => TestUtils.RunNoLogs(LoadingFromMemoryCache);
         [UnityTest] public IEnumerator LoadingFromMemoryCache()
         {
             ImageLoader.settings.useMemoryCache = true;
@@ -34,11 +30,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator LoadingFromDiskCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingFromDiskCache();
-        }
+        [UnityTest] public IEnumerator LoadingFromDiskCache_NoLogs() => TestUtils.RunNoLogs(LoadingFromDiskCache);
         [UnityTest] public IEnumerator LoadingFromDiskCache()
         {
             ImageLoader.settings.useMemoryCache = false;
@@ -51,11 +43,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheEnable_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DiskCacheEnable();
-        }
+        [UnityTest] public IEnumerator DiskCacheEnable_NoLogs() => TestUtils.RunNoLogs(DiskCacheEnable);
         [UnityTest] public IEnumerator DiskCacheEnable()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -66,11 +54,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheDisable_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DiskCacheDisable();
-        }
+        [UnityTest] public IEnumerator DiskCacheDisable_NoLogs() => TestUtils.RunNoLogs(DiskCacheDisable);
         [UnityTest] public IEnumerator DiskCacheDisable()
         {
             ImageLoader.settings.useDiskCache = false;
@@ -81,11 +65,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheEnabled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return MemoryCacheEnabled();
-        }
+        [UnityTest] public IEnumerator MemoryCacheEnabled_NoLogs() => TestUtils.RunNoLogs(MemoryCacheEnabled);
         [UnityTest] public IEnumerator MemoryCacheEnabled()
         {
             ImageLoader.settings.useMemoryCache = true;
@@ -96,11 +76,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheDisabled_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return MemoryCacheDisabled();
-        }
+        [UnityTest] public IEnumerator MemoryCacheDisabled_NoLogs() => TestUtils.RunNoLogs(MemoryCacheDisabled);
         [UnityTest] public IEnumerator MemoryCacheDisabled()
         {
             ImageLoader.settings.useMemoryCache = false;
@@ -111,11 +87,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearDiskCache();
-        }
+        [UnityTest] public IEnumerator ClearDiskCache_NoLogs() => TestUtils.RunNoLogs(ClearDiskCache);
         [UnityTest] public IEnumerator ClearDiskCache()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -128,11 +100,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearMemoryCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearMemoryCache();
-        }
+        [UnityTest] public IEnumerator ClearMemoryCache_NoLogs() => TestUtils.RunNoLogs(ClearMemoryCache);
         [UnityTest] public IEnumerator ClearMemoryCache()
         {
             ImageLoader.settings.useMemoryCache = true;
@@ -145,11 +113,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCacheAll_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearDiskCacheAll();
-        }
+        [UnityTest] public IEnumerator ClearDiskCacheAll_NoLogs() => TestUtils.RunNoLogs(ClearDiskCacheAll);
         [UnityTest] public IEnumerator ClearDiskCacheAll()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -163,11 +127,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
         }
-        [UnityTest] public IEnumerator ClearMemoryCacheAll_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearMemoryCacheAll();
-        }
+        [UnityTest] public IEnumerator ClearMemoryCacheAll_NoLogs() => TestUtils.RunNoLogs(ClearMemoryCacheAll);
         [UnityTest] public IEnumerator ClearMemoryCacheAll()
         {
             ImageLoader.settings.useMemoryCache = true;

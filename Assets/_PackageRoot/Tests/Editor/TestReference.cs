@@ -15,11 +15,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
         [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
-        [UnityTest] public IEnumerator CleanMemoryCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return CleanMemoryCache();
-        }
+        [UnityTest] public IEnumerator CleanMemoryCache_NoLogs() => TestUtils.RunNoLogs(CleanMemoryCache);
         [UnityTest] public IEnumerator CleanMemoryCache()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -43,11 +39,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutOfScope();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScope);
         [UnityTest] public IEnumerator DisposeOnOutOfScope()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -64,6 +56,8 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             } // end of scope
 
+            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGC();
             yield return TestUtils.WaitForGC();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
@@ -87,14 +81,12 @@ namespace Extensions.Unity.ImageLoader.Tests
             reference = null;
 
             yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGC();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
-        [UnityTest] public IEnumerator DisposeOnOutOfScopeAll_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutOfScopeAll();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutOfScopeAll_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScopeAll);
         [UnityTest] public IEnumerator DisposeOnOutOfScopeAll()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -114,15 +106,13 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
 
             yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGC();
 
             foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -145,11 +135,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator CleanMemoryCacheAll_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return CleanMemoryCacheAll();
-        }
+        [UnityTest] public IEnumerator CleanMemoryCacheAll_NoLogs() => TestUtils.RunNoLogs(CleanMemoryCacheAll);
         [UnityTest] public IEnumerator CleanMemoryCacheAll()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -174,11 +160,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDispose_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadOneMake1000ReferencesLaterDispose();
-        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDispose_NoLogs() => TestUtils.RunNoLogs(LoadOneMake1000ReferencesLaterDispose);
         [UnityTest] public IEnumerator LoadOneMake1000ReferencesLaterDispose()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -214,11 +196,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator KeepReferenceButDisposeFuture_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return KeepReferenceButDisposeFuture();
-        }
+        [UnityTest] public IEnumerator KeepReferenceButDisposeFuture_NoLogs() => TestUtils.RunNoLogs(KeepReferenceButDisposeFuture);
         [UnityTest] public IEnumerator KeepReferenceButDisposeFuture()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -244,11 +222,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadOneMake1000ReferencesImmediateDispose();
-        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose_NoLogs() => TestUtils.RunNoLogs(LoadOneMake1000ReferencesImmediateDispose);
         [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -286,11 +260,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadOneMake1000ReferencesInParallelLateDispose();
-        }
+        [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose_NoLogs() => TestUtils.RunNoLogs(LoadOneMake1000ReferencesInParallelLateDispose);
         [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -329,11 +299,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
 
-        [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Load1Sprite2TimesAnd2TimesFromCache();
-        }
+        [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache_NoLogs() => TestUtils.RunNoLogs(Load1Sprite2TimesAnd2TimesFromCache);
         [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -390,11 +356,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref3.Value);
         }
 
-        [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Load2SpritesTimesAnd2TimesFromCache();
-        }
+        [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCache_NoLogs() => TestUtils.RunNoLogs(Load2SpritesTimesAnd2TimesFromCache);
         [UnityTest] public IEnumerator Load2SpritesTimesAnd2TimesFromCache()
         {
             ImageLoader.settings.useDiskCache = true;

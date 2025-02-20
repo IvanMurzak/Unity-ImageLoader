@@ -14,11 +14,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(sprite);
         }
 
-        [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadSpritesCacheMemoryDisk();
-        }
+        [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk_NoLogs() => TestUtils.RunNoLogs(LoadSpritesCacheMemoryDisk);
         [UnityTest] public IEnumerator LoadSpritesCacheMemoryDisk()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -27,11 +23,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadSpritesCacheMemory_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadSpritesCacheMemory();
-        }
+        [UnityTest] public IEnumerator LoadSpritesCacheMemory_NoLogs() => TestUtils.RunNoLogs(LoadSpritesCacheMemory);
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
         {
             ImageLoader.settings.useDiskCache = false;
@@ -40,11 +32,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadSpritesCacheDisk_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadSpritesCacheDisk();
-        }
+        [UnityTest] public IEnumerator LoadSpritesCacheDisk_NoLogs() => TestUtils.RunNoLogs(LoadSpritesCacheDisk);
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -53,11 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
                 yield return LoadSprite(imageURL).ToCoroutine();
         }
-        [UnityTest] public IEnumerator LoadSpritesNoCache_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadSpritesNoCache();
-        }
+        [UnityTest] public IEnumerator LoadSpritesNoCache_NoLogs() => TestUtils.RunNoLogs(LoadSpritesNoCache);
         [UnityTest] public IEnumerator LoadSpritesNoCache()
         {
             ImageLoader.settings.useDiskCache = false;

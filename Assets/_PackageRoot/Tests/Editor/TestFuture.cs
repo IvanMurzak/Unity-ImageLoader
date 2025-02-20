@@ -13,11 +13,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
         [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
-        [UnityTest] public IEnumerator GetAllLoadingFutures_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return GetAllLoadingFutures();
-        }
+        [UnityTest] public IEnumerator GetAllLoadingFutures_NoLogs() => TestUtils.RunNoLogs(GetAllLoadingFutures);
         [UnityTest] public IEnumerator GetAllLoadingFutures()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -33,11 +29,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.Zero(loadingFutures.Count);
             yield return UniTask.Yield();
         }
-        [UnityTest] public IEnumerator LoadingRefAndWaiting_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingRefAndWaiting();
-        }
+        [UnityTest] public IEnumerator LoadingRefAndWaiting_NoLogs() => TestUtils.RunNoLogs(LoadingRefAndWaiting);
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -59,11 +51,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(ref0.Value);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-        [UnityTest] public IEnumerator Loading2RefAndCancelFirst_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndCancelFirst();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndCancelFirst_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndCancelFirst);
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -92,11 +80,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future2.Dispose();
             ref2.Dispose();
         }
-        [UnityTest] public IEnumerator Loading2RefAndWait_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndWait();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndWait_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndWait);
         [UnityTest] public IEnumerator Loading2RefAndWait()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -131,11 +115,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.ClearMemoryCache(url1);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-        [UnityTest] public IEnumerator Loading2RefAndDisposeAll_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndDisposeAll();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndDisposeAll_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndDisposeAll);
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -160,11 +140,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return UniTask.Delay(1000).ToCoroutine();
             Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -189,11 +165,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock2();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock2);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -217,11 +189,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock3();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock3);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -256,11 +224,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
         }
 
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlAndTimeout();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlAndTimeout);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -286,11 +250,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -316,11 +276,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(exception);
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator AsyncOperationCompletion_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return AsyncOperationCompletion();
-        }
+        [UnityTest] public IEnumerator AsyncOperationCompletion_NoLogs() => TestUtils.RunNoLogs(AsyncOperationCompletion);
         [UnityTest] public IEnumerator AsyncOperationCompletion()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -337,11 +293,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             }
             yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
         }
-        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return AsyncOperationCompletionAfterCancel();
-        }
+        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel_NoLogs() => TestUtils.RunNoLogs(AsyncOperationCompletionAfterCancel);
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
         {
             ImageLoader.settings.useDiskCache = true;

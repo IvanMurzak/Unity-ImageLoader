@@ -14,11 +14,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
         [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
-        [UnityTest] public IEnumerator EventsLoadedWhenClear_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventsLoadedWhenClear();
-        }
+        [UnityTest] public IEnumerator EventsLoadedWhenClear_NoLogs() => TestUtils.RunNoLogs(EventsLoadedWhenClear);
         [UnityTest] public IEnumerator EventsLoadedWhenClear()
         {
             ImageLoader.settings.useDiskCache = true;
@@ -57,11 +53,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             future.Dispose();
         }
-        [UnityTest] public IEnumerator EventsFailedWhenClear_NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventsFailedWhenClear();
-        }
+        [UnityTest] public IEnumerator EventsFailedWhenClear_NoLogs() => TestUtils.RunNoLogs(EventsFailedWhenClear);
         [UnityTest] public IEnumerator EventsFailedWhenClear()
         {
             ImageLoader.settings.useDiskCache = true;
