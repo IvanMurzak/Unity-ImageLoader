@@ -2,7 +2,6 @@
 using Extensions.Unity.ImageLoader.Utils;
 using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -25,22 +24,6 @@ namespace Extensions.Unity.ImageLoader
             OnLoaded += action;
             return this;
         }
-
-        /// <summary>
-        /// When the image is loaded successfully from any source
-        /// </summary>
-        /// <param name="action">action to execute on the event</param>
-        /// <returns>Returns the Future instance</returns>
-        // public IFuture<T> ThenSet<C>(Action<C, T> action, C consumer)
-        // {
-        //     if (IsLoaded)
-        //     {
-        //         action(consumer, value);
-        //         return this;
-        //     }
-        //     OnLoaded += action;
-        //     return this;
-        // }
 
         /// <summary>
         /// When the image is failed to load from any source
@@ -73,6 +56,12 @@ namespace Extensions.Unity.ImageLoader
             OnCompleted += action;
             return this;
         }
+
+        /// <summary>
+        /// When the image started to load from memory cache. Also, it will be called when the image is already loaded from memory cache.
+        /// <param name="action">action to execute on the event</param>
+        /// <returns>Returns the Future instance</returns>
+        /// </summary>
         public IFuture<T> LoadedFromMemoryCache(Action<T> action)
         {
             if (Status == FutureStatus.LoadedFromMemoryCache)
@@ -265,10 +254,18 @@ namespace Extensions.Unity.ImageLoader
                     reference.Cancel();
             });
 
-            // WARNING: It creates cross reference between two Future instances
-            // Which doesn't let to dispose non of them until the other one is disposed explicitly
-            // TODO: Find a way to dispose the cross reference automatically. WeakReference for one of them?
-            futureRef.Canceled(Cancel);
+            // ┌─────────┬────────────────────────────────────────────────────────────────────────┐
+            // │ WARNING │ It creates cross reference between two Future instances                │
+            // └─────────┘ Which doesn't let to dispose non of them until the other one is        │
+            // disposed explicitly. Which doesn't let to dispose non of them until the other one  │
+            // is disposed explicitly.                                                            │
+            // ┌──────────┬───────────────────────────────────────────────────────────────────────┤
+            // │ SOLUTION │ I am using WeakReference for storing reference on the Canceled event. │
+            // └──────────┘ It has another drawback - without strong reference on the event       │
+            // somewhere outside it would be Disposed by Garbage Collector at some point.         │
+            // As a result, the event may not fire in that case specific case.                    │
+            futureRef.Canceled(Cancel);                                                        // │
+            // ───────────────────────────────────────────────────────────────────────────────────┘
 
             return futureRef;
         }
