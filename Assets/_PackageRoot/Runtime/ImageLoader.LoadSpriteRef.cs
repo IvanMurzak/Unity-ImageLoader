@@ -38,13 +38,13 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Clear all references to all loaded sprites
         /// </summary>
-        public static void ClearRef() => Reference<Sprite>.Clear();
+        public static void ClearSpriteRef() => Reference<Sprite>.Clear();
 
         /// <summary>
         /// Clear all references to a single loaded sprites by URL
         /// </summary>
         /// <param name="url">URL to the picture, web or local</param>
         /// <returns>Returns operation status boolean</returns>
-        public static bool ClearRef(string url) => Reference<Sprite>.Clear(url);
+        public static bool ClearSpriteRef(string url) => Reference<Sprite>.Clear(url);
     }
 }
