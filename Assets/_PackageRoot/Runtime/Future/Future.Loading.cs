@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader
         }
         internal async UniTask InternalLoading(bool ignoreImageNotFoundError = false)
         {
-            if (IsCancelled || Status == FutureStatus.Disposed)
+            if (IsCancelled || Status == FutureStatus.Disposed || cleared)
                 return;
 
             if (string.IsNullOrEmpty(Url))
@@ -59,11 +59,6 @@ namespace Extensions.Unity.ImageLoader
                 InternalLoading(ignoreImageNotFoundError).Forget();
                 return;
             }
-
-            if (!UseDiskCache)
-                Debug.Log("!!!!!!!!! UseDiskCache is false");
-            if (!DiskCacheContains())
-                Debug.Log("!!!!!!!!! DiskCacheContains is false");
 
             if (UseDiskCache && DiskCacheContains())
             {

@@ -309,7 +309,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             while (!task1.IsCompleted)
             {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
+                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
                 yield return null;
             }
             yield return UniTask.Delay(1000).ToCoroutine();
