@@ -31,7 +31,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Debug.Log($"Loading future: {loadingFuture.Url}, Status={loadingFuture.Status}");
             }
             Assert.Zero(loadingFutures.Count);
-            yield return null;
+            yield return UniTask.Yield();
         }
         [UnityTest] public IEnumerator LoadingRefAndWaiting_NoLogs()
         {
@@ -47,7 +47,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
             while (!task1.IsCompleted)
-                yield return null;
+                yield return UniTask.Yield();
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
@@ -81,7 +81,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             while (!task2.IsCompleted)
             {
                 Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
-                yield return null;
+                yield return UniTask.Yield();
             }
 
             var ref2 = task2.Result;
@@ -108,7 +108,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task2 = ImageLoader.LoadSpriteRef(url1).AsTask();
 
             while (!task1.IsCompleted || !task2.IsCompleted)
-                yield return null;
+                yield return UniTask.Yield();
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
@@ -176,7 +176,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var task1 = future1.AsTask();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
                 while (!task1.IsCompleted)
-                    yield return null;
+                    yield return UniTask.Yield();
 
                 using (var ref1 = task1.Result)
                 {
@@ -204,7 +204,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
                 while (!task1.IsCompleted)
-                    yield return null;
+                    yield return UniTask.Yield();
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -232,7 +232,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
                 while (!task1.IsCompleted)
-                    yield return null;
+                    yield return UniTask.Yield();
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -242,7 +242,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var future2 = ImageLoader.LoadSpriteRef(url);
                 var task2 = future2.AsTask();
                 while (!task2.IsCompleted)
-                    yield return null;
+                    yield return UniTask.Yield();
 
                 using (var ref2 = task2.Result)
                 {
@@ -310,7 +310,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             while (!task1.IsCompleted)
             {
                 Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
-                yield return null;
+                yield return UniTask.Yield();
             }
             yield return UniTask.Delay(1000).ToCoroutine();
             Assert.IsNull(exception);

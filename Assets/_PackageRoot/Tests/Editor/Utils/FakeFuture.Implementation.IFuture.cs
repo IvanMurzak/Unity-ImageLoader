@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -32,6 +33,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public CancellationToken CancellationToken => throw new NotImplementedException();
 
         public IFuture<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace) => throw new NotImplementedException();
+        public IEnumerator AsCoroutine(Action<T> resultHandler = null, Action<Exception> exceptionHandler = null) => throw new NotImplementedException();
         public Task<T> AsTask() => throw new NotImplementedException();
         public UniTask<T> AsUniTask() => throw new NotImplementedException();
         public void Cancel()

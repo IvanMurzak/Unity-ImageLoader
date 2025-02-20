@@ -76,7 +76,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var waitTask = Task.WhenAll(tasks);
 
             while (!waitTask.IsCompleted && !cts.Token.IsCancellationRequested)
-                yield return null;
+                yield return UniTask.Yield();
 
             Assert.False(cts.Token.IsCancellationRequested, "Timeout");
             Assert.AreEqual(count, Reference<Sprite>.Counter(url1));
@@ -114,7 +114,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var future = ImageLoader.LoadSpriteRef(url1);
             var task1 = future.AsTask();
             while (!task1.IsCompleted)
-                yield return null;
+                yield return UniTask.Yield();
 
             Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
 

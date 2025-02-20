@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace Extensions.Unity.ImageLoader
         IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true);
 
         IFuture<Reference<T>> AsReference(DebugLevel logLevel = DebugLevel.Trace);
+        IEnumerator AsCoroutine(Action<T> resultHandler = null, Action<Exception> exceptionHandler = null);
         UniTask<T> AsUniTask();
         Task<T> AsTask();
 
