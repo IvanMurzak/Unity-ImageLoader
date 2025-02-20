@@ -10,37 +10,37 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Create and return empty Future<T> instance with loading status
         /// </summary>
-        public Future<T> SetPlaceholder(Texture placeholder, params FutureLoadingFrom[] from)
-        {
-            if (cleared || IsCancelled)
-            {
-                if (LogLevel.IsActive(DebugLevel.Error))
-                    Debug.Log($"[ImageLoader] Future[id={Id}] SetPlaceholder: is impossible because the future is cleared or canceled\n{Url}");
-                return this;
-            }
-            if (IsInProgress)
-            {
-                // TODO: set placeholder
+        // public Future<T> SetPlaceholder(Texture placeholder, params FutureLoadingFrom[] from)
+        // {
+        //     if (cleared || IsCancelled)
+        //     {
+        //         if (LogLevel.IsActive(DebugLevel.Error))
+        //             Debug.Log($"[ImageLoader] Future[id={Id}] SetPlaceholder: is impossible because the future is cleared or canceled\n{Url}");
+        //         return this;
+        //     }
+        //     if (IsInProgress)
+        //     {
+        //         // TODO: set placeholder
 
-                return this;
-            }
+        //         return this;
+        //     }
 
-            if (from.Any(x => x == FutureLoadingFrom.DiskCache))
-            {
-                LoadingFromDiskCache(() =>
-                {
-                    // TODO: set placeholder
-                });
-            }
-            if (from.Any(x => x == FutureLoadingFrom.Source))
-            {
-                LoadingFromSource(() =>
-                {
-                    // TODO: set placeholder
-                });
-            }
+        //     if (from.Any(x => x == FutureLoadingFrom.DiskCache))
+        //     {
+        //         LoadingFromDiskCache(() =>
+        //         {
+        //             // TODO: set placeholder
+        //         });
+        //     }
+        //     if (from.Any(x => x == FutureLoadingFrom.Source))
+        //     {
+        //         LoadingFromSource(() =>
+        //         {
+        //             // TODO: set placeholder
+        //         });
+        //     }
 
-            return this;
-        }
+        //     return this;
+        // }
     }
 }

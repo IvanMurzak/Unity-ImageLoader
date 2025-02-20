@@ -1,7 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Extensions.Unity.ImageLoader
@@ -9,41 +8,45 @@ namespace Extensions.Unity.ImageLoader
     public static partial class FutureEx
     {
         /// <summary>
-        /// Set image into array of the generic target instances
+        /// Set image into array of the generic consumer instances. It uses MainThread to do the job.
         /// </summary>
-        /// <param name="setter">Setter function that gets Target instance and Reference<Sprite> instance, it should set the Sprite value into Target instance</param>
-        /// <param name="targets">Array of generic Target instances</param>
+        /// <param name="setter">Setter function that gets Consumer and loaded object, it should set the object into Consumer</param>
+        /// <param name="consumers">Array of consumers for injecting</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Reference<Sprite>> ThenSet<T>(this IFuture<Reference<Sprite>> future, Action<T, Reference<Sprite>> setter, params T[] targets)
-            => future.Then(reference =>
+        public static IFuture<Reference<T>> ThenSet<T, C>(this IFuture<Reference<T>> future, Action<C, Reference<T>> setter, params C[] consumers) => future.Then(reference =>
+        {
+            UniTask.Post(() => // using only MainThread to set any images to any targets
             {
-                UniTask.Post(() => // using only MainThread to set any images to any targets
+                foreach (var consumer in consumers)
                 {
-                    foreach (var target in targets)
+                    if (consumer == null)
                     {
-                        if (target == null)
+                        if (future.LogLevel.IsActive(DebugLevel.Warning))
+                            Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] The target is null. Can't set image into it. Skipping.");
+                        continue;
+                    }
+                    if (consumer is UnityEngine.Object unityObject)
+                    {
+                        if (unityObject.IsNull())
                         {
                             if (future.LogLevel.IsActive(DebugLevel.Warning))
-                                Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] The target is null. Can't set image into it. Skipping.");
+                                Debug.LogWarning($"The target ({typeof(T).Name}) is destroyed. Can't set image into it. Skipping.");
                             continue;
                         }
-                        if (target is UIBehaviour uiBehaviour)
-                        {
-                            if (IsDestroyed(uiBehaviour))
-                            {
-                                if (future.LogLevel.IsActive(DebugLevel.Warning))
-                                    Debug.LogWarning($"The target UIBehaviour is destroyed. Can't set image into it. Skipping.");
-                                continue;
-                            }
-                        }
-
-                        setter?.Invoke(target, reference);
-
-                        if (target is Component monoBehaviour)
-                            reference?.AddTo(monoBehaviour.GetCancellationTokenOnDestroy());
                     }
-                });
+
+                    setter?.Invoke(consumer, reference);
+
+                    // ┌────────────────────────┬─────────────────────────────────────────────────────┐
+                    // │ Memory leak protection │ Connection Reference<T> to the Component            │
+                    // └────────────────────────┘ It would be destroyed when the Component destroys   │
+                    //                                                                                |
+                    if (consumer is Component component)                                           // │
+                        reference?.AddTo(component.GetCancellationTokenOnDestroy());               // │
+                    // ───────────────────────────────────────────────────────────────────────────────┘
+                }
             });
+        });
 
         /// <summary>
         /// Set image into array of Images
@@ -51,7 +54,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Images</param>
         /// <returns>Returns async Future</returns>
         public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params Image[] images)
-            => future.ThenSet((target, reference) => target.sprite = reference?.Value, images);
+            => future.ThenSet((consumer, reference) => consumer.sprite = reference?.Value, images);
 
         /// <summary>
         /// Set image into array of RawImages
@@ -59,7 +62,15 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
         public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params RawImage[] rawImages)
-            => future.ThenSet((target, reference) => target.texture = reference?.Value?.texture, rawImages);
+            => future.ThenSet((consumer, reference) => consumer.texture = reference?.Value?.texture, rawImages);
+
+        /// <summary>
+        /// Set image into array of RawImages
+        /// </summary>
+        /// <param name="images">Array of RawImages</param>
+        /// <returns>Returns async Future</returns>
+        public static IFuture<Reference<Texture2D>> ThenSet(this IFuture<Reference<Texture2D>> future, params RawImage[] rawImages)
+            => future.ThenSet((consumer, reference) => consumer.texture = reference?.Value, rawImages);
 
         /// <summary>
         /// Set image into array of SpriteRenderers
@@ -67,7 +78,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of SpriteRenderers</param>
         /// <returns>Returns async Future</returns>
         public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, params SpriteRenderer[] spriteRenderers)
-            => future.ThenSet((target, reference) => target.sprite = reference?.Value, spriteRenderers);
+            => future.ThenSet((consumer, reference) => consumer.sprite = reference?.Value, spriteRenderers);
 
         /// <summary>
         /// Set image into array of Materials
@@ -75,6 +86,14 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="images">Array of Materials</param>
         /// <returns>Returns async Future</returns>
         public static IFuture<Reference<Sprite>> ThenSet(this IFuture<Reference<Sprite>> future, string propertyName = "_MainTex", params Material[] materials)
-            => future.ThenSet((target, reference) => target.SetTexture(propertyName, reference?.Value?.texture), materials);
+            => future.ThenSet((consumer, reference) => consumer.SetTexture(propertyName, reference?.Value?.texture), materials);
+
+        /// <summary>
+        /// Set image into array of Materials
+        /// </summary>
+        /// <param name="images">Array of Materials</param>
+        /// <returns>Returns async Future</returns>
+        public static IFuture<Reference<Texture2D>> ThenSet(this IFuture<Reference<Texture2D>> future, string propertyName = "_MainTex", params Material[] materials)
+            => future.ThenSet((consumer, reference) => consumer.SetTexture(propertyName, reference?.Value), materials);
     }
 }

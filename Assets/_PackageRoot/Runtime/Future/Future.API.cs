@@ -1,5 +1,4 @@
 ﻿using Cysharp.Threading.Tasks;
-using Extensions.Unity.ImageLoader.Utils;
 using System;
 using System.Collections;
 using System.Threading.Tasks;

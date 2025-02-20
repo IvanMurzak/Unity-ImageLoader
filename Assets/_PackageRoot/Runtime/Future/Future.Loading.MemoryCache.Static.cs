@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Extensions.Unity.ImageLoader.Utils;
 using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader

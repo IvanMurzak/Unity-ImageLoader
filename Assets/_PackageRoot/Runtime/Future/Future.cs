@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Extensions.Unity.ImageLoader.Utils;
 using UnityEngine;
 using UnityEngine.Networking;
 

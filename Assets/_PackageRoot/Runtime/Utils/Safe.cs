@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-namespace Extensions.Unity.ImageLoader.Utils
+namespace Extensions.Unity.ImageLoader
 {
     internal static class Safe
     {

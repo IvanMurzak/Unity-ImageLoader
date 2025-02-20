@@ -1,5 +1,4 @@
-﻿using Extensions.Unity.ImageLoader.Utils;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {

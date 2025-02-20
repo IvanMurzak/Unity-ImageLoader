@@ -34,12 +34,12 @@ public class SampleLifecycle : MonoBehaviour
             .ThenSet(image)                      // on loaded set sprite into image  │
             // ──────────────────────────────────────────────────────────────────────┘
 
-            // ┌──────────────────────┬─────────────────────────────────────────────────────────────────────────────┐
-            // │ The end of lifecycle │                                                                             │
-            // └──────────────────────┘                                                                             │
-            .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // on completed                    │
-            //                                                                   // [loaded, failed or canceled]    │
-            // ─────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            // ┌──────────────────────┬──────────────────────────────────────────────────────────────────────────┐
+            // │ The end of lifecycle │                                                                          │
+            // └──────────────────────┘                                                                          │
+            .Completed(isLoaded => Debug.Log($"Completed, isLoaded={isLoaded}")) // on completed                 │
+            //                                                                   // [loaded, failed or canceled] │
+            // ──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
             .Forget(); // removes the compilation warning, does nothing else
     }

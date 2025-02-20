@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Extensions.Unity.ImageLoader
 {
-    static class Extensions
+    static class InternalExtensions
     {
         public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
         {
@@ -30,5 +30,8 @@ namespace Extensions.Unity.ImageLoader
             value = default;
             return false;
         }
+
+        public static bool IsNull(this UnityEngine.Object obj) => ReferenceEquals(obj, null) || obj == null;
+        public static bool IsNotNull(this UnityEngine.Object obj) => !ReferenceEquals(obj, null) && obj != null;
     }
 }
