@@ -72,10 +72,10 @@ await ImageLoader.LoadSprite(imageURL).ThenSet(image);
     - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________)
     - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________-1)
     - [\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_](#____________________-2)
-  - [Other](#other)
-    - [Understanding `IFuture<T>`](#understanding-ifuturet)
-    - [Understanding `Reference<T>`](#understanding-referencet)
-    - [Understanding `Future<Reference<T>>`](#understanding-futurereferencet)
+- [Other](#other)
+  - [Understanding `IFuture<T>`](#understanding-ifuturet)
+  - [Understanding `Reference<T>`](#understanding-referencet)
+  - [Understanding `Future<Reference<T>>`](#understanding-futurereferencet)
 
 ---
 
@@ -101,7 +101,7 @@ ImageLoader.Init(); // just once from the main thread
 
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLifecycle.cs)
 
-`ImageLoader.LoadSprite` returns `IFuture<Sprite>`. This instance provides all range of callbacks and API to modify it. Read more about [Future](#future).
+`ImageLoader.LoadSprite` returns `IFuture<Sprite>`. This instance provides all range of callbacks and API to modify it. [Understanding `IFuture<T>`](#understanding-ifuturet).
 
 ``` C#
 ImageLoader.LoadSprite(imageURL) // loading process started
@@ -207,6 +207,8 @@ ImageLoader.LoadSprite(imageURL).ThenSet(image).Forget();
 
 ## Cancellation
 
+Cancellation is helpful if target image consumer doesn't exist anymore. For example the `Image` was destroyed because another level had been loaded. The is not much sense to continue to load the image. It would safe some network traffic, CPU resources, and RAM. `IFuture<T>` provides wide range of options to cancel the ongoing loading process.
+
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleCancellation.cs)
 
 ### Cancel by MonoBehaviour events
@@ -282,7 +284,17 @@ ImageLoader.LoadSprite(imageURL) // load sprite
 
 ### Timeout
 
+Timeout triggers `IFuture<T>` cancellation.
+
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleTimeout.cs)
+
+Set global timeout in the settings:
+
+``` C#
+ImageLoader.settings.timeout = TimeSpan.FromSeconds(30);
+```
+
+Set timeout for a specific loading request (`IFuture<T>`):
 
 ``` C#
 ImageLoader.LoadSprite(imageURL) // load sprite
@@ -392,10 +404,10 @@ ____________________________
 ____________________________
 ```
 
-## Other
+# Other
 
-### Understanding `IFuture<T>`
+## Understanding `IFuture<T>`
 
-### Understanding `Reference<T>`
+## Understanding `Reference<T>`
 
-### Understanding `Future<Reference<T>>`
+## Understanding `Future<Reference<T>>`
