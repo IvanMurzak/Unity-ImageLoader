@@ -20,6 +20,11 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerable<string> IncorrectImageURLs(int count = 3) => Enumerable.Range(0, count).Select(_ => IncorrectImageURL);
         public static readonly byte[] CorruptedTextureBytes = new byte[] { 0 };
 
+        public static IEnumerator WaitTicks(int ticks = 1)
+        {
+            for (var i = 0; i < ticks; i++)
+                yield return UniTask.Yield();
+        }
         public static IEnumerator ClearEverything(string message)
         {
             if (message != null)

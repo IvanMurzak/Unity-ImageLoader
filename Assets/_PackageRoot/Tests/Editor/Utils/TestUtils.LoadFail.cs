@@ -13,19 +13,19 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerator LoadFail(string url, FutureLoadingFrom? expectedLoadingFrom)
         {
             var timeout = TimeSpan.FromMilliseconds(100);
-            var future1 = ImageLoader.LoadSprite(url).Timeout(timeout);
-            var futureListener = future1.ToFutureListener();
+            var future = ImageLoader.LoadSprite(url).Timeout(timeout);
+            var futureListener = future.ToFutureListener();
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
-            var task1 = future1.AsTask();
+            var task1 = future.AsTask();
             if (expectedLoadingFrom.HasValue && expectedLoadingFrom.Value == FutureLoadingFrom.Source) // exception should be thrown only if ONLY loading from Source
-                LogAssert.Expect(LogType.Error, $"[ImageLoader] Future[id={future1.Id}] Timeout ({timeout}): {url}");
-            yield return UniTask.WaitWhile(() => future1.IsInProgress)
+                LogAssert.Expect(LogType.Error, $"[ImageLoader] Future[id={future.Id}] Timeout ({timeout}): {url}");
+            yield return UniTask.WaitWhile(() => future.IsInProgress)
                 .Timeout(TimeSpan.FromSeconds(10))
                 .ToCoroutine();
-            var task2 = future1.AsTask();
+            var task2 = future.AsTask();
 
             var events = expectedLoadingFrom.HasValue
                 ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Failed, EventName.Completed }
@@ -42,16 +42,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
-            future1.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
                 .Assert_Events_Equals(events)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
             if (expectedLoadingFrom.HasValue)
-                future1.ToFutureListener()
+                future.ToFutureListener()
                     .Assert_Events_Equals(events)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
-            future1.Dispose();
+            future.Dispose();
             yield return UniTask.Yield();
         }
     }

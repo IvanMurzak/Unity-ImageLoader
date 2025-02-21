@@ -11,17 +11,17 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerator LoadFromMemoryCache(string url) => Load(url, null, FutureLoadedFrom.MemoryCache);
         public static IEnumerator Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
         {
-            var future1 = ImageLoader.LoadSprite(url);
-            var futureListener = future1.ToFutureListener();
+            var future = ImageLoader.LoadSprite(url);
+            var futureListener = future.ToFutureListener();
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
-            var task1 = future1.AsTask();
-            yield return future1.AsUniTask()
+            var task1 = future.AsTask();
+            yield return future.AsUniTask()
                 .Timeout(TimeSpan.FromSeconds(10))
                 .ToCoroutine();
-            var task2 = future1.AsTask();
+            var task2 = future.AsTask();
 
             futureListener.Assert_Events_NotContains(EventName.Canceled);
 
@@ -44,16 +44,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future1.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
-                future1.ToFutureListener()
+                future.ToFutureListener()
                     .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future1.Dispose();
+            future.Dispose();
             yield return UniTask.Yield();
         }
         public static IEnumerator LoadFromMemoryCacheThenCancel(string url, bool useGC) => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache, useGC);
@@ -65,22 +65,22 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         // }
         public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool useGC)
         {
-            var future1 = ImageLoader.LoadSprite(url);
-            var futureListener = future1.ToFutureListener();
+            var future = ImageLoader.LoadSprite(url);
+            var futureListener = future.ToFutureListener();
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
-            var task1 = future1.AsTask();
-            yield return future1.AsCoroutine();
-            var task2 = future1.AsTask();
+            var task1 = future.AsTask();
+            yield return future.AsCoroutine();
+            var task2 = future.AsTask();
 
             futureListener.Assert_Events_NotContains(EventName.Canceled);
 
             if (useGC)
                 TestUtils.WaitForGCFast();
 
-            future1.Cancel();
+            future.Cancel();
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
@@ -101,16 +101,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future1.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
-                future1.ToFutureListener()
+                future.ToFutureListener()
                     .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future1.Dispose();
+            future.Dispose();
             yield return UniTask.Yield();
         }
         public static IEnumerator LoadFromMemoryCacheAndCancel(string url) => LoadAndCancel(url, null);
@@ -121,8 +121,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         }
         public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool useGC)
         {
-            var future1 = ImageLoader.LoadSprite(url);
-            var futureListener = future1.ToFutureListener();
+            var future = ImageLoader.LoadSprite(url);
+            var futureListener = future.ToFutureListener();
             var shouldLoadFromMemoryCache = !expectedLoadingFrom.HasValue;
 
             futureListener.Assert_Events_Contains(expectedLoadingFrom.HasValue
@@ -132,9 +132,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             if (useGC)
                 TestUtils.WaitForGCFast();
 
-            var task1 = future1.AsTask();
-            future1.Cancel();
-            var task2 = future1.AsTask();
+            var task1 = future.AsTask();
+            future.Cancel();
+            var task2 = future.AsTask();
 
             var events = shouldLoadFromMemoryCache
                 ? new [] { EventName.LoadedFromMemoryCache, EventName.Then, EventName.Completed }
@@ -151,16 +151,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
-            future1.ToFutureListener()
+            future.ToFutureListener()
                 .Assert_Events_Equals(events)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
-            if (expectedLoadingFrom.HasValue && future1.IsLoaded)
-                future1.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            if (expectedLoadingFrom.HasValue && future.IsLoaded)
+                future.ToFutureListener(ignoreLoadingWhenLoaded: true)
                     .Assert_Events_Equals(events.Except(new [] { expectedLoadingFrom.Value.ToEventName() }))
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
-            future1.Dispose();
+            future.Dispose();
             yield return UniTask.Yield();
         }
     }

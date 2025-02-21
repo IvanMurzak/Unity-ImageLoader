@@ -10,7 +10,11 @@ namespace Extensions.Unity.ImageLoader
         public UniTask StartLoading(bool ignoreImageNotFoundError = false)
         {
             if (isLoadingStarted)
+            {
+                if (LogLevel.IsActive(DebugLevel.Warning))
+                    Debug.Log($"[ImageLoader] Future[id={Id}] Can't start loading, it is already started. Make a new Future instance to start another loading\n{Url}");
                 return default;
+            }
 
             isLoadingStarted = true;
             return InternalLoading(ignoreImageNotFoundError);
