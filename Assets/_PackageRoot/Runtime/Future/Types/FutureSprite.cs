@@ -76,7 +76,7 @@ namespace Extensions.Unity.ImageLoader
                 {
                     if (!ReferenceEquals(obj, null) && obj != null) // double check after async delay
                     {
-                        if (logLevel.IsActive(DebugLevel.Log))
+                        if (logLevel.IsActive(DebugLevel.Trace))
                             Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
                         FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel);
                     }
