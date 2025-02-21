@@ -20,11 +20,6 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerable<string> IncorrectImageURLs(int count = 3) => Enumerable.Range(0, count).Select(_ => IncorrectImageURL);
         public static readonly byte[] CorruptedTextureBytes = new byte[] { 0 };
 
-        public static IEnumerator WaitTicks(int ticks = 1)
-        {
-            for (var i = 0; i < ticks; i++)
-                yield return UniTask.Yield();
-        }
         public static IEnumerator ClearEverything(string message)
         {
             if (message != null)
@@ -33,7 +28,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
             ImageLoader.ClearSpriteRef();
             ImageLoader.ClearTextureRef();
-            yield return ImageLoader.ClearCacheAll().AsUniTask().ToCoroutine();
+            yield return ImageLoader.ClearCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
             WaitForGCFast();
             LogAssert.ignoreFailingMessages = false;
@@ -45,9 +40,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         }
         public static IEnumerator WaitForGC(int millisecondsDelay = 100)
         {
-            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+            yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
             WaitForGCFast();
-            yield return UniTask.Delay(TimeSpan.FromMilliseconds(millisecondsDelay)).ToCoroutine();
+            yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
         }
         public static IEnumerator RunNoLogs(Func<IEnumerator> test)
         {

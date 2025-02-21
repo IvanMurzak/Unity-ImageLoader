@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -21,7 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadTextureTexture(imageURL).ToCoroutine();
+                yield return LoadTextureTexture(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadTextureTexturesCacheMemory_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesCacheMemory);
         [UnityTest] public IEnumerator LoadTextureTexturesCacheMemory()
@@ -30,7 +31,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadTextureTexture(imageURL).ToCoroutine();
+                yield return LoadTextureTexture(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadTextureTexturesCacheDisk_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesCacheDisk);
         [UnityTest] public IEnumerator LoadTextureTexturesCacheDisk()
@@ -39,7 +40,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadTextureTexture(imageURL).ToCoroutine();
+                yield return LoadTextureTexture(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadTextureTexturesNoCache_NoLogs() => TestUtils.RunNoLogs(LoadTextureTexturesNoCache);
         [UnityTest] public IEnumerator LoadTextureTexturesNoCache()
@@ -48,7 +49,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadTextureTexture(imageURL).ToCoroutine();
+                yield return LoadTextureTexture(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
     }
 }

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -21,7 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadSpritesCacheMemory_NoLogs() => TestUtils.RunNoLogs(LoadSpritesCacheMemory);
         [UnityTest] public IEnumerator LoadSpritesCacheMemory()
@@ -30,7 +31,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = true;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadSpritesCacheDisk_NoLogs() => TestUtils.RunNoLogs(LoadSpritesCacheDisk);
         [UnityTest] public IEnumerator LoadSpritesCacheDisk()
@@ -39,7 +40,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
         [UnityTest] public IEnumerator LoadSpritesNoCache_NoLogs() => TestUtils.RunNoLogs(LoadSpritesNoCache);
         [UnityTest] public IEnumerator LoadSpritesNoCache()
@@ -48,7 +49,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useMemoryCache = false;
 
             foreach (var imageURL in TestUtils.ImageURLs)
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
         }
     }
 }

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -26,7 +27,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
             {
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
@@ -39,7 +40,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var imageURL in TestUtils.ImageURLs)
             {
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
@@ -50,7 +51,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
@@ -61,7 +62,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
@@ -72,7 +73,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
@@ -83,7 +84,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
@@ -94,9 +95,9 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
-                yield return ImageLoader.ClearDiskCacheAll().AsUniTask().ToCoroutine();
+                yield return ImageLoader.ClearDiskCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
@@ -107,7 +108,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
                 ImageLoader.ClearMemoryCache(imageURL);
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
@@ -120,10 +121,10 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
-            yield return ImageLoader.ClearDiskCacheAll().AsUniTask().ToCoroutine();
+            yield return ImageLoader.ClearDiskCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
             foreach (var imageURL in TestUtils.ImageURLs)
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
         }
@@ -134,7 +135,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
             ImageLoader.ClearMemoryCacheAll();

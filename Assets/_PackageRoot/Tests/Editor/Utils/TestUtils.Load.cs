@@ -18,9 +18,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
             var task1 = future.AsTask();
-            yield return future.AsUniTask()
-                .Timeout(TimeSpan.FromSeconds(10))
-                .ToCoroutine();
+            yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
             var task2 = future.AsTask();
 
             futureListener.Assert_Events_NotContains(EventName.Canceled);
@@ -72,7 +70,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
             var task1 = future.AsTask();
-            yield return future.AsCoroutine();
+            yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
             var task2 = future.AsTask();
 
             futureListener.Assert_Events_NotContains(EventName.Canceled);

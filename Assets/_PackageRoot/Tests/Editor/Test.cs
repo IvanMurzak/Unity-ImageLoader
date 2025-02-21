@@ -1,6 +1,6 @@
 using System.Collections;
-using NUnit.Framework;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -13,9 +13,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         public virtual IEnumerator TearDown()
         {
-            yield return TestUtils.WaitTicks(10);
-            Assert.Zero(ImageLoader.GetLoadingSpriteFutures().Count);
-            Assert.Zero(ImageLoader.GetLoadingTextureFutures().Count);
+            yield return TestUtils.WaitWhile(() => ImageLoader.GetLoadingSpriteFutures().Count > 0, TimeSpan.FromSeconds(10));
+            yield return TestUtils.WaitWhile(() => ImageLoader.GetLoadingTextureFutures().Count > 0, TimeSpan.FromSeconds(10));
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
     }

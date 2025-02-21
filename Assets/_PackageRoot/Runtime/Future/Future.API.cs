@@ -359,6 +359,9 @@ namespace Extensions.Unity.ImageLoader
         }
         public UniTask<T> AsUniTask()
         {
+            if (IsCompleted)
+                return UniTask.FromResult(value);
+
             var taskCompletionSource = new UniTaskCompletionSource<T>();
 
             Then(value => taskCompletionSource.TrySetResult(value));
@@ -369,6 +372,9 @@ namespace Extensions.Unity.ImageLoader
         }
         public Task<T> AsTask()
         {
+            if (IsCompleted)
+                return Task.FromResult(value);
+
             var taskCompletionSource = new TaskCompletionSource<T>();
 
             Then(taskCompletionSource.SetResult);
@@ -378,7 +384,14 @@ namespace Extensions.Unity.ImageLoader
             return taskCompletionSource.Task;
         }
         public IEnumerator AsCoroutine(Action<T> resultHandler = null, Action<Exception> exceptionHandler = null)
-            => AsUniTask().ToCoroutine(resultHandler, exceptionHandler);
+        {
+            if (IsCompleted)
+            {
+                resultHandler?.Invoke(value);
+                yield break;
+            }
+            yield return AsUniTask().ToCoroutine(resultHandler, exceptionHandler);
+        }
         public FutureAwaiter<T> GetAwaiter() => new FutureAwaiter<T>(AsTask().GetAwaiter());
     }
 }

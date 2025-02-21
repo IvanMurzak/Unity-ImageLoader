@@ -21,22 +21,21 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
-            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url));
             Assert.IsNotNull(ref0.Value);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             ref0.Dispose();
             Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScope);
@@ -48,8 +47,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url = TestUtils.ImageURLs[0];
             { // scope
                 var task = ImageLoader.LoadSpriteRef(url).AsTask();
-                while (!task.IsCompleted)
-                    yield return UniTask.Yield();
+                yield return task.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 var reference = task.Result;
                 Assert.NotNull(reference);
@@ -95,7 +93,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 var future = ImageLoader.LoadSpriteRef(url);
-                yield return future.AsCoroutine();
+                yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
                 Assert.True(future.IsLoaded);
                 Assert.True(future.IsCompleted);
@@ -121,7 +119,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             foreach (var url in TestUtils.ImageURLs)
             {
                 var future = ImageLoader.LoadSpriteRef(url);
-                yield return future.AsCoroutine();
+                yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
                 using (var reference = future.Value)
                 {
@@ -144,7 +142,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var url = TestUtils.ImageURLs[0];
 
             var future = ImageLoader.LoadSpriteRef(url);
-            yield return future.AsCoroutine();
+            yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
             var ref0 = future.Value;
             Assert.AreEqual(1, Reference<Sprite>.Counter(url));
@@ -166,33 +164,32 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref1_1 = task1.Result;
             Assert.NotNull(ref1_1);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             var count = 1000;
             var references = new Reference<Sprite>[count];
             for (var i = 0; i < count; i++)
             {
-                var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
+                var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url);
                 Assert.NotNull(reference);
-                Assert.AreEqual(i + 2, Reference<Sprite>.Counter(url1));
+                Assert.AreEqual(i + 2, Reference<Sprite>.Counter(url));
                 references[i] = reference;
             }
 
             ref1_1.Dispose();
-            Assert.AreEqual(count, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(count, Reference<Sprite>.Counter(url));
 
             for (var i = 0; i < count; i++)
             {
                 references[i].Dispose();
-                Assert.AreEqual(count - i - 1, Reference<Sprite>.Counter(url1));
+                Assert.AreEqual(count - i - 1, Reference<Sprite>.Counter(url));
             }
         }
 
@@ -202,24 +199,23 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var future = ImageLoader.LoadSpriteRef(url1);
+            var future = ImageLoader.LoadSpriteRef(url);
             var task1 = future.AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             var ref1 = task1.Result;
             Assert.NotNull(ref1);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             future.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             ref1.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator LoadOneMake1000ReferencesImmediateDispose_NoLogs() => TestUtils.RunNoLogs(LoadOneMake1000ReferencesImmediateDispose);
@@ -228,36 +224,35 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var future = ImageLoader.LoadSpriteRef(url1);
+            var future = ImageLoader.LoadSpriteRef(url);
             var task1 = future.AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref1_1 = task1.Result;
             Assert.NotNull(ref1_1);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             var count = 1000;
             for (var i = 0; i < count; i++)
             {
-                Assert.AreEqual(1, Reference<Sprite>.Counter(url1), $"ref[{i}] going to create.");
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url), $"ref[{i}] going to create.");
 
-                var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
+                var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url);
                 Assert.NotNull(reference);
-                Assert.AreEqual(2, Reference<Sprite>.Counter(url1), $"ref[{i}] is created, but reference counter is wrong.");
+                Assert.AreEqual(2, Reference<Sprite>.Counter(url), $"ref[{i}] is created, but reference counter is wrong.");
 
                 reference.Dispose();
-                Assert.AreEqual(1, Reference<Sprite>.Counter(url1), $"ref[{i}] is disposed, but it should be still in memory cache because of another ref.");
+                Assert.AreEqual(1, Reference<Sprite>.Counter(url), $"ref[{i}] is disposed, but it should be still in memory cache because of another ref.");
             }
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             future.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             ref1_1.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator LoadOneMake1000ReferencesInParallelLateDispose_NoLogs() => TestUtils.RunNoLogs(LoadOneMake1000ReferencesInParallelLateDispose);
@@ -266,37 +261,36 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref1_1 = task1.Result;
             Assert.NotNull(ref1_1);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             var count = 1000;
             var references = new Reference<Sprite>[count];
             var tasks = Enumerable.Range(0, count)
                 .Select(i => Task.Run(() =>
                 {
-                    var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
+                    var reference = ImageLoader.LoadSpriteRefFromMemoryCache(url);
                     Assert.NotNull(reference);
                     references[i] = reference;
                     return reference;
                 }))
                 .ToArray();
 
-            yield return Task.WhenAll(tasks).AsUniTask().ToCoroutine();
-            Assert.AreEqual(count + 1, Reference<Sprite>.Counter(url1));
+            yield return Task.WhenAll(tasks).TimeoutCoroutine(TimeSpan.FromSeconds(10));
+            Assert.AreEqual(count + 1, Reference<Sprite>.Counter(url));
 
             foreach (var reference in references)
                 reference.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             ref1_1.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator Load1Sprite2TimesAnd2TimesFromCache_NoLogs() => TestUtils.RunNoLogs(Load1Sprite2TimesAnd2TimesFromCache);
@@ -305,51 +299,49 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
-            var task2 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task2.IsCompleted)
-                yield return UniTask.Yield();
+            var task2 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task2.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref1 = task2.Result;
-            Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(2, Reference<Sprite>.Counter(url));
 
-            var ref2 = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
-            Assert.AreEqual(3, Reference<Sprite>.Counter(url1));
+            var ref2 = ImageLoader.LoadSpriteRefFromMemoryCache(url);
+            Assert.AreEqual(3, Reference<Sprite>.Counter(url));
 
-            var ref3 = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
-            Assert.AreEqual(4, Reference<Sprite>.Counter(url1));
+            var ref3 = ImageLoader.LoadSpriteRefFromMemoryCache(url);
+            Assert.AreEqual(4, Reference<Sprite>.Counter(url));
 
             ref0.Dispose();
-            Assert.AreEqual(3, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(3, Reference<Sprite>.Counter(url));
             Assert.IsNull(ref0.Value);
             Assert.IsNotNull(ref1.Value);
             Assert.IsNotNull(ref2.Value);
             Assert.IsNotNull(ref3.Value);
 
             ref1.Dispose();
-            Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(2, Reference<Sprite>.Counter(url));
             Assert.IsNull(ref0.Value);
             Assert.IsNull(ref1.Value);
             Assert.IsNotNull(ref2.Value);
             Assert.IsNotNull(ref3.Value);
 
             ref2.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             Assert.IsNull(ref0.Value);
             Assert.IsNull(ref1.Value);
             Assert.IsNull(ref2.Value);
             Assert.IsNotNull(ref3.Value);
 
             ref3.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             Assert.IsNull(ref0.Value);
             Assert.IsNull(ref1.Value);
             Assert.IsNull(ref2.Value);
@@ -362,35 +354,33 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
             var url2 = TestUtils.ImageURLs[1];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref1_1 = task1.Result;
             Assert.NotNull(ref1_1);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
             var task2 = ImageLoader.LoadSpriteRef(url2).AsTask();
-            while (!task2.IsCompleted)
-                yield return UniTask.Yield();
+            yield return task2.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref2_1 = task2.Result;
             Assert.NotNull(ref2_1);
             Assert.AreEqual(1, Reference<Sprite>.Counter(url2));
 
-            var ref1_2 = ImageLoader.LoadSpriteRefFromMemoryCache(url1);
+            var ref1_2 = ImageLoader.LoadSpriteRefFromMemoryCache(url);
             Assert.NotNull(ref1_2);
-            Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(2, Reference<Sprite>.Counter(url));
 
             var ref2_2 = ImageLoader.LoadSpriteRefFromMemoryCache(url2);
             Assert.NotNull(ref2_2);
             Assert.AreEqual(2, Reference<Sprite>.Counter(url2));
 
             ref1_1.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             Assert.AreEqual(2, Reference<Sprite>.Counter(url2));
             Assert.IsNull(ref1_1.Value);
             Assert.IsNotNull(ref2_1.Value);
@@ -398,7 +388,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref2_2.Value);
 
             ref2_1.Dispose();
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             Assert.AreEqual(1, Reference<Sprite>.Counter(url2));
             Assert.IsNull(ref1_1.Value);
             Assert.IsNull(ref2_1.Value);
@@ -406,7 +396,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref2_2.Value);
 
             ref1_2.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             Assert.AreEqual(1, Reference<Sprite>.Counter(url2));
             Assert.IsNull(ref1_1.Value);
             Assert.IsNull(ref2_1.Value);
@@ -414,7 +404,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(ref2_2.Value);
 
             ref2_2.Dispose();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             Assert.AreEqual(0, Reference<Sprite>.Counter(url2));
             Assert.IsNull(ref1_1.Value);
             Assert.IsNull(ref2_1.Value);

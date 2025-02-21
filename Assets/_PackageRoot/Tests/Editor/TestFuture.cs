@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine;
 using System;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
@@ -44,21 +45,20 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return UniTask.Yield();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
-            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url));
 
             ref0.Dispose();
             Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndCancelFirst);
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
@@ -66,25 +66,20 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
-            var startTime = DateTime.Now;
+            var url = TestUtils.ImageURLs[0];
 
-            var future1 = ImageLoader.LoadSpriteRef(url1);
-            var future2 = ImageLoader.LoadSpriteRef(url1);
+            var future1 = ImageLoader.LoadSpriteRef(url);
+            var future2 = ImageLoader.LoadSpriteRef(url);
 
             future1.Cancel();
 
-            var task2 = future2.AsTask();
-            while (!task2.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
-                yield return UniTask.Yield();
-            }
+            var task1 = future2.AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
-            var ref2 = task2.Result;
+            var ref2 = task1.Result;
             Assert.IsNotNull(ref2);
             Assert.IsNotNull(ref2.Value);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             future1.Dispose();
             future2.Dispose();
             ref2.Dispose();
@@ -95,34 +90,33 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            var task2 = ImageLoader.LoadSpriteRef(url1).AsTask();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            var task2 = ImageLoader.LoadSpriteRef(url).AsTask();
 
-            while (!task1.IsCompleted || !task2.IsCompleted)
-                yield return UniTask.Yield();
+            yield return Task.WhenAll(task1, task2).TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
             var ref1 = task2.Result;
             Assert.IsNotNull(ref1);
-            Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(2, Reference<Sprite>.Counter(url));
 
-            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url));
 
             ref0.Dispose();
             Assert.IsNull(ref0.Value);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             ref1.Dispose();
             Assert.IsNull(ref1.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
 
-            var sprite = ImageLoader.LoadSpriteFromMemoryCache(url1);
+            var sprite = ImageLoader.LoadSpriteFromMemoryCache(url);
             Assert.IsNull(sprite);
 
-            ImageLoader.ClearMemoryCache(url1);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            ImageLoader.ClearMemoryCache(url);
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndDisposeAll);
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
@@ -130,14 +124,14 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = TestUtils.ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var future1 = ImageLoader.LoadSpriteRef(url1);
+            var future1 = ImageLoader.LoadSpriteRef(url);
             Assert.IsNotNull(future1);
-            var future2 = ImageLoader.LoadSpriteRef(url1);
+            var future2 = ImageLoader.LoadSpriteRef(url);
             Assert.IsNotNull(future2);
 
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
 
             future1.Cancel();
             future2.Cancel();
@@ -145,9 +139,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             future1.Dispose();
             future2.Dispose();
 
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
-            yield return UniTask.Delay(1000).ToCoroutine();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
@@ -160,8 +154,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
-                while (!task1.IsCompleted)
-                    yield return UniTask.Yield();
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 using (var ref1 = task1.Result)
                 {
@@ -184,8 +177,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
-                while (!task1.IsCompleted)
-                    yield return UniTask.Yield();
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -208,8 +200,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
-                while (!task1.IsCompleted)
-                    yield return UniTask.Yield();
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -218,8 +209,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 var future2 = ImageLoader.LoadSpriteRef(url);
                 var task2 = future2.AsTask();
-                while (!task2.IsCompleted)
-                    yield return UniTask.Yield();
+                yield return task2.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 using (var ref2 = task2.Result)
                 {
@@ -249,14 +239,14 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNull(exception);
 
             LogAssert.ignoreFailingMessages = true;
-            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(2));
             var task1 = future1.AsTask();
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsNotNull(exception);
 
             future1.Cancel(); // expected warning
             LogAssert.ignoreFailingMessages = false;
-            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(2));
             future1.Dispose();
         }
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlNotCalledBecauseOfCancel);
@@ -276,12 +266,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task1 = future1.AsTask();
             future1.Cancel();
 
-            while (!task1.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
-                yield return UniTask.Yield();
-            }
-            yield return UniTask.Delay(1000).ToCoroutine();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
             Assert.IsNull(exception);
             future1.Dispose();
         }
@@ -296,11 +282,11 @@ namespace Extensions.Unity.ImageLoader.Tests
                 var completed = false;
                 yield return ImageLoader.LoadSprite(url)
                     .Completed(success => completed = true)
-                    .AsUniTask().ToCoroutine();
+                    .TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
                 Assert.IsTrue(completed);
             }
-            yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
         }
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel_NoLogs() => TestUtils.RunNoLogs(AsyncOperationCompletionAfterCancel);
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()

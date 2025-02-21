@@ -26,7 +26,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var future = new FutureSprite(url);
             var futureListener = new FutureListener<Sprite>(future);
             var task = future.StartLoading().AsTask();
-            yield return new WaitUntil(() => task.IsCompleted);
+            yield return task.TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
             futureListener.Assert_Events_Equals(new List<EventName>
             {
@@ -47,8 +47,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future.Cancel();
             Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
 
-            var task2 = future.AsTask();
-            Assert.True(task2.IsCompleted);
+            Assert.True(future.AsTask().IsCompleted);
             Assert.AreEqual(FutureStatus.LoadedFromSource, future.Status);
 
             future.Dispose();
@@ -67,7 +66,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future.Timeout(TimeSpan.FromMilliseconds(100));
 
             LogAssert.ignoreFailingMessages = true;
-            yield return future.StartLoading().ToCoroutine();
+            yield return future.StartLoading().TimeoutCoroutine(TimeSpan.FromSeconds(10));
             LogAssert.ignoreFailingMessages = false;
 
             futureListener.Assert_Events_Equals(new List<EventName>
@@ -86,8 +85,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             future.Cancel();
             Assert.AreEqual(FutureStatus.FailedToLoad, future.Status);
 
-            var task2 = future.AsTask();
-            Assert.True(task2.IsCompleted);
+            Assert.True(future.AsTask().IsCompleted);
             Assert.AreEqual(FutureStatus.FailedToLoad, future.Status);
 
             future.Dispose();

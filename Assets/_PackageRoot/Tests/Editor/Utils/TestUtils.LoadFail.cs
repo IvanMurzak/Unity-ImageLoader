@@ -22,9 +22,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             var task1 = future.AsTask();
             if (expectedLoadingFrom.HasValue && expectedLoadingFrom.Value == FutureLoadingFrom.Source) // exception should be thrown only if ONLY loading from Source
                 LogAssert.Expect(LogType.Error, $"[ImageLoader] Future[id={future.Id}] Timeout ({timeout}): {url}");
-            yield return UniTask.WaitWhile(() => future.IsInProgress)
-                .Timeout(TimeSpan.FromSeconds(10))
-                .ToCoroutine();
+            yield return TestUtils.WaitWhile(() => future.IsInProgress, TimeSpan.FromSeconds(10));
             var task2 = future.AsTask();
 
             var events = expectedLoadingFrom.HasValue
