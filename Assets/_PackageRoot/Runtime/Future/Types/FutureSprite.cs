@@ -72,9 +72,15 @@ namespace Extensions.Unity.ImageLoader
         {
             if (!ReferenceEquals(obj, null) && obj != null)
             {
-                if (logLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
-                UniTask.Post(() => FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel));
+                UniTask.Post(() =>
+                {
+                    if (!ReferenceEquals(obj, null) && obj != null) // double check after async delay
+                    {
+                        if (logLevel.IsActive(DebugLevel.Log))
+                            Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
+                        FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel);
+                    }
+                });
             }
         }
 
