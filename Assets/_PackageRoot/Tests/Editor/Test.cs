@@ -13,7 +13,8 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
         public virtual IEnumerator TearDown()
         {
-            Assert.Zero(ImageLoader.GetLoadingFutures().Count);
+            Assert.Zero(ImageLoader.GetLoadingSpriteFutures().Count);
+            Assert.Zero(ImageLoader.GetLoadingTextureFutures().Count);
             yield return TestUtils.ClearEverything("<b>Test End </b>");
         }
     }

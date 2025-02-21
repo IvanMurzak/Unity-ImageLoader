@@ -19,15 +19,24 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var loadingFutures = ImageLoader.GetLoadingFutures();
-            Assert.NotNull(loadingFutures);
-            Debug.Log($"Loading future count={loadingFutures.Count}");
-            foreach (var loadingFuture in loadingFutures)
+            var loadingSpriteFutures = ImageLoader.GetLoadingSpriteFutures();
+            Assert.NotNull(loadingSpriteFutures);
+            Debug.Log($"Loading Future<Sprite> count={loadingSpriteFutures.Count}");
+            foreach (var loadingFuture in loadingSpriteFutures)
             {
-                Debug.Log($"Loading future: {loadingFuture.Url}, Status={loadingFuture.Status}");
+                Debug.Log($"Loading Future<Sprite>: {loadingFuture.Url}, Status={loadingFuture.Status}");
             }
-            Assert.Zero(loadingFutures.Count);
+            Assert.Zero(loadingSpriteFutures.Count);
             yield return UniTask.Yield();
+
+            var loadingTextureFutures = ImageLoader.GetLoadingTextureFutures();
+            Assert.NotNull(loadingTextureFutures);
+            Debug.Log($"Loading Future<Texture2D> count={loadingTextureFutures.Count}");
+            foreach (var loadingFuture in loadingTextureFutures)
+            {
+                Debug.Log($"Loading Future<Texture2D>: {loadingFuture.Url}, Status={loadingFuture.Status}");
+            }
+            Assert.Zero(loadingTextureFutures.Count);
         }
         [UnityTest] public IEnumerator LoadingRefAndWaiting_NoLogs() => TestUtils.RunNoLogs(LoadingRefAndWaiting);
         [UnityTest] public IEnumerator LoadingRefAndWaiting()

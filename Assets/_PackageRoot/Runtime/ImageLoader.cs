@@ -1,38 +1,11 @@
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        private static ConcurrentDictionary<string, Future<Sprite>> loadingInProcess = new ConcurrentDictionary<string, Future<Sprite>>();
-        private static void AddLoading(Future<Sprite> future)
-        {
-            if (!loadingInProcess.TryAdd(future.Url, future))
-                throw new Exception($"[ImageLoader] Future[id={future.Id}] AddLoading: already loading\n{future.Url}");
-
-            if (settings.debugLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={future.Id}] AddLoading: total {loadingInProcess.Count} loading tasks\n{future.Url}");
-        }
-        private static void RemoveLoading(Future<Sprite> future) => RemoveLoading(future.Url);
-        private static void RemoveLoading(string url)
-        {
-            if (loadingInProcess.TryRemove(url, out var future))
-            {
-                if (settings.debugLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={future.Id}] RemoveLoading: left {loadingInProcess.Count} loading tasks\n{url}");
-            }
-            else
-            {
-                if (settings.debugLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] RemoveLoading: not found in loading tasks\n{url}");
-            }
-        }
-
         /// <summary>
         /// Initialization of static variables, should be called from main thread at project start
         /// </summary>
@@ -46,20 +19,39 @@ namespace Extensions.Unity.ImageLoader
         /// Check if the url is loading right now
         /// </summary>
         /// <returns>Returns true if the url is loading right now</returns>
-        public static bool IsLoading(string url) => loadingInProcess.ContainsKey(url);
+        public static bool IsLoadingSprite<T>(string url) => Future<Sprite>.IsLoading(url);
+
+        /// <summary>
+        /// Check if the url is loading right now
+        /// </summary>
+        /// <returns>Returns true if the url is loading right now</returns>
+        public static bool IsLoadingTexture<T>(string url) => Future<Texture2D>.IsLoading(url);
 
         /// <summary>
         /// Find and return current loading Future by the url
         /// <param name="url">URL to the picture, web or local</param>
         /// </summary>
         /// <returns>Returns current loading Future or null if none</returns>
-        public static Future<Sprite> GetLoadingFuture(string url) => loadingInProcess.TryGetValue(url, out var future) ? future : null;
+        public static Future<Sprite> GetLoadingSpriteFuture<T>(string url) => Future<Sprite>.GetLoadingFuture(url);
+
+        /// <summary>
+        /// Find and return current loading Future by the url
+        /// <param name="url">URL to the picture, web or local</param>
+        /// </summary>
+        /// <returns>Returns current loading Future or null if none</returns>
+        public static Future<Texture2D> GetLoadingTextureFuture<T>(string url) => Future<Texture2D>.GetLoadingFuture(url);
 
         /// <summary>
         /// Return all current loading Futures
         /// </summary>
         /// <returns>Returns read only list of all current loading Futures</returns>
-        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values.ToList().AsReadOnly();
+        public static IReadOnlyCollection<Future<Sprite>> GetLoadingSpriteFutures() => Future<Sprite>.GetLoadingFutures();
+
+        /// <summary>
+        /// Return all current loading Futures
+        /// </summary>
+        /// <returns>Returns read only list of all current loading Futures</returns>
+        public static IReadOnlyCollection<Future<Texture2D>> GetLoadingTextureFutures() => Future<Texture2D>.GetLoadingFutures();
 
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls

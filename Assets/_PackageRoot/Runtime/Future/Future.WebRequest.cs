@@ -6,7 +6,7 @@ namespace Extensions.Unity.ImageLoader
 {
     public partial class Future<T>
     {
-        internal Future<T> SetWebRequest(UnityWebRequest webRequest)
+        protected virtual Future<T> SetWebRequest(UnityWebRequest webRequest)
         {
             WebRequest = PrepareWebRequest(webRequest);
             return this;
@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader
             return webRequest;
         }
 
-        internal UnityWebRequestAsyncOperation SendWebRequest()
+        protected virtual UnityWebRequestAsyncOperation SendWebRequest()
         {
             if (WebRequest == null)
                 throw new Exception($"[ImageLoader] Future[id={Id}] UnityWebRequest is not set. Use SetWebRequest method before calling SendWebRequest.");
