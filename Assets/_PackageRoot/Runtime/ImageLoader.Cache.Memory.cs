@@ -74,8 +74,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCache(string url)
         {
-            FutureTexture.ClearMemoryCache(url, FutureTexture.ReleaseMemoryTexture, settings.debugLevel);
             FutureSprite.ClearMemoryCache(url, FutureSprite.ReleaseMemorySprite, settings.debugLevel);
+            FutureTexture.ClearMemoryCache(url, FutureTexture.ReleaseMemoryTexture, settings.debugLevel);
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="url">URL to the picture, web or local</param>
         public static void ClearMemoryCacheAll()
         {
-            FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture, settings.debugLevel);
             FutureSprite.ClearMemoryCacheAll(FutureSprite.ReleaseMemorySprite, settings.debugLevel);
+            FutureTexture.ClearMemoryCacheAll(FutureTexture.ReleaseMemoryTexture, settings.debugLevel);
         }
     }
 }

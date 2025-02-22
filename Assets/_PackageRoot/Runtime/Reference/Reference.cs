@@ -15,8 +15,8 @@ namespace Extensions.Unity.ImageLoader
         public T Value { get; private set; }
         public readonly string Url;
 
-        private bool disposed;
         public uint Id { get; } = idCounter++;
+        public bool IsDisposed { get; private set; }
 
         internal Reference(string url, T value)
         {
@@ -55,11 +55,11 @@ namespace Extensions.Unity.ImageLoader
             EventOnClearUrl -= OnClearUrl;
             EventOnClearAll -= OnClearAll;
 
-            if (disposed)
+            if (IsDisposed)
                 return;
 
             Value = default;
-            disposed = true;
+            IsDisposed = true;
 
             lock (referenceCounters)
             {

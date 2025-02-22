@@ -45,7 +45,9 @@ namespace Extensions.Unity.ImageLoader
                 if (LogLevel.IsActive(DebugLevel.Log))
                     Debug.Log($"[ImageLoader] Future[id={Id}] Waiting while another task is loading\n{Url}");
 
-                anotherLoadingFuture.PassEvents(this, passCancelled: false).Forget();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                anotherLoadingFuture.PassEvents(this, passCancelled: false);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 await UniTask.WaitWhile(() => IsLoading(Url) && !IsCancelled);
 
                 if (LogLevel.IsActive(DebugLevel.Log))

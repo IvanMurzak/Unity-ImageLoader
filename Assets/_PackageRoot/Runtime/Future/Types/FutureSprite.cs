@@ -14,18 +14,19 @@ namespace Extensions.Unity.ImageLoader
 
         protected Vector2 pivot;
         protected bool mipChain;
+        protected float pixelDensity;
         protected TextureFormat textureFormat;
 
-        public FutureSprite(string url, CancellationToken cancellationToken = default)
-            : this(url, new Vector2(.5f, .5f), TextureFormat.ARGB32, mipChain: true, cancellationToken: cancellationToken)
-        {
+        public FutureSprite(string url, float pixelDensity = 100, CancellationToken cancellationToken = default)
+            : this(url, pivot: new Vector2(.5f, .5f), pixelDensity: pixelDensity, textureFormat: TextureFormat.ARGB32, mipChain: true, cancellationToken: cancellationToken)
+        { }
 
-        }
-
-        public FutureSprite(string url, Vector2 pivot, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, CancellationToken cancellationToken = default) : base(url, cancellationToken)
+        public FutureSprite(string url, Vector2 pivot, float pixelDensity = 100, TextureFormat textureFormat = TextureFormat.ARGB32, bool mipChain = true, CancellationToken cancellationToken = default)
+            : base(url, cancellationToken)
         {
             this.pivot = pivot;
             this.mipChain = mipChain;
+            this.pixelDensity = pixelDensity;
             this.textureFormat = textureFormat;
         }
 
@@ -53,7 +54,7 @@ namespace Extensions.Unity.ImageLoader
                 var texture = FutureTexture.LoadFromMemoryCache(Url);
                 if (texture != null)
                 {
-                    sprite = ImageLoader.ToSprite(texture);
+                    sprite = texture.ToSprite(pivot, pixelDensity);
                     if (sprite != null)
                         SaveToMemoryCache(sprite);
                 }
@@ -68,20 +69,41 @@ namespace Extensions.Unity.ImageLoader
         }
         protected override void ReleaseMemory(Sprite obj, DebugLevel logLevel = DebugLevel.Log) => ReleaseMemorySprite(obj, logLevel);
 
-        public static void ReleaseMemorySprite(Sprite obj, DebugLevel logLevel = DebugLevel.Log)
+        public static void ReleaseMemorySprite(Sprite sprite, DebugLevel logLevel = DebugLevel.Log)
         {
-            if (!ReferenceEquals(obj, null) && obj != null)
+            if (PlayerLoopHelper.IsMainThread)
             {
-                UniTask.Post(() =>
+                if (sprite.IsNull())
+                    return;
+
+                if (sprite.texture.IsNotNull())
                 {
-                    if (!ReferenceEquals(obj, null) && obj != null) // double check after async delay
-                    {
-                        if (logLevel.IsActive(DebugLevel.Trace))
-                            Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
-                        FutureTexture.ReleaseMemoryTexture(obj.texture, logLevel);
-                    }
-                });
+                    if (logLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
+                    UnityEngine.Object.DestroyImmediate(sprite.texture);
+                }
+                UnityEngine.Object.DestroyImmediate(sprite);
+                return;
             }
+
+            // 'sprite.texture' could be called only from main thread
+            // checking sprite.IsNull is enough until we are in main thread
+            if (sprite.IsNull())
+                return;
+
+            UniTask.Post(() =>
+            {
+                if (sprite.IsNull()) // double check after async delay
+                    return;
+
+                if (sprite.texture.IsNotNull()) // double check after async delay
+                {
+                    if (logLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Release memory Sprite->Texture2D");
+                    UnityEngine.Object.DestroyImmediate(sprite.texture);
+                }
+                UnityEngine.Object.DestroyImmediate(sprite);
+            });
         }
 
         // --- Web Request ---

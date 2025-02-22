@@ -164,14 +164,14 @@ namespace Extensions.Unity.ImageLoader
             if (IsCancelled)
             {
                 if (LogLevel.IsActive(DebugLevel.Log))
-                    Debug.Log($"[ImageLoader] Future[id={Id}] Canceled\n{Url}");
+                    Debug.Log($"[ImageLoader] Future[id={Id}] Canceled. Status={Status}\n{Url}");
                 Safe.Run(action, LogLevel);
                 return this;
             }
             if (cleared)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Canceled event is not set because Future is cleared\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Canceled event is not set because Future is cleared. Status={Status}\n{Url}");
                 return this;
             }
             OnCanceled += action;
@@ -186,19 +186,19 @@ namespace Extensions.Unity.ImageLoader
             if (IsLoaded)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already loaded\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already loaded. Status={Status}\n{Url}");
                 return;
             }
             if (IsCancelled)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already canceled\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already canceled. Status={Status}\n{Url}");
                 return;
             }
             if (cleared)
             {
                 if (LogLevel.IsActive(DebugLevel.Warning))
-                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared\n{Url}");
+                    Debug.LogWarning($"[ImageLoader] Future[id={Id}] Can't cancel. Task is already cleared. Status={Status}\n{Url}");
                 return;
             }
             if (LogLevel.IsActive(DebugLevel.Log))
@@ -224,18 +224,18 @@ namespace Extensions.Unity.ImageLoader
 
             LoadedFromMemoryCache(obj =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
+                if (weakReference.TryGetTarget(out var future))
+                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
             });
             LoadingFromDiskCache(() =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.Loading(FutureLoadingFrom.DiskCache);
+                if (weakReference.TryGetTarget(out var future))
+                    future.Loading(FutureLoadingFrom.DiskCache);
             });
             LoadedFromDiskCache(obj =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
+                if (weakReference.TryGetTarget(out var future))
+                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
             });
             LoadingFromSource(() =>
             {
@@ -244,18 +244,21 @@ namespace Extensions.Unity.ImageLoader
             });
             LoadedFromSource(obj =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
+                if (weakReference.TryGetTarget(out var future))
+                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
             });
             Failed(e =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.FailToLoad(e);
+                if (weakReference.TryGetTarget(out var future))
+                    future.FailToLoad(e);
             });
             Canceled(() =>
             {
-                if (weakReference.TryGetTarget(out var reference))
-                    reference.Cancel();
+                if (weakReference.TryGetTarget(out var future))
+                {
+                    if (future.Status != FutureStatus.Disposed && !future.IsCompleted && !future.IsCancelled)
+                        future.Cancel();
+                }
             });
 
             // ┌─────────┬────────────────────────────────────────────────────────────────────────┐

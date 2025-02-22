@@ -1,6 +1,6 @@
 ﻿namespace Extensions.Unity.ImageLoader
 {
-    internal class ComponentCancelOnDisable : ComponentCancelOn
+    internal class ComponentTriggerOnDisable : ComponentTrigger
     {
         private void OnDisable() => Trigger();
     }

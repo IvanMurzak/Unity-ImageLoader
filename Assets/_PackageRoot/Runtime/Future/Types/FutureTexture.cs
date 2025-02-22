@@ -36,18 +36,28 @@ namespace Extensions.Unity.ImageLoader
 
         public static void ReleaseMemoryTexture(Texture2D obj, DebugLevel logLevel = DebugLevel.Log)
         {
-            if (!ReferenceEquals(obj, null) && obj != null)
+            if (PlayerLoopHelper.IsMainThread)
             {
-                UniTask.Post(() =>
-                {
-                    if (!ReferenceEquals(obj, null) && obj != null) // double check after async delay
-                    {
-                        if (logLevel.IsActive(DebugLevel.Trace))
-                            Debug.Log($"[ImageLoader] Release memory Texture2D");
-                        FutureTexture.ReleaseMemoryTexture(obj, logLevel);
-                    }
-                });
+                if (obj.IsNull())
+                    return;
+
+                if (logLevel.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[ImageLoader] Release memory Texture2D");
+                UnityEngine.Object.DestroyImmediate(obj);
+                return;
             }
+            if (obj.IsNull())
+                return;
+
+            UniTask.Post(() =>
+            {
+                if (obj.IsNull()) // double check after async delay
+                    return;
+
+                if (logLevel.IsActive(DebugLevel.Trace))
+                    Debug.Log($"[ImageLoader] Release memory Texture2D");
+                UnityEngine.Object.DestroyImmediate(obj);
+            });
         }
 
         // --- Web Request ---

@@ -63,14 +63,17 @@ namespace Extensions.Unity.ImageLoader
 
         public T Value => value;
         public bool IsCancelled => Status == FutureStatus.Canceled;
-        public bool IsLoaded => Status == FutureStatus.LoadedFromMemoryCache
+        public bool IsLoaded
+            => Status == FutureStatus.LoadedFromMemoryCache
             || Status == FutureStatus.LoadedFromDiskCache
             || Status == FutureStatus.LoadedFromSource;
-        public bool IsCompleted => Status == FutureStatus.LoadedFromMemoryCache
+        public bool IsCompleted
+            => Status == FutureStatus.LoadedFromMemoryCache
             || Status == FutureStatus.LoadedFromDiskCache
             || Status == FutureStatus.LoadedFromSource
             || Status == FutureStatus.FailedToLoad;
-        public bool IsInProgress => Status == FutureStatus.Initialized
+        public bool IsInProgress
+            => Status == FutureStatus.Initialized
             || Status == FutureStatus.LoadingFromDiskCache
             || Status == FutureStatus.LoadingFromSource;
         public FutureStatus Status { get; private set; } = FutureStatus.Initialized;
@@ -105,7 +108,10 @@ namespace Extensions.Unity.ImageLoader
             Failed(to.FailToLoad);
 
             if (passCancelled)
-                Canceled(to.Cancel);
+            {
+                if (Status != FutureStatus.Disposed && !IsCompleted)
+                    Canceled(to.Cancel);
+            }
 
             return this;
         }
@@ -122,7 +128,10 @@ namespace Extensions.Unity.ImageLoader
             Failed(to.FailToLoad);
 
             if (passCancelled)
-                Canceled(to.Cancel);
+            {
+                if (Status != FutureStatus.Disposed && !IsCompleted)
+                    Canceled(to.Cancel);
+            }
 
             return this;
         }
