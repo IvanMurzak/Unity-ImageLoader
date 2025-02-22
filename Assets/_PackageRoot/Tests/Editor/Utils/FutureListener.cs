@@ -73,13 +73,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 lock (events)
                     events.Add(new EventData { name = EventName.Failed, value = exception });
             });
-            future.Canceled(() =>
+            if (future.Status != FutureStatus.Disposed && !future.IsCompleted)
             {
-                if (logLevel.Value.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[FutureListener] Future[id={future.Id}] Canceled");
-                lock (events)
-                    events.Add(new EventData { name = EventName.Canceled });
-            });
+                future.Canceled(() =>
+                {
+                    if (logLevel.Value.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[FutureListener] Future[id={future.Id}] Canceled");
+                    lock (events)
+                        events.Add(new EventData { name = EventName.Canceled });
+                });
+            }
             future.Completed(value =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
