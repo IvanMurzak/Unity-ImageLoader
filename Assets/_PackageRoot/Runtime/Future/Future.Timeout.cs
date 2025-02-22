@@ -3,29 +3,32 @@ using System;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public partial class Future<T>
+    public static partial class FutureEx
     {
         /// <summary>
         /// Set timeout duration. If the duration reached it fails the Future with related exception
         /// </summary>
         /// <param name="duration">The timeout duration</param>
         /// <returns>Returns async Future</returns>
-        public Future<T> Timeout(TimeSpan duration)
+        public static IFuture<T> Timeout<T>(this IFuture<T> future, TimeSpan duration)
         {
-            timeout = duration;
-            if (WebRequest != null)
-            {
-                WebRequest.timeout = (int)Math.Ceiling(duration.TotalSeconds);
-            }
+            var internalFuture = (IFutureInternal<T>)future;
+            internalFuture.SetTimeout(duration);
+
+            if ((internalFuture.WebRequest?.isModifiable) ?? false)
+                internalFuture.WebRequest.timeout = (int)Math.Ceiling(duration.TotalSeconds);
+
             if (duration <= TimeSpan.Zero)
             {
-                FailToLoad(new Exception($"[ImageLoader] Future[id={id}] Timeout ({duration}): {Url}"));
-                return this;
+                internalFuture.FailToLoad(new Exception($"[ImageLoader] Future[id={future.Id}] Timeout ({duration}): {future.Url}"));
+                return future;
             }
+
             UniTask.Delay(duration)
-                .ContinueWith(() => FailToLoad(new Exception($"[ImageLoader] Future[id={id}] Timeout ({duration}): {Url}")))
-                .AttachExternalCancellation(CancellationToken);
-            return this;
+                .ContinueWith(() => internalFuture.FailToLoad(new Exception($"[ImageLoader] Future[id={future.Id}] Timeout ({duration}): {future.Url}")))
+                .AttachExternalCancellation(future.CancellationToken);
+
+            return future;
         }
     }
 }

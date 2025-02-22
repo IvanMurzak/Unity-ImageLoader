@@ -4,162 +4,134 @@ using UnityEngine.TestTools;
 using System.Collections;
 using UnityEngine;
 using System;
+using Extensions.Unity.ImageLoader.Tests.Utils;
+using System.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestFuture
+    public partial class TestFuture : Test
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-        static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
-        [SetUp]
-        public void SetUp()
-        {
-            LogAssert.ignoreFailingMessages = false;
-            ImageLoader.settings.debugLevel = DebugLevel.Log;
-            ImageLoader.ClearRef();
-        }
-
-        [UnityTest] public IEnumerator GetAllLoadingFuturesNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return GetAllLoadingFutures();
-        }
+        [UnityTest] public IEnumerator GetAllLoadingFutures_NoLogs() => TestUtils.RunNoLogs(GetAllLoadingFutures);
         [UnityTest] public IEnumerator GetAllLoadingFutures()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var loadingFutures = ImageLoader.GetLoadingFutures();
-            Debug.Log($"Loading future count={loadingFutures.Count}");
-            foreach (var loadingFuture in loadingFutures)
+            var loadingSpriteFutures = ImageLoader.GetLoadingSpriteFutures();
+            Assert.NotNull(loadingSpriteFutures);
+            Debug.Log($"Loading Future<Sprite> count={loadingSpriteFutures.Count}");
+            foreach (var loadingFuture in loadingSpriteFutures)
             {
-                Debug.Log($"Loading future: {loadingFuture.Url}, Status={loadingFuture.Status}");
+                Debug.Log($"Loading Future<Sprite>: {loadingFuture.Url}, Status={loadingFuture.Status}");
             }
-            Assert.Zero(loadingFutures.Count);
+            Assert.Zero(loadingSpriteFutures.Count);
+            yield return UniTask.Yield();
+
+            var loadingTextureFutures = ImageLoader.GetLoadingTextureFutures();
+            Assert.NotNull(loadingTextureFutures);
+            Debug.Log($"Loading Future<Texture2D> count={loadingTextureFutures.Count}");
+            foreach (var loadingFuture in loadingTextureFutures)
+            {
+                Debug.Log($"Loading Future<Texture2D>: {loadingFuture.Url}, Status={loadingFuture.Status}");
+            }
+            Assert.Zero(loadingTextureFutures.Count);
         }
-        [UnityTest] public IEnumerator LoadingRefAndWaitingNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingRefAndWaiting();
-        }
+        [UnityTest] public IEnumerator LoadingRefAndWaiting_NoLogs() => TestUtils.RunNoLogs(LoadingRefAndWaiting);
         [UnityTest] public IEnumerator LoadingRefAndWaiting()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            while (!task1.IsCompleted)
-                yield return null;
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
-            ImageLoader.ClearMemoryCache(url1);
-            Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url));
 
             ref0.Dispose();
             Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
-        [UnityTest] public IEnumerator Loading2RefAndCancelFirstNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndCancelFirst();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndCancelFirst_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndCancelFirst);
         [UnityTest] public IEnumerator Loading2RefAndCancelFirst()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
-            var startTime = DateTime.Now;
+            var url = TestUtils.ImageURLs[0];
 
-            var future1 = ImageLoader.LoadSpriteRef(url1);
-            var future2 = ImageLoader.LoadSpriteRef(url1);
+            var future1 = ImageLoader.LoadSpriteRef(url);
+            var future2 = ImageLoader.LoadSpriteRef(url);
 
             future1.Cancel();
 
-            var task2 = future2.AsTask();
-            while (!task2.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(25));
-                yield return null;
-            }
+            var task1 = future2.AsTask();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
-            var ref2 = task2.Result;
+            var ref2 = task1.Result;
             Assert.IsNotNull(ref2);
             Assert.IsNotNull(ref2.Value);
-            Assert.AreEqual(1, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             future1.Dispose();
             future2.Dispose();
             ref2.Dispose();
         }
-        [UnityTest] public IEnumerator Loading2RefAndWaitNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndWait();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndWait_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndWait);
         [UnityTest] public IEnumerator Loading2RefAndWait()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var task1 = ImageLoader.LoadSpriteRef(url1).AsTask();
-            var task2 = ImageLoader.LoadSpriteRef(url1).AsTask();
+            var task1 = ImageLoader.LoadSpriteRef(url).AsTask();
+            var task2 = ImageLoader.LoadSpriteRef(url).AsTask();
 
-            while (!task1.IsCompleted || !task2.IsCompleted)
-                yield return null;
+            yield return Task.WhenAll(task1, task2).TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
             var ref0 = task1.Result;
             Assert.IsNotNull(ref0);
             var ref1 = task2.Result;
             Assert.IsNotNull(ref1);
-            Assert.AreEqual(2, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(2, Reference<Sprite>.Counter(url));
 
-            ImageLoader.ClearMemoryCache(url1);
-            Assert.IsNull(ref0.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.Throws<Exception>(() => ImageLoader.ClearMemoryCache(url));
 
             ref0.Dispose();
+            Assert.IsNull(ref0.Value);
+            Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             ref1.Dispose();
             Assert.IsNull(ref1.Value);
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+
+            var sprite = ImageLoader.LoadSpriteFromMemoryCache(url);
+            Assert.IsNull(sprite);
+
+            ImageLoader.ClearMemoryCache(url);
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
-        [UnityTest] public IEnumerator Loading2RefAndDisposeAllNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return Loading2RefAndDisposeAll();
-        }
+        [UnityTest] public IEnumerator Loading2RefAndDisposeAll_NoLogs() => TestUtils.RunNoLogs(Loading2RefAndDisposeAll);
         [UnityTest] public IEnumerator Loading2RefAndDisposeAll()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url1 = ImageURLs[0];
+            var url = TestUtils.ImageURLs[0];
 
-            var future1 = ImageLoader.LoadSpriteRef(url1);
+            var future1 = ImageLoader.LoadSpriteRef(url);
             Assert.IsNotNull(future1);
-            var future2 = ImageLoader.LoadSpriteRef(url1);
+            var future2 = ImageLoader.LoadSpriteRef(url);
             Assert.IsNotNull(future2);
 
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
 
             future1.Cancel();
             future2.Cancel();
@@ -167,28 +139,22 @@ namespace Extensions.Unity.ImageLoader.Tests
             future1.Dispose();
             future2.Dispose();
 
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
-            yield return UniTask.Delay(1000).ToCoroutine();
-            Assert.AreEqual(0, Reference<Sprite>.Counter(url1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
+            Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlockNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
-                while (!task1.IsCompleted)
-                    yield return null;
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 using (var ref1 = task1.Result)
                 {
@@ -196,28 +162,22 @@ namespace Extensions.Unity.ImageLoader.Tests
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock2();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock2);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock2()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
-                while (!task1.IsCompleted)
-                    yield return null;
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -225,28 +185,22 @@ namespace Extensions.Unity.ImageLoader.Tests
                 ref1.Dispose();
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
-        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3NoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DisposeOnOutDisposingBlock3();
-        }
+        [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutDisposingBlock3);
         [UnityTest] public IEnumerator DisposeOnOutDisposingBlock3()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var future1 = ImageLoader.LoadSpriteRef(url);
                 var task1 = future1.AsTask();
-                while (!task1.IsCompleted)
-                    yield return null;
+                yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
 
@@ -255,8 +209,7 @@ namespace Extensions.Unity.ImageLoader.Tests
 
                 var future2 = ImageLoader.LoadSpriteRef(url);
                 var task2 = future2.AsTask();
-                while (!task2.IsCompleted)
-                    yield return null;
+                yield return task2.TimeoutCoroutine(TimeSpan.FromSeconds(25));
 
                 using (var ref2 = task2.Result)
                 {
@@ -264,381 +217,45 @@ namespace Extensions.Unity.ImageLoader.Tests
                 }
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));
             }
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url), $"Should be zero references to URL={url}");
             }
         }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromMemoryCacheCalled();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheCalled()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromMemoryCache(x => sprite = x);
-
-                var task1 = future1.AsTask();
-
-                while (sprite != null)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancelNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromMemoryCacheNotCalledBecauseOfCancel();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromMemoryCacheNotCalledBecauseOfCancel()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromMemoryCache(x => sprite = x);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsNull(sprite);
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadedFromDiskCalledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromDiskCalled();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromDiskCalled()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromDiskCache(x => sprite = x);
-
-                var task1 = future1.AsTask();
-
-                while (sprite != null)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancelNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromDiskNotCalledBecauseOfCancel();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromDiskNotCalledBecauseOfCancel()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromDiskCache(x => sprite = x);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsNull(sprite);
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadedFromSourceCalledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromSourceCalled();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromSourceCalled()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromSource(x => sprite = x);
-
-                var task1 = future1.AsTask();
-
-                while (sprite != null)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancelNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadedFromSourceNotCalledBecauseOfCancel();
-        }
-        [UnityTest] public IEnumerator EventLoadedFromSourceNotCalledBecauseOfCancel()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var sprite = default(Sprite);
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadedFromSource(x => sprite = x);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsNull(sprite);
-
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheCalled();
-        }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalled()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = false;
-
-            foreach (var url in ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromDiskCache(() => called = true);
-
-                var task1 = future1.AsTask();
-
-                while (!called)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
-                Assert.IsTrue(called);
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediatelyNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromDiskCacheCalledImmediately();
-        }
-        [UnityTest] public IEnumerator EventLoadingFromDiskCacheCalledImmediately()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = false;
-
-            foreach (var url in ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsUniTask().ToCoroutine();
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromDiskCache(() => called = true);
-
-                Assert.IsTrue(called);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                Assert.IsTrue(called);
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                Assert.IsTrue(called);
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsTrue(called);
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromSourceCalled();
-        }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalled()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromSource(() => called = true);
-
-                var task1 = future1.AsTask();
-
-                while (!called)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                while (!task1.IsCompleted)
-                    yield return null;
-
-                Assert.IsTrue(called);
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediatelyNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventLoadingFromSourceCalledImmediately();
-        }
-        [UnityTest] public IEnumerator EventLoadingFromSourceCalledImmediately()
-        {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
-            ImageLoader.settings.useDiskCache = true;
-            ImageLoader.settings.useMemoryCache = true;
-
-            foreach (var url in ImageURLs)
-            {
-                var called = false;
-                var startTime = DateTime.Now;
-                var future1 = ImageLoader.LoadSprite(url)
-                    .LoadingFromSource(() => called = true);
-
-                Assert.IsTrue(called);
-
-                var task1 = future1.AsTask();
-                future1.Cancel();
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                yield return UniTask.Delay(1000).ToCoroutine();
-                Assert.IsTrue(called);
-                future1.Dispose();
-            }
-        }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeoutNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlAndTimeout();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlAndTimeout);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlAndTimeout()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future1 = ImageLoader.LoadSprite(url)
-                .Timeout(TimeSpan.FromSeconds(0.5f))
+                .Timeout(TimeSpan.FromSeconds(0.1f))
                 .Failed(e => exception = e);
 
             Assert.IsNull(exception);
 
             LogAssert.ignoreFailingMessages = true;
-            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(2));
             var task1 = future1.AsTask();
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsNotNull(exception);
-            future1.Cancel();
+
+            future1.Cancel(); // expected warning
             LogAssert.ignoreFailingMessages = false;
-            yield return UniTask.Delay(TimeSpan.FromSeconds(2)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(2));
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancelNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return EventFailedWithIncorrectUrlNotCalledBecauseOfCancel();
-        }
+        [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel_NoLogs() => TestUtils.RunNoLogs(EventFailedWithIncorrectUrlNotCalledBecauseOfCancel);
         [UnityTest] public IEnumerator EventFailedWithIncorrectUrlNotCalledBecauseOfCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            var url = IncorrectImageURL;
+            var url = TestUtils.IncorrectImageURL;
             var exception = default(Exception);
             var startTime = DateTime.Now;
             var future1 = ImageLoader.LoadSprite(url)
@@ -649,83 +266,36 @@ namespace Extensions.Unity.ImageLoader.Tests
             var task1 = future1.AsTask();
             future1.Cancel();
 
-            while (!task1.IsCompleted)
-            {
-                Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                yield return null;
-            }
-            yield return UniTask.Delay(1000).ToCoroutine();
+            yield return task1.TimeoutCoroutine(TimeSpan.FromSeconds(25));
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
             Assert.IsNull(exception);
             future1.Dispose();
         }
-        [UnityTest] public IEnumerator AsyncOperationCompletionNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return AsyncOperationCompletion();
-        }
+        [UnityTest] public IEnumerator AsyncOperationCompletion_NoLogs() => TestUtils.RunNoLogs(AsyncOperationCompletion);
         [UnityTest] public IEnumerator AsyncOperationCompletion()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in ImageURLs)
+            foreach (var url in TestUtils.ImageURLs)
             {
                 var completed = false;
                 yield return ImageLoader.LoadSprite(url)
                     .Completed(success => completed = true)
-                    .AsUniTask().ToCoroutine();
+                    .TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
                 Assert.IsTrue(completed);
             }
-            yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
+            yield return TestUtils.Wait(TimeSpan.FromSeconds(1));
         }
-        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancelNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return AsyncOperationCompletionAfterCancel();
-        }
+        [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel_NoLogs() => TestUtils.RunNoLogs(AsyncOperationCompletionAfterCancel);
         [UnityTest] public IEnumerator AsyncOperationCompletionAfterCancel()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
-            LogAssert.ignoreFailingMessages = true;
 
-            foreach (var url in ImageURLs)
-            {
-                var completed = false;
-                var cancelled = false;
-                var startTime = DateTime.Now;
-                var future = ImageLoader.LoadSprite(url)
-                    .Completed(success => completed = true)
-                    .Canceled(() => cancelled = true);
-
-                Assert.IsFalse(completed);
-                Assert.IsFalse(cancelled);
-                var task1 = future.AsTask();
-                future.Cancel();
-                var task2 = future.AsTask();
-
-                Assert.IsFalse(completed);
-                Assert.IsTrue(cancelled);
-
-                while (!task1.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-                while (!task2.IsCompleted)
-                {
-                    Assert.Less(DateTime.Now - startTime, TimeSpan.FromSeconds(2));
-                    yield return null;
-                }
-
-                Assert.IsFalse(completed);
-                Assert.IsTrue(cancelled);
-                yield return UniTask.Delay(TimeSpan.FromSeconds(1)).ToCoroutine();
-                future.Dispose();
-            }
+            foreach (var url in TestUtils.ImageURLs)
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
         }
     }
 }

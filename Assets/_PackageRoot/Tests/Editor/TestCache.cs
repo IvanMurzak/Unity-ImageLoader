@@ -2,19 +2,15 @@ using NUnit.Framework;
 using Cysharp.Threading.Tasks;
 using UnityEngine.TestTools;
 using System.Collections;
+using Extensions.Unity.ImageLoader.Tests.Utils;
+using System;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
-    public class TestCache
+    public class TestCache : Test
     {
-        static readonly string[] ImageURLs =
-        {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/master/Test%20Images/ImageC.png"
-        };
-
-        [SetUp] public void SetUp() => ImageLoader.settings.debugLevel = DebugLevel.Log;
+        [UnitySetUp] public override IEnumerator SetUp() => base.SetUp();
+        [UnityTearDown] public override IEnumerator TearDown() => base.TearDown();
 
         public async UniTask LoadSprite(string url)
         {
@@ -22,178 +18,128 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.IsNotNull(sprite);
         }
 
-        [UnityTest] public IEnumerator LoadingFromMemoryCacheNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingFromMemoryCache();
-        }
+        [UnityTest] public IEnumerator LoadingFromMemoryCache_NoLogs() => TestUtils.RunNoLogs(LoadingFromMemoryCache);
         [UnityTest] public IEnumerator LoadingFromMemoryCache()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = true;
             ImageLoader.settings.useDiskCache = false;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator LoadingFromDiskCacheNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return LoadingFromDiskCache();
-        }
+        [UnityTest] public IEnumerator LoadingFromDiskCache_NoLogs() => TestUtils.RunNoLogs(LoadingFromDiskCache);
         [UnityTest] public IEnumerator LoadingFromDiskCache()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = false;
             ImageLoader.settings.useDiskCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheEnableNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DiskCacheEnable();
-        }
+        [UnityTest] public IEnumerator DiskCacheEnable_NoLogs() => TestUtils.RunNoLogs(DiskCacheEnable);
         [UnityTest] public IEnumerator DiskCacheEnable()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator DiskCacheDisableNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return DiskCacheDisable();
-        }
+        [UnityTest] public IEnumerator DiskCacheDisable_NoLogs() => TestUtils.RunNoLogs(DiskCacheDisable);
         [UnityTest] public IEnumerator DiskCacheDisable()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = false;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheEnabledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return MemoryCacheEnabled();
-        }
+        [UnityTest] public IEnumerator MemoryCacheEnabled_NoLogs() => TestUtils.RunNoLogs(MemoryCacheEnabled);
         [UnityTest] public IEnumerator MemoryCacheEnabled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator MemoryCacheDisabledNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return MemoryCacheDisabled();
-        }
+        [UnityTest] public IEnumerator MemoryCacheDisabled_NoLogs() => TestUtils.RunNoLogs(MemoryCacheDisabled);
         [UnityTest] public IEnumerator MemoryCacheDisabled()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCacheNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearDiskCache();
-        }
+        [UnityTest] public IEnumerator ClearDiskCache_NoLogs() => TestUtils.RunNoLogs(ClearDiskCache);
         [UnityTest] public IEnumerator ClearDiskCache()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
-                yield return ImageLoader.ClearDiskCache().AsUniTask().ToCoroutine();
+                yield return ImageLoader.ClearDiskCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearMemoryCacheNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearMemoryCache();
-        }
+        [UnityTest] public IEnumerator ClearMemoryCache_NoLogs() => TestUtils.RunNoLogs(ClearMemoryCache);
         [UnityTest] public IEnumerator ClearMemoryCache()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
                 ImageLoader.ClearMemoryCache(imageURL);
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
             }
         }
-        [UnityTest] public IEnumerator ClearDiskCacheAllNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearDiskCacheAll();
-        }
+        [UnityTest] public IEnumerator ClearDiskCacheAll_NoLogs() => TestUtils.RunNoLogs(ClearDiskCacheAll);
         [UnityTest] public IEnumerator ClearDiskCacheAll()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useDiskCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.DiskCacheContains(imageURL));
             }
-            yield return ImageLoader.ClearDiskCache().AsUniTask().ToCoroutine();
-            foreach (var imageURL in ImageURLs)
+            yield return ImageLoader.ClearDiskCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
+            foreach (var imageURL in TestUtils.ImageURLs)
                 Assert.IsFalse(ImageLoader.DiskCacheContains(imageURL));
         }
-        [UnityTest] public IEnumerator ClearMemoryCacheAllNoLogs()
-        {
-            ImageLoader.settings.debugLevel = DebugLevel.Error;
-            yield return ClearMemoryCacheAll();
-        }
+        [UnityTest] public IEnumerator ClearMemoryCacheAll_NoLogs() => TestUtils.RunNoLogs(ClearMemoryCacheAll);
         [UnityTest] public IEnumerator ClearMemoryCacheAll()
         {
-            yield return ImageLoader.ClearCache().AsUniTask().ToCoroutine();
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var imageURL in ImageURLs)
+            foreach (var imageURL in TestUtils.ImageURLs)
             {
-                yield return LoadSprite(imageURL).ToCoroutine();
+                yield return LoadSprite(imageURL).TimeoutCoroutine(TimeSpan.FromSeconds(10));
                 Assert.IsTrue(ImageLoader.MemoryCacheContains(imageURL));
             }
-            ImageLoader.ClearMemoryCache();
-            foreach (var imageURL in ImageURLs)
+            ImageLoader.ClearMemoryCacheAll();
+            foreach (var imageURL in TestUtils.ImageURLs)
                 Assert.IsFalse(ImageLoader.MemoryCacheContains(imageURL));
         }
     }

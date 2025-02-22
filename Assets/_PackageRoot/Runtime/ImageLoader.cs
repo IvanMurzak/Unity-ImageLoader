@@ -1,38 +1,11 @@
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Extensions.Unity.ImageLoader
 {
     public static partial class ImageLoader
     {
-        private static ConcurrentDictionary<string, Future<Sprite>> loadingInProcess = new ConcurrentDictionary<string, Future<Sprite>>();
-        private static void AddLoading(Future<Sprite> future)
-        {
-            if (!loadingInProcess.TryAdd(future.Url, future))
-                throw new Exception($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url} already loading");
-
-            if (settings.debugLevel <= DebugLevel.Log)
-                Debug.Log($"[ImageLoader] Future[id={future.id}] AddLoading: {future.Url}, total {loadingInProcess.Count} loading tasks");
-        }
-        private static void RemoveLoading(Future<Sprite> future) => RemoveLoading(future.Url);
-        private static void RemoveLoading(string url)
-        {
-            if (loadingInProcess.TryRemove(url, out var future))
-            {
-                if (settings.debugLevel <= DebugLevel.Log)
-                    Debug.Log($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url}, left {loadingInProcess.Count} loading tasks");
-            }
-            else
-            {
-                if (settings.debugLevel <= DebugLevel.Warning)
-                    Debug.LogWarning($"[ImageLoader] Future[id={future.id}] RemoveLoading: {url} not found in loading tasks");
-            }
-        }
-
         /// <summary>
         /// Initialization of static variables, should be called from main thread at project start
         /// </summary>
@@ -46,29 +19,48 @@ namespace Extensions.Unity.ImageLoader
         /// Check if the url is loading right now
         /// </summary>
         /// <returns>Returns true if the url is loading right now</returns>
-        public static bool IsLoading(string url) => loadingInProcess.ContainsKey(url);
+        public static bool IsLoadingSprite<T>(string url) => Future<Sprite>.IsLoading(url);
+
+        /// <summary>
+        /// Check if the url is loading right now
+        /// </summary>
+        /// <returns>Returns true if the url is loading right now</returns>
+        public static bool IsLoadingTexture<T>(string url) => Future<Texture2D>.IsLoading(url);
 
         /// <summary>
         /// Find and return current loading Future by the url
         /// <param name="url">URL to the picture, web or local</param>
         /// </summary>
         /// <returns>Returns current loading Future or null if none</returns>
-        public static Future<Sprite> GetLoadingFuture(string url) => loadingInProcess.TryGetValue(url, out var future) ? future : null;
+        public static Future<Sprite> GetLoadingSpriteFuture<T>(string url) => Future<Sprite>.GetLoadingFuture(url);
+
+        /// <summary>
+        /// Find and return current loading Future by the url
+        /// <param name="url">URL to the picture, web or local</param>
+        /// </summary>
+        /// <returns>Returns current loading Future or null if none</returns>
+        public static Future<Texture2D> GetLoadingTextureFuture<T>(string url) => Future<Texture2D>.GetLoadingFuture(url);
 
         /// <summary>
         /// Return all current loading Futures
         /// </summary>
         /// <returns>Returns read only list of all current loading Futures</returns>
-        public static IReadOnlyCollection<Future<Sprite>> GetLoadingFutures() => loadingInProcess.Values.ToArray();
+        public static IReadOnlyCollection<Future<Sprite>> GetLoadingSpriteFutures() => Future<Sprite>.GetLoadingFutures();
+
+        /// <summary>
+        /// Return all current loading Futures
+        /// </summary>
+        /// <returns>Returns read only list of all current loading Futures</returns>
+        public static IReadOnlyCollection<Future<Texture2D>> GetLoadingTextureFutures() => Future<Texture2D>.GetLoadingFutures();
 
         /// <summary>
         /// Clear cache from Memory and Disk layers for all urls
         /// </summary>
         /// <returns>Returns task of the disk cache clearing process</returns>
-        public static Task ClearCache()
+        public static Task ClearCacheAll()
         {
-            ClearMemoryCache();
-            return ClearDiskCache();
+            ClearMemoryCacheAll();
+            return ClearDiskCacheAll();
         }
 
         /// <summary>
@@ -95,7 +87,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="texture">Texture for creation Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, float pixelDensity = 100f)
+        public static Sprite ToSprite(this Texture2D texture, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelDensity);
 
         /// <summary>
@@ -105,7 +97,14 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="pivot">Pivot of created Sprite</param>
         /// <param name="pixelDensity">Pixel density of the Sprite</param>
         /// <returns>Returns sprite</returns>
-        public static Sprite ToSprite(Texture2D texture, Vector2 pivot, float pixelDensity = 100f)
+        public static Sprite ToSprite(this Texture2D texture, Vector2 pivot, float pixelDensity = 100f)
             => Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), pivot, pixelDensity);
+
+        /// <summary>
+        /// Get reference count of the image
+        /// </summary>
+        /// <param name="url">URL to the image, web or local</param>
+        /// <returns>Returns reference count</returns>
+        public static int GetReferenceCount(string url) => Reference<Texture2D>.Counter(url);
     }
 }
