@@ -49,5 +49,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             yield return test();
         }
+        public static void RunNoLogs(Action test)
+        {
+            ImageLoader.settings.debugLevel = DebugLevel.Error;
+            test();
+        }
     }
 }
