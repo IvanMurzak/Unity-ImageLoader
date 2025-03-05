@@ -1,64 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Extensions.Unity.ImageLoader
 {
     public partial class Future<T>
     {
-        protected Mutex placeholderMutex = new Mutex();
-        protected Dictionary<FutureLoadingFrom, T> placeholders;
-
         /// <summary>
         ///
         /// </summary>
-        public IFuture<T> SetPlaceholder(T placeholder, params FutureLoadingFrom[] from)
+        public IFuture<T> SetPlaceholder(T placeholder, params FuturePlaceholderTrigger[] triggers)
         {
-            lock (placeholderMutex)
-            {
-                if (placeholders == null)
-                    placeholders = new Dictionary<FutureLoadingFrom, T>();
-
-                foreach (var f in from)
-                {
-                    if (placeholders.ContainsKey(f))
-                    {
-                        if (LogLevel.IsActive(DebugLevel.Warning))
-                            Debug.Log($"[ImageLoader] Future[id={Id}] Placeholder for loading from {f} is already set. Replacing it with new value\n{Url}");
-                    }
-                    if (LogLevel.IsActive(DebugLevel.Trace))
-                        Debug.Log($"[ImageLoader] Future[id={Id}] Set placeholder for loading from {f}\n{Url}");
-                    placeholders[f] = placeholder;
-                }
-            }
             if (cleared || IsCancelled)
             {
                 if (LogLevel.IsActive(DebugLevel.Error))
                     Debug.Log($"[ImageLoader] Future[id={Id}] SetPlaceholder: is impossible because the future is cleared or canceled\n{Url}");
                 return this;
             }
-            if (IsInProgress)
-            {
-                // TODO: set placeholder
 
-                return this;
-            }
-
-            if (from.Any(x => x == FutureLoadingFrom.DiskCache))
+            foreach (var trigger in triggers)
             {
-                LoadingFromDiskCache(() =>
+                if (trigger.IsEqual(Status))
                 {
-                    // TODO: set placeholder
-                });
-            }
-            if (from.Any(x => x == FutureLoadingFrom.Source))
-            {
-                LoadingFromSource(() =>
+                    foreach (var setter in setters)
+                        Safe.Run(setter, placeholder, LogLevel);
+                    continue;
+                }
+                switch (trigger)
                 {
-                    // TODO: set placeholder
-                });
+                    case FuturePlaceholderTrigger.LoadingFromDiskCache:
+                        LoadingFromDiskCache(() =>
+                        {
+                            foreach (var setter in setters)
+                                Safe.Run(setter, placeholder, LogLevel);
+                        });
+                        break;
+                    case FuturePlaceholderTrigger.LoadingFromSource:
+                        LoadingFromDiskCache(() =>
+                        {
+                            foreach (var setter in setters)
+                                Safe.Run(setter, placeholder, LogLevel);
+                        });
+                        break;
+                    case FuturePlaceholderTrigger.FailedToLoad:
+                        Failed(exception =>
+                        {
+                            foreach (var setter in setters)
+                                Safe.Run(setter, placeholder, LogLevel);
+                        });
+                        break;
+                    case FuturePlaceholderTrigger.Canceled:
+                        Canceled(() =>
+                        {
+                            foreach (var setter in setters)
+                                Safe.Run(setter, placeholder, LogLevel);
+                        });
+                        break;
+                }
             }
 
             return this;

@@ -35,8 +35,8 @@ namespace Extensions.Unity.ImageLoader
 
         public uint Id { get; } = FutureMetadata.idCounter++;
 
+        protected readonly List<Action<T>> setters = new List<Action<T>>();
         protected TimeSpan timeout;
-        protected List<Action<T, Sprite>> setters = new List<Action<T, Sprite>>();
         protected bool cleared = false;
         protected bool disposeValue = false;
         protected T value = default;
@@ -135,35 +135,6 @@ namespace Extensions.Unity.ImageLoader
 
             return this;
         }
-        internal void Placeholder(Sprite placeholder)
-        {
-            if (cleared || IsCancelled) return;
-
-            if (LogLevel.IsActive(DebugLevel.Log))
-                Debug.Log($"[ImageLoader] Future[id={Id}] Placeholder\n{Url}");
-
-            // UniTask.ReturnToMainThread()
-            // if (UnityMainThreadDispatcher.IsMainThread)
-            // {
-            //     OnLoadedFromMemoryCache?.Invoke(placeholder);
-            //     OnLoadedFromDiskCache?.Invoke(placeholder);
-            //     OnLoadedFromSource?.Invoke(placeholder);
-            //     OnLoaded?.Invoke(placeholder);
-            //     OnCompleted?.Invoke(true);
-            //     Clear();
-            // }
-            // else
-            // {
-            //     UniTask.SwitchToMainThread();
-            //     Placeholder(placeholder);
-            // }
-
-            OnLoadedFromMemoryCache += (v) => { };
-            OnLoadingFromDiskCache += ( ) => { };
-            OnLoadedFromDiskCache += (v) => { };
-            OnLoadingFromSource += ( ) => { };
-            OnLoadedFromSource += (v) => { };
-        }
         void IFutureInternal<T>.Loading(FutureLoadingFrom loadingFrom)
         {
             if (cleared || IsCancelled) return;
@@ -244,6 +215,7 @@ namespace Extensions.Unity.ImageLoader
                 Debug.Log($"[ImageLoader] Future[id={Id}] Cleared\n{Url}");
             cleared = true;
 
+            setters.Clear();
             OnLoadedFromMemoryCache = null;
             OnLoadingFromDiskCache = null;
             OnLoadedFromDiskCache = null;
