@@ -3,10 +3,10 @@ name: 6000.0.37f1-Player
 on:
   pull_request:
     branches:
-      - main
+      - master
   push:
     branches:
-      - main
+      - master
 
 jobs:
   editor-tests:

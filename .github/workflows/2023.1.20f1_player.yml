@@ -3,10 +3,10 @@ name: 2023.1.20f1-Player
 on:
   pull_request:
     branches:
-      - main
+      - master
   push:
     branches:
-      - main
+      - master
 
 jobs:
   editor-tests:
