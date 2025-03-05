@@ -1,0 +1,18 @@
+name: 2023.2.20f1-Player
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  editor-tests:
+    uses: ./.github/workflows/main.yml
+    with:
+      projectPath: './'
+      unityVersion: '2023.2.20f1'
+      testMode: 'playmode'
+    secrets: inherit
