@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    internal static partial class TestUtils
+    public static partial class TestUtils
     {
         public static IEnumerator LoadFromMemoryCache(string url) => Load(url, null, FutureLoadedFrom.MemoryCache);
         public static IEnumerator Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)

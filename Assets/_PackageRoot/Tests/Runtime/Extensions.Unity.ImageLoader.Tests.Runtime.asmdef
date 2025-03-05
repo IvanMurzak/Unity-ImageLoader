@@ -1,0 +1,20 @@
+{
+    "name": "Extensions.Unity.ImageLoader.Tests.Runtime",
+    "references": [
+        "Extensions.Unity.ImageLoader.Tests",
+        "Extensions.Unity.ImageLoader",
+        "UnityEngine.TestRunner",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
