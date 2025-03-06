@@ -9,10 +9,18 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
     public static partial class TestUtils
     {
         public static IEnumerator LoadFromMemoryCache(string url) => Load(url, null, FutureLoadedFrom.MemoryCache);
-        public static IEnumerator Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
+        public static IEnumerator Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool usePlaceholder = false)
         {
             var future = ImageLoader.LoadSprite(url);
-            var futureListener = future.ToFutureListener();
+            var futureListener = future.ToFutureListener(ignorePlaceholder: !usePlaceholder);
+
+            if (usePlaceholder)
+            {
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+            }
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
@@ -55,12 +63,6 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             yield return UniTask.Yield();
         }
         public static IEnumerator LoadFromMemoryCacheThenCancel(string url, bool useGC) => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache, useGC);
-
-        // public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
-        // {
-        //     yield return LoadThenCancel(url, expectedLoadingFrom, expectedLoadedFrom, useGC: true);
-        //     yield return LoadThenCancel(url, expectedLoadingFrom, expectedLoadedFrom, useGC: false);
-        // }
         public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool useGC)
         {
             var future = ImageLoader.LoadSprite(url);

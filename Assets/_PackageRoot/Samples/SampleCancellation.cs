@@ -12,19 +12,19 @@ public class SampleCancellation : MonoBehaviour
     void Start()
     {
         ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
+            .Consume(image) // if success set sprite into image
             .CancelOnDestroy(this) // cancel OnDestroy event of current gameObject
             .Forget();
 
         ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
+            .Consume(image) // if success set sprite into image
             .Failed(exception => Debug.LogException(exception)) // if fail print exception
             .CancelOnDestroy(this) // cancel OnDestroy event of current gameObject
             .Forget();
 
         ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
-            .Then(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
+            .Consume(image) // if success set sprite into image
+            .Loaded(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
             .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
             .Canceled(() => Debug.Log("ImageLoading canceled")) // if cancelled
             .CancelOnDisable(this) // cancel OnDisable event of current gameObject
@@ -34,7 +34,7 @@ public class SampleCancellation : MonoBehaviour
     void DestroyWithMonoBehaviour()
     {
         ImageLoader.LoadSprite(imageURL)
-            .ThenSet(image)
+            .Consume(image)
             .CancelOnEnable(this)   // cancel on OnEnable event of current MonoBehaviour
             .CancelOnDisable(this)  // cancel on OnDisable event of current MonoBehaviour
             .CancelOnDestroy(this); // cancel on OnDestroy event of current MonoBehaviour
@@ -42,7 +42,7 @@ public class SampleCancellation : MonoBehaviour
 
     void SimpleCancellation()
     {
-        var future = ImageLoader.LoadSprite(imageURL).ThenSet(image);
+        var future = ImageLoader.LoadSprite(imageURL).Consume(image);
         future.Cancel();
     }
 
@@ -52,7 +52,7 @@ public class SampleCancellation : MonoBehaviour
 
         // loading with attached cancellation token
         ImageLoader.LoadSprite(imageURL, cancellationToken: cancellationTokenSource.Token)
-            .ThenSet(image)
+            .Consume(image)
             .Forget();
 
         cancellationTokenSource.Cancel(); // canceling
@@ -63,7 +63,7 @@ public class SampleCancellation : MonoBehaviour
         var cancellationTokenSource = new CancellationTokenSource();
 
         ImageLoader.LoadSprite(imageURL)
-            .ThenSet(image)
+            .Consume(image)
             .Register(cancellationTokenSource.Token) // registering cancellation token
             .Forget();
 
@@ -72,7 +72,7 @@ public class SampleCancellation : MonoBehaviour
 
     void DisposeSample()
     {
-        using (var future = ImageLoader.LoadSprite(imageURL).ThenSet(image))
+        using (var future = ImageLoader.LoadSprite(imageURL).Consume(image))
         {
             // future would be canceled and disposed outside of the brackets
         }

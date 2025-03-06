@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 events.Add(new EventData { name = eventName });
         }
 
-        public void Loaded(T value, FutureLoadedFrom loadedFrom)
+        public void SetLoaded(T value, FutureLoadedFrom loadedFrom)
         {
             if (LogLevel.IsActive(DebugLevel.Trace))
                 UnityEngine.Debug.Log($"FakeFuture[id={Id}] Loaded from {loadedFrom}");

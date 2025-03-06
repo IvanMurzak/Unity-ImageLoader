@@ -11,7 +11,7 @@ public class SampleTimeout : MonoBehaviour
     void Start()
     {
         ImageLoader.LoadSprite(imageURL) // load sprite
-            .ThenSet(image) // if success set sprite into image
+            .Consume(image) // if success set sprite into image
             .Timeout(TimeSpan.FromSeconds(10)) // set timeout duration 10 seconds
             .Forget();
     }

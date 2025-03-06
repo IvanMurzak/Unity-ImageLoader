@@ -13,6 +13,6 @@ public class SampleLoadSpriteThenSetImage : MonoBehaviour
         image.sprite = await ImageLoader.LoadSprite(imageURL);
 
         // Load a sprite from the web and set it directly to the Image component
-        await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+        await ImageLoader.LoadSprite(imageURL).Consume(image);
     }
 }

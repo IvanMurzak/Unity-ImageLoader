@@ -13,28 +13,19 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="setter">Setter function that gets Consumer and loaded object, it should set the object into Consumer</param>
         /// <param name="consumers">Array of consumers for injecting</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<T> ThenSet<T, C>(this IFuture<T> future, Action<C, T> setter, params C[] consumers) => future.Then(obj =>
+        public static IFuture<T> Consume<T, C>(this IFuture<T> future, Action<C, T> setter, params C[] consumers) => future.Consume(obj =>
         {
             UniTask.Post(() => // using only MainThread to set any images to any targets
             {
-                foreach (var target in consumers)
+                foreach (var consumer in consumers)
                 {
-                    if (target == null)
+                    if (ReferenceEquals(consumer, null) || consumer == null)
                     {
                         if (future.LogLevel.IsActive(DebugLevel.Warning))
                             Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] The target is null. Can't set image into it. Skipping.");
                         continue;
                     }
-                    if (target is UnityEngine.Object unityObject)
-                    {
-                        if (unityObject.IsNull())
-                        {
-                            if (future.LogLevel.IsActive(DebugLevel.Warning))
-                                Debug.LogWarning($"The target ({typeof(T).Name}) is destroyed. Can't set image into it. Skipping.");
-                            continue;
-                        }
-                    }
-                    setter?.Invoke(target, obj);
+                    Safe.Run(setter, consumer, obj, future.LogLevel);
                 }
             });
         });
@@ -44,57 +35,40 @@ namespace Extensions.Unity.ImageLoader
         /// </summary>
         /// <param name="images">Array of Images</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Sprite> ThenSet(this IFuture<Sprite> future, params Image[] images)
-            => future.ThenSet((consumer, sprite) => consumer.sprite = sprite, images);
+        public static IFuture<Sprite> Consume(this IFuture<Sprite> future, params Image[] images)
+            => future.Consume((consumer, sprite) => consumer.sprite = sprite, images);
 
         /// <summary>
         /// Set image into array of RawImages
         /// </summary>
         /// <param name="rawImages">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Sprite> ThenSet(this IFuture<Sprite> future, params RawImage[] rawImages)
-            => future.ThenSet((consumer, sprite) => consumer.texture = sprite?.texture, rawImages);
+        public static IFuture<Sprite> Consume(this IFuture<Sprite> future, params RawImage[] rawImages)
+            => future.Consume((consumer, sprite) => consumer.texture = sprite?.texture, rawImages);
 
         /// <summary>
         /// Set image into array of RawImages
         /// </summary>
         /// <param name="rawImages">Array of RawImages</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Texture2D> ThenSet(this IFuture<Texture2D> future, params RawImage[] rawImages)
-            => future.ThenSet((consumer, texture) => consumer.texture = texture, rawImages);
+        public static IFuture<Texture2D> Consume(this IFuture<Texture2D> future, params RawImage[] rawImages)
+            => future.Consume((consumer, texture) => consumer.texture = texture, rawImages);
 
         /// <summary>
         /// Set image into array of SpriteRenderers
         /// </summary>
         /// <param name="spriteRenderers">Array of SpriteRenderers</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Sprite> ThenSet(this IFuture<Sprite> future, params SpriteRenderer[] spriteRenderers)
-            => future.ThenSet((consumer, sprite) => consumer.sprite = sprite, spriteRenderers);
+        public static IFuture<Sprite> Consume(this IFuture<Sprite> future, params SpriteRenderer[] spriteRenderers)
+            => future.Consume((consumer, sprite) => consumer.sprite = sprite, spriteRenderers);
 
         /// <summary>
         /// Set image into array of Materials
         /// </summary>
         /// <param name="materials">Array of Materials</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Sprite> ThenSet(this IFuture<Sprite> future, params Material[] materials)
-            => future.ThenSet("_MainTex", materials);
-
-        /// <summary>
-        /// Set image into array of Materials
-        /// </summary>
-        /// <param name="propertyName">Property name to set the texture</param>
-        /// <param name="materials">Array of Materials</param>
-        /// <returns>Returns async Future</returns>
-        public static IFuture<Sprite> ThenSet(this IFuture<Sprite> future, string propertyName = "_MainTex", params Material[] materials)
-            => future.ThenSet((consumer, sprite) => consumer.SetTexture(propertyName, sprite?.texture), materials);
-
-        /// <summary>
-        /// Set image into array of Materials
-        /// </summary>
-        /// <param name="materials">Array of Materials</param>
-        /// <returns>Returns async Future</returns>
-        public static IFuture<Texture2D> ThenSet(this IFuture<Texture2D> future, params Material[] materials)
-            => future.ThenSet("_MainTex", materials);
+        public static IFuture<Sprite> Consume(this IFuture<Sprite> future, params Material[] materials)
+            => future.Consume("_MainTex", materials);
 
         /// <summary>
         /// Set image into array of Materials
@@ -102,7 +76,24 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="propertyName">Property name to set the texture</param>
         /// <param name="materials">Array of Materials</param>
         /// <returns>Returns async Future</returns>
-        public static IFuture<Texture2D> ThenSet(this IFuture<Texture2D> future, string propertyName = "_MainTex", params Material[] materials)
-            => future.ThenSet((consumer, texture) => consumer.SetTexture(propertyName, texture), materials);
+        public static IFuture<Sprite> Consume(this IFuture<Sprite> future, string propertyName = "_MainTex", params Material[] materials)
+            => future.Consume((consumer, sprite) => consumer.SetTexture(propertyName, sprite?.texture), materials);
+
+        /// <summary>
+        /// Set image into array of Materials
+        /// </summary>
+        /// <param name="materials">Array of Materials</param>
+        /// <returns>Returns async Future</returns>
+        public static IFuture<Texture2D> Consume(this IFuture<Texture2D> future, params Material[] materials)
+            => future.Consume("_MainTex", materials);
+
+        /// <summary>
+        /// Set image into array of Materials
+        /// </summary>
+        /// <param name="propertyName">Property name to set the texture</param>
+        /// <param name="materials">Array of Materials</param>
+        /// <returns>Returns async Future</returns>
+        public static IFuture<Texture2D> Consume(this IFuture<Texture2D> future, string propertyName = "_MainTex", params Material[] materials)
+            => future.Consume((consumer, texture) => consumer.SetTexture(propertyName, texture), materials);
     }
 }

@@ -35,7 +35,7 @@ namespace Extensions.Unity.ImageLoader
                 var cachedObj = LoadFromMemoryCache(Url);
                 if (cachedObj != null)
                 {
-                    ((IFutureInternal<T>)this).Loaded(cachedObj, FutureLoadedFrom.MemoryCache);
+                    ((IFutureInternal<T>)this).SetLoaded(cachedObj, FutureLoadedFrom.MemoryCache);
                     return;
                 }
             }
@@ -89,7 +89,7 @@ namespace Extensions.Unity.ImageLoader
                             RemoveLoading(); // LOADING REMOVED
                             if (IsCancelled || Status == FutureStatus.FailedToLoad)
                                 return;
-                            ((IFutureInternal<T>)this).Loaded(loadedObj, FutureLoadedFrom.DiskCache);
+                            ((IFutureInternal<T>)this).SetLoaded(loadedObj, FutureLoadedFrom.DiskCache);
                             return;
                         }
                     }
@@ -214,7 +214,7 @@ namespace Extensions.Unity.ImageLoader
                 SaveToMemoryCache(downloadedObj, replace: true);
             RemoveLoading(); // LOADING REMOVED
 
-            ((IFutureInternal<T>)this).Loaded(downloadedObj, FutureLoadedFrom.Source);
+            ((IFutureInternal<T>)this).SetLoaded(downloadedObj, FutureLoadedFrom.Source);
         }
 
         protected virtual bool RegisterLoading(out Future<T> anotherLoadingFuture)

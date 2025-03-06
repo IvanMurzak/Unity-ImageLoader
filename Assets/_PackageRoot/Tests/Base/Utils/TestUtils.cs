@@ -20,6 +20,14 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static IEnumerable<string> IncorrectImageURLs(int count = 3) => Enumerable.Range(0, count).Select(_ => IncorrectImageURL);
         public static readonly byte[] CorruptedTextureBytes = new byte[] { 0 };
 
+        public static readonly Dictionary<FuturePlaceholderTrigger, Sprite> placeholderSprites = new Dictionary<FuturePlaceholderTrigger, Sprite>
+        {
+            { FuturePlaceholderTrigger.LoadingFromDiskCache, Texture2D.whiteTexture.ToSprite() },
+            { FuturePlaceholderTrigger.LoadingFromSource, Texture2D.blackTexture.ToSprite() },
+            { FuturePlaceholderTrigger.FailedToLoad, Texture2D.redTexture.ToSprite() },
+            { FuturePlaceholderTrigger.Canceled, Texture2D.grayTexture.ToSprite() }
+        };
+
         public static IEnumerator ClearEverything(string message)
         {
             if (message != null)

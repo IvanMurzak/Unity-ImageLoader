@@ -12,6 +12,6 @@ public class SampleLoadTextureThenSetMaterial : MonoBehaviour
         material.mainTexture = await ImageLoader.LoadTexture(imageURL);
 
         // Load a Texture2D from the web and set it directly to the Material
-        await ImageLoader.LoadTexture(imageURL).ThenSet(material);
+        await ImageLoader.LoadTexture(imageURL).Consume(material);
     }
 }

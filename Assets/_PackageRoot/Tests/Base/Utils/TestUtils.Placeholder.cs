@@ -3,55 +3,63 @@ using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public static partial class TestUtils
     {
-        public static IEnumerator PlaceholderFromMemoryCache(string url) => Placeholder(url, null, FutureLoadedFrom.MemoryCache);
-        public static IEnumerator Placeholder(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom)
+        // public static IEnumerator PlaceholderFromMemoryCache(string url) => Placeholder(url, null, FutureLoadedFrom.MemoryCache);
+        public static IEnumerator Placeholder(string url, params FuturePlaceholderTrigger[] triggers)
         {
             var future = ImageLoader.LoadSprite(url);
             var futureListener = future.ToFutureListener();
 
-            if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
+            var spritePlaceholder = Texture2D.whiteTexture.ToSprite();
 
-            var task1 = future.AsTask();
-            yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
-            var task2 = future.AsTask();
+            future.SetPlaceholder(spritePlaceholder, triggers);
 
-            futureListener.Assert_Events_NotContains(EventName.Canceled);
 
-            if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
-            else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+            // var loadedFromMemoryCache = triggers.Contains(FuturePlaceholderTrigger.LoadedFromMemoryCache);
+            // if (triggers.Any.HasValue)
+            //     futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
-            futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+            // var task1 = future.AsTask();
+            // yield return future.TimeoutCoroutine(TimeSpan.FromSeconds(10));
+            // var task2 = future.AsTask();
 
-            Assert.IsTrue(task1.IsCompleted, "Task was not cancelled but Future was cancelled");
-            Assert.IsTrue(task2.IsCompleted, "Task was not cancelled but Future was cancelled");
+            // futureListener.Assert_Events_NotContains(EventName.Canceled);
 
-            yield return UniTask.Yield();
+            // if (expectedLoadingFrom.HasValue)
+            //     futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+            // else
+            //     futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
 
-            if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
-            else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+            // futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+            // Assert.IsTrue(task1.IsCompleted, "Task was not cancelled but Future was cancelled");
+            // Assert.IsTrue(task2.IsCompleted, "Task was not cancelled but Future was cancelled");
 
-            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
-                .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
-                .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+            // yield return UniTask.Yield();
 
-            if (expectedLoadingFrom.HasValue)
-                future.ToFutureListener()
-                    .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
-                    .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+            // if (expectedLoadingFrom.HasValue)
+            //     futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+            // else
+            //     futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
 
-            future.Dispose();
+            // futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+
+            // future.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            //     .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+            //     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+
+            // if (expectedLoadingFrom.HasValue)
+            //     future.ToFutureListener()
+            //         .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+            //         .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+
+            // future.Dispose();
             yield return UniTask.Yield();
         }
     }

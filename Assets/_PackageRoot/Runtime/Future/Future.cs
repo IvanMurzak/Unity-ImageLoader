@@ -101,11 +101,11 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Trace))
                 Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events\n{Url}");
 
-            LoadedFromMemoryCache((v) => to.Loaded(v, FutureLoadedFrom.MemoryCache));
+            LoadedFromMemoryCache((v) => to.SetLoaded(v, FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache(( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache((v) => to.Loaded(v, FutureLoadedFrom.DiskCache));
+            LoadedFromDiskCache((v) => to.SetLoaded(v, FutureLoadedFrom.DiskCache));
             LoadingFromSource(( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource((v) => to.Loaded(v, FutureLoadedFrom.Source));
+            LoadedFromSource((v) => to.SetLoaded(v, FutureLoadedFrom.Source));
             Failed(to.FailToLoad);
 
             if (passCancelled)
@@ -121,11 +121,11 @@ namespace Extensions.Unity.ImageLoader
             if (LogLevel.IsActive(DebugLevel.Log))
                 Debug.Log($"[ImageLoader] Future[id={Id}] -> Future[id={to.Id}] Subscribe on events (${typeof(T).Name} -> ${typeof(T2).Name})\n{Url}");
 
-            LoadedFromMemoryCache((v) => to.Loaded(convert(v), FutureLoadedFrom.MemoryCache));
+            LoadedFromMemoryCache((v) => to.SetLoaded(convert(v), FutureLoadedFrom.MemoryCache));
             LoadingFromDiskCache(( ) => to.Loading(FutureLoadingFrom.DiskCache));
-            LoadedFromDiskCache((v) => to.Loaded(convert(v), FutureLoadedFrom.DiskCache));
+            LoadedFromDiskCache((v) => to.SetLoaded(convert(v), FutureLoadedFrom.DiskCache));
             LoadingFromSource(( ) => to.Loading(FutureLoadingFrom.Source));
-            LoadedFromSource((v) => to.Loaded(convert(v), FutureLoadedFrom.Source));
+            LoadedFromSource((v) => to.SetLoaded(convert(v), FutureLoadedFrom.Source));
             Failed(to.FailToLoad);
 
             if (passCancelled)
@@ -162,7 +162,7 @@ namespace Extensions.Unity.ImageLoader
             Safe.Run(onLoadingEvent, LogLevel);
             ActivatePlaceholder(Status);
         }
-        void IFutureInternal<T>.Loaded(T value, FutureLoadedFrom loadedFrom)
+        void IFutureInternal<T>.SetLoaded(T value, FutureLoadedFrom loadedFrom)
         {
             if (cleared || IsCancelled) return;
 
@@ -192,7 +192,7 @@ namespace Extensions.Unity.ImageLoader
 
             Safe.Run(onLoadedEvent, this.value, LogLevel);
             Safe.Run(OnLoaded, this.value, LogLevel);
-            ActivatePlaceholder(Status);
+            FeedConsumers(this.value);
             Safe.Run(OnCompleted, true, LogLevel);
             Clear();
         }
@@ -217,13 +217,15 @@ namespace Extensions.Unity.ImageLoader
             lock (placeholders)
             {
                 if (placeholders.TryGetValue(status, out var placeholder))
-                {
-                    lock (consumers)
-                    {
-                        foreach (var setter in consumers)
-                            Safe.Run(setter, placeholder, LogLevel);
-                    }
-                }
+                    FeedConsumers(placeholder);
+            }
+        }
+        void FeedConsumers(T value)
+        {
+            lock (consumers)
+            {
+                foreach (var setter in consumers)
+                    Safe.Run(setter, value, LogLevel);
             }
         }
 

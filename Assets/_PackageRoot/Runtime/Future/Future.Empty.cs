@@ -20,7 +20,7 @@ namespace Extensions.Unity.ImageLoader
         public static IFuture<T> EmptyLoaded(string url = null, FutureLoadedFrom from = FutureLoadedFrom.Source, T value = default)
         {
             var future = new FutureEmpty<T>(url).SetLogLevel(DebugLevel.None);
-            ((IFutureInternal<T>)future).Loaded(value, from);
+            ((IFutureInternal<T>)future).SetLoaded(value, from);
             return future;
         }
 

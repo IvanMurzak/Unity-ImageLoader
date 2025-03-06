@@ -24,7 +24,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             var startTime = DateTime.Now;
 
             var future = new FutureSprite(url);
-            var futureListener = new FutureListener<Sprite>(future);
+            var futureListener = new FutureListener<Sprite>(future, ignorePlaceholder: true);
             var task = future.StartLoading().AsTask();
             yield return task.TimeoutCoroutine(TimeSpan.FromSeconds(10));
 

@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             }
         }
 
-        public FutureListener(IFuture<T> future, bool ignoreLoadingWhenLoaded = false, DebugLevel? logLevel = null)
+        public FutureListener(IFuture<T> future, bool ignoreLoadingWhenLoaded = false, bool ignorePlaceholder = false, DebugLevel? logLevel = null)
         {
             if (logLevel == null)
                 logLevel = ImageLoader.settings.debugLevel;
@@ -59,13 +59,23 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 lock (events)
                     events.Add(new EventData { name = EventName.LoadedFromSource, value = value });
             });
-            future.Then(value =>
+            future.Loaded(value =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
                     Debug.Log($"[FutureListener] Future[id={future.Id}] Then: {value}");
                 lock (events)
                     events.Add(new EventData { name = EventName.Then, value = value });
             });
+            if (ignorePlaceholder)
+            {
+                future.Consume(value =>
+                {
+                    if (logLevel.Value.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[FutureListener] Future[id={future.Id}] Consume: {value}");
+                    lock (events)
+                        events.Add(new EventData { name = EventName.Consume, value = value });
+                });
+            }
             future.Failed(exception =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
@@ -89,13 +99,6 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                     Debug.Log($"[FutureListener] Future[id={future.Id}] Completed: {value}");
                 lock (events)
                     events.Add(new EventData { name = EventName.Completed, value = value });
-            });
-            future.Consume(value =>
-            {
-                if (logLevel.Value.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[FutureListener] Future[id={future.Id}] Consume: {value}");
-                lock (events)
-                    events.Add(new EventData { name = EventName.Consume, value = value });
             });
         }
     }

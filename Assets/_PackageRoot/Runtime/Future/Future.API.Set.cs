@@ -36,27 +36,5 @@ namespace Extensions.Unity.ImageLoader
             LogLevel = value;
             return this;
         }
-
-        /// <summary>
-        /// Set the setter function
-        /// </summary>
-        /// <param name="consumer">Setter function</param>
-        /// <returns>Returns the Future instance</returns>
-        public IFuture<T> Consume(Action<T> consumer, bool replace = false)
-        {
-            lock (consumers)
-            {
-                if (replace)
-                    consumers.Clear();
-                consumers.Add(consumer);
-            }
-
-            if (IsLoaded)
-            {
-                Safe.Run(consumer, value, LogLevel);
-                return this;
-            }
-            return this;
-        }
     }
 }

@@ -9,11 +9,33 @@ namespace Extensions.Unity.ImageLoader
     public partial class Future<T> : IDisposable
     {
         /// <summary>
-        /// When the image is loaded successfully from any source
+        /// When the it is time to set data into any consumer. Such as setting placeholder or final loaded subject
+        /// </summary>
+        /// <param name="consumer">Consumer (setter) function</param>
+        /// <param name="replace">If true, clear all existed consumer and replace them with this new one</param>
+        /// <returns>Returns the Future instance</returns>
+        public IFuture<T> Consume(Action<T> consumer, bool replace = false)
+        {
+            if (IsLoaded)
+            {
+                Safe.Run(consumer, value, LogLevel);
+                return this;
+            }
+            lock (consumers)
+            {
+                if (replace)
+                    consumers.Clear();
+                consumers.Add(consumer);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// When is loaded successfully from any source
         /// </summary>
         /// <param name="action">action to execute on the event</param>
         /// <returns>Returns the Future instance</returns>
-        public IFuture<T> Then(Action<T> action)
+        public IFuture<T> Loaded(Action<T> action)
         {
             if (IsLoaded)
             {
@@ -226,7 +248,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromMemoryCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var future))
-                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
+                    future.SetLoaded(new Reference<T>(url, obj), FutureLoadedFrom.MemoryCache);
             });
             LoadingFromDiskCache(() =>
             {
@@ -236,7 +258,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromDiskCache(obj =>
             {
                 if (weakReference.TryGetTarget(out var future))
-                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
+                    future.SetLoaded(new Reference<T>(url, obj), FutureLoadedFrom.DiskCache);
             });
             LoadingFromSource(() =>
             {
@@ -246,7 +268,7 @@ namespace Extensions.Unity.ImageLoader
             LoadedFromSource(obj =>
             {
                 if (weakReference.TryGetTarget(out var future))
-                    future.Loaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
+                    future.SetLoaded(new Reference<T>(url, obj), FutureLoadedFrom.Source);
             });
             Failed(e =>
             {
@@ -368,7 +390,7 @@ namespace Extensions.Unity.ImageLoader
 
             var taskCompletionSource = new UniTaskCompletionSource<T>();
 
-            Then(value => taskCompletionSource.TrySetResult(value));
+            Loaded(value => taskCompletionSource.TrySetResult(value));
             Failed(exception => taskCompletionSource.TrySetException(exception));
             Canceled(() => taskCompletionSource.TrySetCanceled());
 
@@ -381,7 +403,7 @@ namespace Extensions.Unity.ImageLoader
 
             var taskCompletionSource = new TaskCompletionSource<T>();
 
-            Then(taskCompletionSource.SetResult);
+            Loaded(taskCompletionSource.SetResult);
             Failed(taskCompletionSource.SetException);
             Canceled(taskCompletionSource.SetCanceled);
 

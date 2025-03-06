@@ -25,7 +25,7 @@ namespace Extensions.Unity.ImageLoader
         T Value { get; }
         DebugLevel LogLevel { get; }
         UniTask StartLoading(bool ignoreImageNotFoundError = false);
-        IFuture<T> Then(Action<T> onCompleted);
+        IFuture<T> Loaded(Action<T> onCompleted);
         IFuture<T> Failed(Action<Exception> action);
         IFuture<T> Completed(Action<bool> action);
         IFuture<T> LoadedFromMemoryCache(Action<T> action);
@@ -58,7 +58,7 @@ namespace Extensions.Unity.ImageLoader
         UnityWebRequest WebRequest { get; }
         void FailToLoad(Exception exception);
         void Loading(FutureLoadingFrom loadingFrom);
-        void Loaded(T value, FutureLoadedFrom loadedFrom);
+        void SetLoaded(T value, FutureLoadedFrom loadedFrom);
         void SetTimeout(TimeSpan duration);
     }
 }

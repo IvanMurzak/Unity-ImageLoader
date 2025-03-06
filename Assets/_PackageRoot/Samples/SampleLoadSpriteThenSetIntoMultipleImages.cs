@@ -11,6 +11,6 @@ public class SampleLoadSpriteThenSetIntoMultipleImages : MonoBehaviour
     void Start()
     {
         // Loading with auto set to multiple images
-        ImageLoader.LoadSprite(imageURL).ThenSet(image1, image2).Forget();
+        ImageLoader.LoadSprite(imageURL).Consume(image1, image2).Forget();
     }
 }
