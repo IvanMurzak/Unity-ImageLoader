@@ -13,7 +13,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         Then,
         Failed,
         Completed,
-        Canceled
+        Canceled,
+        Consume
     }
 
     public static class EventNameEx
