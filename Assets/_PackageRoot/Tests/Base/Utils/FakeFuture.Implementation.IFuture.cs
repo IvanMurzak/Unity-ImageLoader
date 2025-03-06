@@ -51,6 +51,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public IFuture<T> LoadedFromSource(Action<T> action) => throw new NotImplementedException();
         public IFuture<T> LoadingFromDiskCache(Action action, bool ignoreLoaded = false) => throw new NotImplementedException();
         public IFuture<T> LoadingFromSource(Action action, bool ignoreLoaded = false) => throw new NotImplementedException();
+        public IFuture<T> Consume(Action<T> setter, bool replace = false) => throw new NotImplementedException();
         public IFuture<T> PassEvents(IFutureInternal<T> to, bool passCancelled = true) => throw new NotImplementedException();
         public IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true) => throw new NotImplementedException();
         public IFuture<T> SetLogLevel(DebugLevel value) => throw new NotImplementedException();
