@@ -32,11 +32,11 @@ namespace Extensions.Unity.ImageLoader.Tests
             {
                 EventName.LoadingFromSource,
                 EventName.LoadedFromSource,
-                EventName.Then,
+                EventName.Loaded,
                 EventName.Completed
             });
             futureListener.Assert_Events_Value(EventName.LoadedFromSource, sprite => sprite != null);
-            futureListener.Assert_Events_Value(EventName.Then, sprite => sprite != null);
+            futureListener.Assert_Events_Value(EventName.Loaded, sprite => sprite != null);
             futureListener.Assert_Events_Value(EventName.Completed, success => ((bool)success) == true);
             futureListener.Assert_Events_NotContains(EventName.Canceled);
 

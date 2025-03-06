@@ -10,11 +10,11 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         LoadedFromDiskCache,
         LoadingFromSource,
         LoadedFromSource,
-        Then,
+        Loaded,
+        Consumed,
         Failed,
         Completed,
-        Canceled,
-        Consume
+        Canceled
     }
 
     public static class EventNameEx

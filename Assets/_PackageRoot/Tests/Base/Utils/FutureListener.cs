@@ -64,16 +64,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
                     Debug.Log($"[FutureListener] Future[id={future.Id}] Then: {value}");
                 lock (events)
-                    events.Add(new EventData { name = EventName.Then, value = value });
+                    events.Add(new EventData { name = EventName.Loaded, value = value });
             });
-            if (ignorePlaceholder)
+            if (!ignorePlaceholder)
             {
                 future.Consume(value =>
                 {
                     if (logLevel.Value.IsActive(DebugLevel.Trace))
                         Debug.Log($"[FutureListener] Future[id={future.Id}] Consume: {value}");
                     lock (events)
-                        events.Add(new EventData { name = EventName.Consume, value = value });
+                        events.Add(new EventData { name = EventName.Consumed, value = value });
                 });
             }
             future.Failed(exception =>

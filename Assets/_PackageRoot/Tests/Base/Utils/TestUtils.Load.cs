@@ -32,9 +32,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_NotContains(EventName.Canceled);
 
             if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
             else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
@@ -44,19 +44,19 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             yield return UniTask.Yield();
 
             if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
             else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.ToFutureListener(ignoreLoadingWhenLoaded: true)
-                .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+                .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
                 future.ToFutureListener()
-                    .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+                    .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.Dispose();
@@ -83,9 +83,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             future.Cancel();
 
             if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
             else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
@@ -95,19 +95,19 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             yield return UniTask.Yield();
 
             if (expectedLoadingFrom.HasValue)
-                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
             else
-                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed);
+                futureListener.Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed);
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.ToFutureListener(ignoreLoadingWhenLoaded: true)
-                .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+                .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
                 future.ToFutureListener()
-                    .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Then, EventName.Completed)
+                    .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.Dispose();
@@ -137,7 +137,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             var task2 = future.AsTask();
 
             var events = shouldLoadFromMemoryCache
-                ? new [] { EventName.LoadedFromMemoryCache, EventName.Then, EventName.Completed }
+                ? new [] { EventName.LoadedFromMemoryCache, EventName.Loaded, EventName.Completed }
                 : new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Completed };
 
             futureListener.Assert_Events_Equals(events);
