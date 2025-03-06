@@ -19,6 +19,7 @@ namespace Extensions.Unity.ImageLoader
             if (IsLoaded)
             {
                 Safe.Run(consumer, value, LogLevel);
+                return this;
             }
             else if (Status == FutureStatus.LoadingFromDiskCache || Status == FutureStatus.LoadingFromSource)
             {
