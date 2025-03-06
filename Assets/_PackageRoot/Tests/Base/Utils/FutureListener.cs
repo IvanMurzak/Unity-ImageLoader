@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             }
         }
 
-        public FutureListener(IFuture<T> future, bool ignoreLoadingWhenLoaded = false, bool ignorePlaceholder = false, DebugLevel? logLevel = null)
+        public FutureListener(IFuture<T> future, bool ignoreLoadingWhenLoaded = false, bool ignorePlaceholder = true, DebugLevel? logLevel = null)
         {
             if (logLevel == null)
                 logLevel = ImageLoader.settings.debugLevel;
@@ -62,7 +62,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             future.Loaded(value =>
             {
                 if (logLevel.Value.IsActive(DebugLevel.Trace))
-                    Debug.Log($"[FutureListener] Future[id={future.Id}] Then: {value}");
+                    Debug.Log($"[FutureListener] Future[id={future.Id}] Loaded: {value}");
                 lock (events)
                     events.Add(new EventData { name = EventName.Loaded, value = value });
             });
