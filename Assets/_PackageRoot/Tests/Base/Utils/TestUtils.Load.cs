@@ -8,7 +8,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public static partial class TestUtils
     {
-        public static IEnumerator LoadFromMemoryCache(string url) => Load(url, null, FutureLoadedFrom.MemoryCache);
+        public static IEnumerator LoadFromMemoryCache(string url, bool usePlaceholder = false) => Load(url, null, FutureLoadedFrom.MemoryCache, usePlaceholder);
         public static IEnumerator Load(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool usePlaceholder = false)
         {
             var future = ImageLoader.LoadSprite(url);
@@ -50,23 +50,32 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
-                future.ToFutureListener()
+                future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
                     .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.Dispose();
             yield return UniTask.Yield();
         }
-        public static IEnumerator LoadFromMemoryCacheThenCancel(string url, bool useGC) => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache, useGC);
-        public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool useGC)
+        public static IEnumerator LoadFromMemoryCacheThenCancel(string url, bool useGC, bool usePlaceholder = false)
+            => LoadThenCancel(url, null, FutureLoadedFrom.MemoryCache, useGC, usePlaceholder);
+        public static IEnumerator LoadThenCancel(string url, FutureLoadingFrom? expectedLoadingFrom, FutureLoadedFrom expectedLoadedFrom, bool useGC, bool usePlaceholder = false)
         {
             var future = ImageLoader.LoadSprite(url);
-            var futureListener = future.ToFutureListener();
+            var futureListener = future.ToFutureListener(ignorePlaceholder: !usePlaceholder);
+
+            if (usePlaceholder)
+            {
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+            }
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
@@ -101,29 +110,37 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
-            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             if (expectedLoadingFrom.HasValue)
-                future.ToFutureListener()
+                future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
                     .Assert_Events_Equals(expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
             future.Dispose();
             yield return UniTask.Yield();
         }
-        public static IEnumerator LoadFromMemoryCacheAndCancel(string url) => LoadAndCancel(url, null);
-        public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom)
+        public static IEnumerator LoadFromMemoryCacheAndCancel(string url, bool usePlaceholder = false) => LoadAndCancel(url, null, usePlaceholder);
+        public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool usePlaceholder = false)
         {
-            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: true);
-            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: false);
+            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: true, usePlaceholder);
+            yield return LoadAndCancel(url, expectedLoadingFrom, useGC: false, usePlaceholder);
         }
-        public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool useGC)
+        public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool useGC, bool usePlaceholder = false)
         {
             var future = ImageLoader.LoadSprite(url);
-            var futureListener = future.ToFutureListener();
+            var futureListener = future.ToFutureListener(ignorePlaceholder: !usePlaceholder);
             var shouldLoadFromMemoryCache = !expectedLoadingFrom.HasValue;
+
+            if (usePlaceholder)
+            {
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+            }
 
             futureListener.Assert_Events_Contains(expectedLoadingFrom.HasValue
                 ? expectedLoadingFrom.Value.ToEventName()
@@ -151,12 +168,12 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
-            future.ToFutureListener()
+            future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
                 .Assert_Events_Equals(events)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
             if (expectedLoadingFrom.HasValue && future.IsLoaded)
-                future.ToFutureListener(ignoreLoadingWhenLoaded: true)
+                future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
                     .Assert_Events_Equals(events.Except(new [] { expectedLoadingFrom.Value.ToEventName() }))
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
