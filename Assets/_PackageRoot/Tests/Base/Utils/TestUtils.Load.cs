@@ -33,7 +33,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             var events = expectedLoadingFrom.HasValue
                 ? usePlaceholder
-                    ? new [] { expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
+                    ? new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Consumed, expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
                     : new [] { expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed }
                 : usePlaceholder
                     ? new [] { expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
@@ -97,7 +97,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             var events = expectedLoadingFrom.HasValue
                 ? usePlaceholder
-                    ? new [] { expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
+                    ? new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Consumed, expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
                     : new [] { expectedLoadingFrom.Value.ToEventName(), expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed }
                 : usePlaceholder
                     ? new [] { expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Consumed, EventName.Completed }
@@ -166,7 +166,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                     ? new [] { EventName.LoadedFromMemoryCache, EventName.Loaded, EventName.Consumed, EventName.Completed }
                     : new [] { EventName.LoadedFromMemoryCache, EventName.Loaded, EventName.Completed }
                 : usePlaceholder
-                    ? new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Consumed, EventName.Completed }
+                    ? new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Consumed, EventName.Canceled, EventName.Consumed, EventName.Completed }
                     : new [] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Completed };
 
             futureListener.Assert_Events_Equals(events);

@@ -34,8 +34,12 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             var task2 = future.AsTask();
 
             var events = expectedLoadingFrom.HasValue
-                ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Failed, EventName.Completed }
-                : new[] { EventName.Failed, EventName.Completed};
+                ? usePlaceholder
+                    ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Consumed, EventName.Failed, EventName.Consumed, EventName.Completed }
+                    : new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Failed, EventName.Completed }
+                : usePlaceholder
+                    ? new[] { EventName.Failed, EventName.Consumed, EventName.Completed}
+                    : new[] { EventName.Failed, EventName.Completed};
 
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == false);
