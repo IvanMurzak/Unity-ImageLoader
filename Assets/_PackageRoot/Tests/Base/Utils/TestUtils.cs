@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    internal static partial class TestUtils
+    public static partial class TestUtils
     {
         public static readonly string[] ImageURLs =
         {

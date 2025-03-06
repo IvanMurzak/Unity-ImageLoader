@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
-    internal static partial class TestUtils
+    public static partial class TestUtils
     {
         public static IEnumerator WaitTicks(int ticks = 1)
         {
