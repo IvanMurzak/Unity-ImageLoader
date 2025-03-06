@@ -40,36 +40,20 @@ namespace Extensions.Unity.ImageLoader
         /// <summary>
         /// Set the setter function
         /// </summary>
-        /// <param name="setter">Setter function</param>
+        /// <param name="consumer">Setter function</param>
         /// <returns>Returns the Future instance</returns>
-        public IFuture<T> Set(Action<T> setter)
+        public IFuture<T> Consume(Action<T> consumer, bool replace = false)
         {
-            lock (setters)
+            lock (consumers)
             {
-                setters.Clear();
-                setters.Add(setter);
+                if (replace)
+                    consumers.Clear();
+                consumers.Add(consumer);
             }
 
             if (IsLoaded)
             {
-                Safe.Run(setter, value, LogLevel);
-                return this;
-            }
-            return this;
-        }
-        /// <summary>
-        /// Set or add the setter function
-        /// </summary>
-        /// <param name="setter">Setter function</param>
-        /// <returns>Returns the Future instance</returns>
-        public IFuture<T> SetOrAdd(Action<T> setter)
-        {
-            lock (setters)
-                setters.Add(setter);
-
-            if (IsLoaded)
-            {
-                Safe.Run(setter, value, LogLevel);
+                Safe.Run(consumer, value, LogLevel);
                 return this;
             }
             return this;

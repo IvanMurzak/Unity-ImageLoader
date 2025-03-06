@@ -33,6 +33,9 @@ namespace Extensions.Unity.ImageLoader
         IFuture<T> LoadedFromDiskCache(Action<T> action);
         IFuture<T> LoadingFromSource(Action action, bool ignoreWhenLoaded = false);
         IFuture<T> LoadedFromSource(Action<T> action);
+
+        IFuture<T> Consume(Action<T> setter, bool replace = false);
+
         IFuture<T> Canceled(Action action);
 
         IFuture<T> SetUseDiskCache(bool value = true);

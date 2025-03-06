@@ -20,57 +20,15 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (trigger.IsEqual(Status))
                 {
-                    lock (setters)
+                    lock (consumers)
                     {
-                        foreach (var setter in setters)
+                        foreach (var setter in consumers)
                             Safe.Run(setter, placeholder, LogLevel);
                     }
                     continue;
                 }
-                placeholders[trigger.AsFutureStatus()] = placeholder;
-                // switch (trigger)
-                // {
-                //     case FuturePlaceholderTrigger.LoadingFromDiskCache:
-                //         LoadingFromDiskCache(() =>
-                //         {
-                //             lock (settersAll)
-                //             {
-                //                 foreach (var setter in settersAll)
-                //                     Safe.Run(setter, placeholder, LogLevel);
-                //             }
-                //         });
-                //         break;
-                //     case FuturePlaceholderTrigger.LoadingFromSource:
-                //         LoadingFromDiskCache(() =>
-                //         {
-                //             lock (settersAll)
-                //             {
-                //                 foreach (var setter in settersAll)
-                //                     Safe.Run(setter, placeholder, LogLevel);
-                //             }
-                //         });
-                //         break;
-                //     case FuturePlaceholderTrigger.FailedToLoad:
-                //         Failed(exception =>
-                //         {
-                //             lock (settersAll)
-                //             {
-                //                 foreach (var setter in settersAll)
-                //                     Safe.Run(setter, placeholder, LogLevel);
-                //             }
-                //         });
-                //         break;
-                //     case FuturePlaceholderTrigger.Canceled:
-                //         Canceled(() =>
-                //         {
-                //             lock (settersAll)
-                //             {
-                //                 foreach (var setter in settersAll)
-                //                     Safe.Run(setter, placeholder, LogLevel);
-                //             }
-                //         });
-                //         break;
-                //}
+                lock (placeholders)
+                    placeholders[trigger.AsFutureStatus()] = placeholder;
             }
 
             return this;

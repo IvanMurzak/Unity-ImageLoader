@@ -35,7 +35,7 @@ namespace Extensions.Unity.ImageLoader
 
         public uint Id { get; } = FutureMetadata.idCounter++;
 
-        protected readonly List<Action<T>> setters = new List<Action<T>>();
+        protected readonly List<Action<T>> consumers = new List<Action<T>>();
         protected readonly Dictionary<FutureStatus, T> placeholders = new Dictionary<FutureStatus, T>();
         protected TimeSpan timeout;
         protected bool cleared = false;
@@ -214,10 +214,16 @@ namespace Extensions.Unity.ImageLoader
         void IFutureInternal<T>.SetTimeout(TimeSpan duration) => timeout = duration;
         void ActivatePlaceholder(FutureStatus status)
         {
-            if (placeholders.TryGetValue(status, out var placeholder))
+            lock (placeholders)
             {
-                foreach (var setter in setters)
-                    Safe.Run(setter, placeholder, LogLevel);
+                if (placeholders.TryGetValue(status, out var placeholder))
+                {
+                    lock (consumers)
+                    {
+                        foreach (var setter in consumers)
+                            Safe.Run(setter, placeholder, LogLevel);
+                    }
+                }
             }
         }
 
