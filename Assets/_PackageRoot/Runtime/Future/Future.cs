@@ -36,6 +36,7 @@ namespace Extensions.Unity.ImageLoader
         public uint Id { get; } = FutureMetadata.idCounter++;
 
         protected readonly List<Action<T>> setters = new List<Action<T>>();
+        protected readonly Dictionary<FutureStatus, T> placeholders = new Dictionary<FutureStatus, T>();
         protected TimeSpan timeout;
         protected bool cleared = false;
         protected bool disposeValue = false;
@@ -159,6 +160,7 @@ namespace Extensions.Unity.ImageLoader
 
             this.loadingFrom = loadingFrom;
             Safe.Run(onLoadingEvent, LogLevel);
+            ActivatePlaceholder(Status);
         }
         void IFutureInternal<T>.Loaded(T value, FutureLoadedFrom loadedFrom)
         {
@@ -190,6 +192,7 @@ namespace Extensions.Unity.ImageLoader
 
             Safe.Run(onLoadedEvent, this.value, LogLevel);
             Safe.Run(OnLoaded, this.value, LogLevel);
+            ActivatePlaceholder(Status);
             Safe.Run(OnCompleted, true, LogLevel);
             Clear();
         }
@@ -204,10 +207,19 @@ namespace Extensions.Unity.ImageLoader
                 Debug.LogError(exception.Message);
 
             Safe.Run(OnFailedToLoad, exception, LogLevel);
+            ActivatePlaceholder(Status);
             Safe.Run(OnCompleted, false, LogLevel);
             Clear();
         }
         void IFutureInternal<T>.SetTimeout(TimeSpan duration) => timeout = duration;
+        void ActivatePlaceholder(FutureStatus status)
+        {
+            if (placeholders.TryGetValue(status, out var placeholder))
+            {
+                foreach (var setter in setters)
+                    Safe.Run(setter, placeholder, LogLevel);
+            }
+        }
 
         protected virtual void Clear()
         {
@@ -215,7 +227,8 @@ namespace Extensions.Unity.ImageLoader
                 Debug.Log($"[ImageLoader] Future[id={Id}] Cleared\n{Url}");
             cleared = true;
 
-            setters.Clear();
+            lock (placeholders)
+                placeholders.Clear();
             OnLoadedFromMemoryCache = null;
             OnLoadingFromDiskCache = null;
             OnLoadedFromDiskCache = null;

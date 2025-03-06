@@ -17,7 +17,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (IsLoaded)
             {
-                action(value);
+                Safe.Run(action, value, LogLevel);
                 return this;
             }
             OnLoaded += action;
@@ -33,7 +33,7 @@ namespace Extensions.Unity.ImageLoader
         {
             if (Status == FutureStatus.FailedToLoad)
             {
-                action(exception);
+                Safe.Run(action, exception, LogLevel);
                 return this;
             }
             OnFailedToLoad += action;
@@ -207,6 +207,7 @@ namespace Extensions.Unity.ImageLoader
             if (Safe.RunCancel(cts, LogLevel))
             {
                 Safe.Run(OnCanceled, LogLevel);
+                ActivatePlaceholder(Status);
                 Safe.Run(OnCompleted, IsLoaded, LogLevel);
             }
             Clear();

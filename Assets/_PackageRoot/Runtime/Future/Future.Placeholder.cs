@@ -20,41 +20,57 @@ namespace Extensions.Unity.ImageLoader
             {
                 if (trigger.IsEqual(Status))
                 {
-                    foreach (var setter in setters)
-                        Safe.Run(setter, placeholder, LogLevel);
+                    lock (setters)
+                    {
+                        foreach (var setter in setters)
+                            Safe.Run(setter, placeholder, LogLevel);
+                    }
                     continue;
                 }
-                switch (trigger)
-                {
-                    case FuturePlaceholderTrigger.LoadingFromDiskCache:
-                        LoadingFromDiskCache(() =>
-                        {
-                            foreach (var setter in setters)
-                                Safe.Run(setter, placeholder, LogLevel);
-                        });
-                        break;
-                    case FuturePlaceholderTrigger.LoadingFromSource:
-                        LoadingFromDiskCache(() =>
-                        {
-                            foreach (var setter in setters)
-                                Safe.Run(setter, placeholder, LogLevel);
-                        });
-                        break;
-                    case FuturePlaceholderTrigger.FailedToLoad:
-                        Failed(exception =>
-                        {
-                            foreach (var setter in setters)
-                                Safe.Run(setter, placeholder, LogLevel);
-                        });
-                        break;
-                    case FuturePlaceholderTrigger.Canceled:
-                        Canceled(() =>
-                        {
-                            foreach (var setter in setters)
-                                Safe.Run(setter, placeholder, LogLevel);
-                        });
-                        break;
-                }
+                placeholders[trigger.AsFutureStatus()] = placeholder;
+                // switch (trigger)
+                // {
+                //     case FuturePlaceholderTrigger.LoadingFromDiskCache:
+                //         LoadingFromDiskCache(() =>
+                //         {
+                //             lock (settersAll)
+                //             {
+                //                 foreach (var setter in settersAll)
+                //                     Safe.Run(setter, placeholder, LogLevel);
+                //             }
+                //         });
+                //         break;
+                //     case FuturePlaceholderTrigger.LoadingFromSource:
+                //         LoadingFromDiskCache(() =>
+                //         {
+                //             lock (settersAll)
+                //             {
+                //                 foreach (var setter in settersAll)
+                //                     Safe.Run(setter, placeholder, LogLevel);
+                //             }
+                //         });
+                //         break;
+                //     case FuturePlaceholderTrigger.FailedToLoad:
+                //         Failed(exception =>
+                //         {
+                //             lock (settersAll)
+                //             {
+                //                 foreach (var setter in settersAll)
+                //                     Safe.Run(setter, placeholder, LogLevel);
+                //             }
+                //         });
+                //         break;
+                //     case FuturePlaceholderTrigger.Canceled:
+                //         Canceled(() =>
+                //         {
+                //             lock (settersAll)
+                //             {
+                //                 foreach (var setter in settersAll)
+                //                     Safe.Run(setter, placeholder, LogLevel);
+                //             }
+                //         });
+                //         break;
+                //}
             }
 
             return this;
