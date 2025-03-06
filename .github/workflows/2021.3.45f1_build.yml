@@ -3,10 +3,10 @@ name: 2021.3.45f1-Build
 on:
   pull_request:
     branches:
-      - master
+      - master_disabled
   push:
     branches:
-      - master
+      - master_disabled
 
 jobs:
   editor-tests:
