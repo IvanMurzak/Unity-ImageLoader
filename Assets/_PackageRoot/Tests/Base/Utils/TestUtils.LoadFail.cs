@@ -9,12 +9,20 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     public static partial class TestUtils
     {
-        public static IEnumerator LoadFailFromMemoryCache(string url) => LoadFail(url, null);
-        public static IEnumerator LoadFail(string url, FutureLoadingFrom? expectedLoadingFrom)
+        public static IEnumerator LoadFailFromMemoryCache(string url, bool usePlaceholder = false) => LoadFail(url, null, usePlaceholder);
+        public static IEnumerator LoadFail(string url, FutureLoadingFrom? expectedLoadingFrom, bool usePlaceholder = false)
         {
             var timeout = TimeSpan.FromMilliseconds(100);
             var future = ImageLoader.LoadSprite(url).Timeout(timeout);
-            var futureListener = future.ToFutureListener();
+            var futureListener = future.ToFutureListener(ignorePlaceholder: !usePlaceholder);
+
+            if (usePlaceholder)
+            {
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+            }
 
             if (expectedLoadingFrom.HasValue)
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
@@ -40,12 +48,12 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
-            future.ToFutureListener(ignoreLoadingWhenLoaded: true)
+            future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
                 .Assert_Events_Equals(events)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
             if (expectedLoadingFrom.HasValue)
-                future.ToFutureListener()
+                future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
                     .Assert_Events_Equals(events)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
