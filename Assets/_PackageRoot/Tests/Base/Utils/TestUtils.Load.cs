@@ -196,7 +196,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                     ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Consumed, EventName.Completed }
                     : new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Completed };
 
-            future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
+            var lateFutureListener = future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
                 .Assert_Events_Equals(lateEvents)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
