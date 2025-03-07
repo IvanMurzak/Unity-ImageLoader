@@ -52,13 +52,23 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
+            Assert.AreEqual(future.Status, FutureStatus.FailedToLoad);
+
+            var lateEvents = expectedLoadingFrom.HasValue
+                ? usePlaceholder
+                    ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Failed, EventName.Consumed, EventName.Completed }
+                    : new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Failed, EventName.Completed }
+                : usePlaceholder
+                    ? new[] { EventName.Failed, EventName.Consumed, EventName.Completed}
+                    : new[] { EventName.Failed, EventName.Completed};
+
             future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
-                .Assert_Events_Equals(events)
+                .Assert_Events_Equals(lateEvents)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
             if (expectedLoadingFrom.HasValue)
                 future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
-                    .Assert_Events_Equals(events)
+                    .Assert_Events_Equals(lateEvents)
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == false);
 
             future.Dispose();

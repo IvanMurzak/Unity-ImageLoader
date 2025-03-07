@@ -50,6 +50,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
 
+            Assert.AreEqual(future.Status, expectedLoadedFrom.AsFutureStatus());
+
             future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: true)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == true);
@@ -113,6 +115,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == true);
+
+            Assert.AreEqual(future.Status, expectedLoadedFrom.AsFutureStatus());
 
             future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: true)
                 .Assert_Events_Equals(expectedLoadedFrom.ToEventName(), EventName.Loaded, EventName.Completed)
@@ -180,13 +184,25 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             futureListener.Assert_Events_Equals(events);
             futureListener.Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
+            Assert.AreEqual(future.Status, shouldLoadFromMemoryCache
+                ? FutureStatus.LoadedFromMemoryCache
+                : FutureStatus.Canceled);
+
+            var lateEvents = shouldLoadFromMemoryCache
+                ? usePlaceholder
+                    ? new[] { EventName.LoadedFromMemoryCache, EventName.Loaded, EventName.Consumed, EventName.Completed }
+                    : new[] { EventName.LoadedFromMemoryCache, EventName.Loaded, EventName.Completed }
+                : usePlaceholder
+                    ? new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Consumed, EventName.Completed }
+                    : new[] { expectedLoadingFrom.Value.ToEventName(), EventName.Canceled, EventName.Completed };
+
             future.ToFutureListener(ignorePlaceholder: !usePlaceholder)
-                .Assert_Events_Equals(events)
+                .Assert_Events_Equals(lateEvents)
                 .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
             if (expectedLoadingFrom.HasValue && future.IsLoaded)
                 future.ToFutureListener(ignoreLoadingWhenLoaded: true, ignorePlaceholder: !usePlaceholder)
-                    .Assert_Events_Equals(events.Except(new [] { expectedLoadingFrom.Value.ToEventName() }))
+                    .Assert_Events_Equals(lateEvents.Except(new [] { expectedLoadingFrom.Value.ToEventName() }))
                     .Assert_Events_Value<bool>(EventName.Completed, success => success == shouldLoadFromMemoryCache);
 
             future.Dispose();

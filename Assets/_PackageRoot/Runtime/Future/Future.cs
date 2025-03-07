@@ -235,8 +235,8 @@ namespace Extensions.Unity.ImageLoader
                 Debug.Log($"[ImageLoader] Future[id={Id}] Cleared\n{Url}");
             cleared = true;
 
-            lock (placeholders)
-                placeholders.Clear();
+            // lock (placeholders)
+            //     placeholders.Clear();
             OnLoadedFromMemoryCache = null;
             OnLoadingFromDiskCache = null;
             OnLoadedFromDiskCache = null;
