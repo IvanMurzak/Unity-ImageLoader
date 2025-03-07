@@ -16,10 +16,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             if (usePlaceholder)
             {
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromDiskCache], PlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromSource], PlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.FailedToLoad], PlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.Canceled], PlaceholderTrigger.Canceled);
             }
 
             if (expectedLoadingFrom.HasValue)
@@ -77,10 +77,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             if (usePlaceholder)
             {
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromDiskCache], PlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromSource], PlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.FailedToLoad], PlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.Canceled], PlaceholderTrigger.Canceled);
             }
 
             if (expectedLoadingFrom.HasValue)
@@ -148,10 +148,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             if (usePlaceholder)
             {
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromDiskCache], FuturePlaceholderTrigger.LoadingFromDiskCache);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.LoadingFromSource], FuturePlaceholderTrigger.LoadingFromSource);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.FailedToLoad], FuturePlaceholderTrigger.FailedToLoad);
-                future.SetPlaceholder(placeholderSprites[FuturePlaceholderTrigger.Canceled], FuturePlaceholderTrigger.Canceled);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromDiskCache], PlaceholderTrigger.LoadingFromDiskCache);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromSource], PlaceholderTrigger.LoadingFromSource);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.FailedToLoad], PlaceholderTrigger.FailedToLoad);
+                future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.Canceled], PlaceholderTrigger.Canceled);
             }
 
             futureListener.Assert_Events_Contains(expectedLoadingFrom.HasValue

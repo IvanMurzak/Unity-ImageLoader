@@ -65,6 +65,7 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
   - [Load `Sprite` then set into multiple `Image`](#load-sprite-then-set-into-multiple-image)
   - [Error handling](#error-handling)
   - [Async `await` and `Forget`](#async-await-and-forget)
+  - [Placeholder](#placeholder)
   - [Cancellation](#cancellation)
     - [Cancel by MonoBehaviour events](#cancel-by-monobehaviour-events)
     - [Explicit cancellation](#explicit-cancellation)
@@ -226,6 +227,26 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 // To do that we can simply remove 'await' from the start.
 // To avoid compilation warning need to add '.Forget()'.
 ImageLoader.LoadSprite(imageURL).Consume(image).Forget();
+```
+
+## Placeholder
+
+While the target image is loading it would be a good idea to set placeholder image. Also, it works well for setting image if loading fails.
+
+> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SamplePlaceholder.cs)
+
+```csharp
+ImageLoader.LoadSprite(imageURL)
+    // set placeholder in all conditions
+    .SetPlaceholder(placeholder1)
+
+    // set placeholder in a specific conditions
+    .SetPlaceholder(placeholder2, PlaceholderTrigger.LoadingFromSource)
+    .SetPlaceholder(placeholder3, PlaceholderTrigger.FailedToLoad)
+
+    // set consumer
+    .Consume(image)
+    .Forget();
 ```
 
 ## Cancellation

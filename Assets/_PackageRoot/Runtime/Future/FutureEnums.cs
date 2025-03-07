@@ -24,7 +24,7 @@
         DiskCache = 2,
         Source = 4
     }
-    public enum FuturePlaceholderTrigger
+    public enum PlaceholderTrigger
     {
         LoadingFromDiskCache = 2,
         LoadingFromSource = 4,

@@ -57,7 +57,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public IFuture<T> SetLogLevel(DebugLevel value) => throw new NotImplementedException();
         public IFuture<T> SetUseDiskCache(bool value = true) => throw new NotImplementedException();
         public IFuture<T> SetUseMemoryCache(bool value = true) => throw new NotImplementedException();
-        public IFuture<T> SetPlaceholder(T placeholder, params FuturePlaceholderTrigger[] triggers) => throw new NotImplementedException();
+        public IFuture<T> SetPlaceholder(T placeholder, params PlaceholderTrigger[] triggers) => throw new NotImplementedException();
         public UniTask StartLoading(bool ignoreImageNotFoundError = false) => throw new NotImplementedException();
         public IFuture<T> Loaded(Action<T> onCompleted) => throw new NotImplementedException();
     }

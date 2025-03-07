@@ -41,7 +41,7 @@ namespace Extensions.Unity.ImageLoader
         IFuture<T> SetUseDiskCache(bool value = true);
         IFuture<T> SetUseMemoryCache(bool value = true);
         IFuture<T> SetLogLevel(DebugLevel value);
-        IFuture<T> SetPlaceholder(T placeholder, params FuturePlaceholderTrigger[] triggers);
+        IFuture<T> SetPlaceholder(T placeholder, params PlaceholderTrigger[] triggers);
 
         IFuture<T> PassEvents(IFutureInternal<T> to, bool passCancelled = true);
         IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true);
