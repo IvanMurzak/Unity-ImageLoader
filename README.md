@@ -230,11 +230,11 @@ While the target image is loading it would be a good idea to set placeholder ima
 ```csharp
 ImageLoader.LoadSprite(imageURL)
     // set placeholder in all conditions
-    .SetPlaceholder(placeholder1)
+    .SetPlaceholder(placeholderAny)
 
     // set placeholder in a specific conditions
-    .SetPlaceholder(placeholder2, PlaceholderTrigger.LoadingFromSource)
-    .SetPlaceholder(placeholder3, PlaceholderTrigger.FailedToLoad)
+    .SetPlaceholder(placeholderLoadingFromSource, PlaceholderTrigger.LoadingFromSource)
+    .SetPlaceholder(placeholderFailedToLoad, PlaceholderTrigger.FailedToLoad)
 
     // set consumer
     .Consume(image)
