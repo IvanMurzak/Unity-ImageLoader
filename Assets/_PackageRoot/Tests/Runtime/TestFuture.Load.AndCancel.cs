@@ -9,12 +9,17 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadFrom_Source_AndCancel_NoLogs() => TestUtils.RunNoLogs(LoadFrom_Source_AndCancel);
         [UnityTest] public IEnumerator LoadFrom_Source_AndCancel()
         {
-            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: true);
-            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: false);
-            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: true);
-            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: false);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: true,  usePlaceholder: false);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: false, usePlaceholder: false);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: true,  usePlaceholder: false);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: false, usePlaceholder: false);
+
+            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: true,  usePlaceholder: true);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: true,  useMemoryCache: false, usePlaceholder: true);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: true,  usePlaceholder: true);
+            yield return LoadFrom_Source_AndCancel(useDiskCache: false, useMemoryCache: false, usePlaceholder: true);
         }
-        IEnumerator LoadFrom_Source_AndCancel(bool useDiskCache, bool useMemoryCache)
+        IEnumerator LoadFrom_Source_AndCancel(bool useDiskCache, bool useMemoryCache, bool usePlaceholder)
         {
             ImageLoader.settings.useDiskCache = useDiskCache;
             ImageLoader.settings.useMemoryCache = useMemoryCache;
@@ -24,17 +29,32 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             yield return TestUtils.ClearEverything(message: null);
         }
+        IEnumerator LoadFrom_MemoryCache_AndCancel(bool usePlaceholder)
+        {
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadFromMemoryCacheAndCancel(url, usePlaceholder: usePlaceholder);
+            }
+            yield return TestUtils.ClearEverything(message: null);
+        }
+        IEnumerator LoadFrom_DiskCache_AndCancel(bool usePlaceholder)
+        {
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.DiskCache, usePlaceholder: usePlaceholder);
+            }
+            yield return TestUtils.ClearEverything(message: null);
+        }
         [UnityTest] public IEnumerator LoadFrom_MemoryCache_AndCancel_NoLogs() => TestUtils.RunNoLogs(LoadFrom_MemoryCache_AndCancel);
         [UnityTest] public IEnumerator LoadFrom_MemoryCache_AndCancel()
         {
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in TestUtils.ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadFromMemoryCacheAndCancel(url);
-            }
+            yield return LoadFrom_MemoryCache_AndCancel(usePlaceholder: false);
+            yield return LoadFrom_MemoryCache_AndCancel(usePlaceholder: true);
         }
 
         [UnityTest] public IEnumerator LoadFrom_DiskCache_AndCancel_NoLogs() => TestUtils.RunNoLogs(LoadFrom_DiskCache_AndCancel);
@@ -43,11 +63,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in TestUtils.ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.DiskCache);
-            }
+            yield return LoadFrom_DiskCache_AndCancel(usePlaceholder: false);
+            yield return LoadFrom_DiskCache_AndCancel(usePlaceholder: true);
         }
     }
 }

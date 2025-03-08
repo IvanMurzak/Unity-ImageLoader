@@ -9,19 +9,42 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator LoadFrom_Source_NoLogs() => TestUtils.RunNoLogs(LoadFrom_Source);
         [UnityTest] public IEnumerator LoadFrom_Source()
         {
-            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: true);
-            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: false);
-            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: true);
-            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: false);
+            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: true,  usePlaceholder: false);
+            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: false, usePlaceholder: false);
+            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: true,  usePlaceholder: false);
+            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: false, usePlaceholder: false);
+
+            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: true,  usePlaceholder: true);
+            yield return LoadFrom_Source(useDiskCache: true,  useMemoryCache: false, usePlaceholder: true);
+            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: true,  usePlaceholder: true);
+            yield return LoadFrom_Source(useDiskCache: false, useMemoryCache: false, usePlaceholder: true);
         }
-        IEnumerator LoadFrom_Source(bool useDiskCache, bool useMemoryCache)
+        IEnumerator LoadFrom_Source(bool useDiskCache, bool useMemoryCache, bool usePlaceholder)
         {
             ImageLoader.settings.useDiskCache = useDiskCache;
             ImageLoader.settings.useMemoryCache = useMemoryCache;
 
             foreach (var url in TestUtils.ImageURLs)
-                yield return TestUtils.Load(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source);
+                yield return TestUtils.Load(url, FutureLoadingFrom.Source, FutureLoadedFrom.Source, usePlaceholder: usePlaceholder);
 
+            yield return TestUtils.ClearEverything(message: null);
+        }
+        IEnumerator LoadFrom_DiskCache(bool usePlaceholder)
+        {
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.Load(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache, usePlaceholder: usePlaceholder);
+            }
+            yield return TestUtils.ClearEverything(message: null);
+        }
+        IEnumerator LoadFrom_MemoryCache(bool usePlaceholder)
+        {
+            foreach (var url in TestUtils.ImageURLs)
+            {
+                yield return ImageLoader.LoadSprite(url).AsCoroutine();
+                yield return TestUtils.LoadFromMemoryCache(url, usePlaceholder: usePlaceholder);
+            }
             yield return TestUtils.ClearEverything(message: null);
         }
 
@@ -31,11 +54,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = false;
 
-            foreach (var url in TestUtils.ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.Load(url, FutureLoadingFrom.DiskCache, FutureLoadedFrom.DiskCache);
-            }
+            yield return LoadFrom_DiskCache(usePlaceholder: false);
+            yield return LoadFrom_DiskCache(usePlaceholder: true);
         }
 
         [UnityTest] public IEnumerator LoadFrom_MemoryCache_NoLogs() => TestUtils.RunNoLogs(LoadFrom_MemoryCache);
@@ -44,11 +64,8 @@ namespace Extensions.Unity.ImageLoader.Tests
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
-            foreach (var url in TestUtils.ImageURLs)
-            {
-                yield return ImageLoader.LoadSprite(url).AsCoroutine();
-                yield return TestUtils.LoadFromMemoryCache(url);
-            }
+            yield return LoadFrom_MemoryCache(usePlaceholder: false);
+            yield return LoadFrom_MemoryCache(usePlaceholder: true);
         }
     }
 }
