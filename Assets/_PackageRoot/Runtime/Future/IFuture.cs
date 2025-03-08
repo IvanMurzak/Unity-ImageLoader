@@ -25,7 +25,7 @@ namespace Extensions.Unity.ImageLoader
         T Value { get; }
         DebugLevel LogLevel { get; }
         UniTask StartLoading(bool ignoreImageNotFoundError = false);
-        IFuture<T> Then(Action<T> onCompleted);
+        IFuture<T> Loaded(Action<T> onCompleted);
         IFuture<T> Failed(Action<Exception> action);
         IFuture<T> Completed(Action<bool> action);
         IFuture<T> LoadedFromMemoryCache(Action<T> action);
@@ -33,11 +33,15 @@ namespace Extensions.Unity.ImageLoader
         IFuture<T> LoadedFromDiskCache(Action<T> action);
         IFuture<T> LoadingFromSource(Action action, bool ignoreWhenLoaded = false);
         IFuture<T> LoadedFromSource(Action<T> action);
+
+        IFuture<T> Consume(Action<T> setter, bool replace = false);
+
         IFuture<T> Canceled(Action action);
 
         IFuture<T> SetUseDiskCache(bool value = true);
         IFuture<T> SetUseMemoryCache(bool value = true);
         IFuture<T> SetLogLevel(DebugLevel value);
+        IFuture<T> SetPlaceholder(T placeholder, params PlaceholderTrigger[] triggers);
 
         IFuture<T> PassEvents(IFutureInternal<T> to, bool passCancelled = true);
         IFuture<T> PassEvents<T2>(IFutureInternal<T2> to, Func<T, T2> convert, bool passCancelled = true);
@@ -55,7 +59,7 @@ namespace Extensions.Unity.ImageLoader
         UnityWebRequest WebRequest { get; }
         void FailToLoad(Exception exception);
         void Loading(FutureLoadingFrom loadingFrom);
-        void Loaded(T value, FutureLoadedFrom loadedFrom);
+        void SetLoaded(T value, FutureLoadedFrom loadedFrom);
         void SetTimeout(TimeSpan duration);
     }
 }

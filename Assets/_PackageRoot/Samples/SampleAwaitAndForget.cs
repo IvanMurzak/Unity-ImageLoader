@@ -13,11 +13,11 @@ public class SampleAwaitAndForget : MonoBehaviour
         await ImageLoader.LoadSprite(imageURL);
 
         // Load image, set image and wait
-        await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+        await ImageLoader.LoadSprite(imageURL).Consume(image);
 
         // Skip waiting for completion.
         // To do that we can simply remove 'await' from the start.
         // To avoid compilation warning need to add '.Forget()'.
-        ImageLoader.LoadSprite(imageURL).ThenSet(image).Forget();
+        ImageLoader.LoadSprite(imageURL).Consume(image).Forget();
     }
 }

@@ -20,19 +20,23 @@ public class SampleLifecycle : MonoBehaviour
             .LoadedFromSource     (sprite => Debug.Log("Loaded from source"))       // on loaded from source       │
             // ────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+            // ┌──────────────────────────┬───────────────────────────────────────────┐
+            // │ Success lifecycle events │                                           │
+            // └──────────────────────────┘                                           │
+            .Loaded(sprite => Debug.Log("Loaded")) // on successfully loaded          │
+            //               ┌────────────────────────────────────────────────────────┤
+            //               │ Set/Consume sprite [placeholder, successfully loaded]  │
+            //               └────────────────────────────────────────────────────────┤
+            .Consume(sprite => Debug.Log("Consumed"))                              // │
+            .Consume(image)                                                        // │
+            // ───────────────────────────────────────────────────────────────────────┘
+
             // ┌───────────────────────────┬──────────────────────────────────────────┐
             // │ Negative lifecycle events │                                          │
             // └───────────────────────────┘                                          │
             .Canceled(() => Debug.Log("Canceled"))              // on canceled        │
             .Failed(exception => Debug.LogException(exception)) // on failed to load  │
             // ───────────────────────────────────────────────────────────────────────┘
-
-            // ┌──────────────────────────────────────┬──────────────────────────────┐
-            // │ Successfully loaded lifecycle events │                              │
-            // └──────────────────────────────────────┘                              │
-            .Then(sprite => Debug.Log("Loaded")) // on loaded                        │
-            .ThenSet(image)                      // on loaded set sprite into image  │
-            // ──────────────────────────────────────────────────────────────────────┘
 
             // ┌──────────────────────┬──────────────────────────────────────────────────────────────────────────┐
             // │ The end of lifecycle │                                                                          │

@@ -15,13 +15,13 @@ image.sprite = await ImageLoader.LoadSprite(imageURL);
 Don't wait, use callback to set loaded image later:
 
 ```csharp
-ImageLoader.LoadSprite(imageURL).ThenSet(image).Forget();
+ImageLoader.LoadSprite(imageURL).Consume(image).Forget();
 ```
 
 Use callback to set image and still wait for the completion:
 
 ```csharp
-await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+await ImageLoader.LoadSprite(imageURL).Consume(image);
 ```
 
 ## Features
@@ -33,10 +33,10 @@ await ImageLoader.LoadSprite(imageURL).ThenSet(image);
 - ✔️ Avoids loading same image multiple times simultaneously, a new load task waits for completion of existed task
 - ✔️ Uses `UnityWebRequest` to load data which works smooth across all platforms including `WebGL`
 - ✔️ Cache supported on at `WebGL`. Memory cache works, Disk cache isn't allowed by the platform
-- ✔️ Set into Image `ImageLoader.LoadSprite(imageURL).ThenSet(image);`
-- ✔️ Set into RawImage `ImageLoader.LoadSprite(imageURL).ThenSet(rawImage);`
-- ✔️ Set into Material `ImageLoader.LoadSprite(imageURL).ThenSet("_MainTex", material);`
-- ✔️ Set into SpriteRenderer `ImageLoader.LoadSprite(imageURL).ThenSet(spriteRenderer);`
+- ✔️ Set into Image `ImageLoader.LoadSprite(imageURL).Consume(image);`
+- ✔️ Set into RawImage `ImageLoader.LoadSprite(imageURL).Consume(rawImage);`
+- ✔️ Set into Material `ImageLoader.LoadSprite(imageURL).Consume("_MainTex", material);`
+- ✔️ Set into SpriteRenderer `ImageLoader.LoadSprite(imageURL).Consume(spriteRenderer);`
 - ✔️ [Set into anything](#cancellation)
 - ✔️ Cancellation `ImageLoader.LoadSprite(imageURL).Cancel();`
 - ✔️ Cancellation callback `ImageLoader.LoadSprite(imageURL).Cancelled(() => ...);`
@@ -57,6 +57,7 @@ await ImageLoader.LoadSprite(imageURL).ThenSet(image);
   - [Load `Sprite` then set into multiple `Image`](#load-sprite-then-set-into-multiple-image)
   - [Error handling](#error-handling)
   - [Async `await` and `Forget`](#async-await-and-forget)
+  - [Placeholder](#placeholder)
   - [Cancellation](#cancellation)
     - [Cancel by MonoBehaviour events](#cancel-by-monobehaviour-events)
     - [Explicit cancellation](#explicit-cancellation)
@@ -126,19 +127,23 @@ ImageLoader.LoadSprite(imageURL) // loading process started
     .LoadedFromSource     (sprite => Debug.Log("Loaded from source"))       // on loaded from source       │
     // ────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+    // ┌──────────────────────────┬───────────────────────────────────────────┐
+    // │ Success lifecycle events │                                           │
+    // └──────────────────────────┘                                           │
+    .Loaded(sprite => Debug.Log("Loaded")) // on successfully loaded          │
+    //               ┌────────────────────────────────────────────────────────┤
+    //               │ Set/Consume sprite [placeholder, successfully loaded]  │
+    //               └────────────────────────────────────────────────────────┤
+    .Consume(sprite => Debug.Log("Consumed"))                              // │
+    .Consume(image)                                                        // │
+    // ───────────────────────────────────────────────────────────────────────┘
+
     // ┌───────────────────────────┬──────────────────────────────────────────┐
     // │ Negative lifecycle events │                                          │
     // └───────────────────────────┘                                          │
     .Canceled(() => Debug.Log("Canceled"))              // on canceled        │
     .Failed(exception => Debug.LogException(exception)) // on failed to load  │
     // ───────────────────────────────────────────────────────────────────────┘
-
-    // ┌──────────────────────────────────────┬──────────────────────────────┐
-    // │ Successfully loaded lifecycle events │                              │
-    // └──────────────────────────────────────┘                              │
-    .Then(sprite => Debug.Log("Loaded")) // on loaded                        │
-    .ThenSet(image)                      // on loaded set sprite into image  │
-    // ──────────────────────────────────────────────────────────────────────┘
 
     // ┌──────────────────────┬──────────────────────────────────────────────────────────────────────────┐
     // │ The end of lifecycle │                                                                          │
@@ -152,34 +157,34 @@ ImageLoader.LoadSprite(imageURL) // loading process started
 
 ## Load `Sprite` then set into `Image`
 
-> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadSpriteThenSetImage.cs)
+> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadSpriteConsumeImage.cs)
 
 ```csharp
 // Load a sprite from the web and cache it for faster loading next time
 image.sprite = await ImageLoader.LoadSprite(imageURL);
 
 // Load a sprite from the web and set it directly to the Image component
-await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+await ImageLoader.LoadSprite(imageURL).Consume(image);
 ```
 
 ## Load `Texture2D` then set into `Material`
 
-> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadTextureThenSetMaterial.cs)
+> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadTextureConsumeMaterial.cs)
 
 ```csharp
 // Load a Texture2D from the web and cache it for faster loading next time
 material.mainTexture = await ImageLoader.LoadTexture(imageURL);
 
 // Load a Texture2D from the web and set it directly to the Material
-await ImageLoader.LoadTexture(imageURL).ThenSet(material);
+await ImageLoader.LoadTexture(imageURL).Consume(material);
 ```
 
 ## Load `Sprite` then set into multiple `Image`
 
-> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadSpriteThenSetIntoMultipleImages.cs)
+> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleLoadSpriteConsumeIntoMultipleImages.cs)
 
 ```csharp
-ImageLoader.LoadSprite(imageURL).ThenSet(image1, image2).Forget();
+ImageLoader.LoadSprite(imageURL).Consume(image1, image2).Forget();
 ```
 
 ## Error handling
@@ -188,12 +193,12 @@ ImageLoader.LoadSprite(imageURL).ThenSet(image1, image2).Forget();
 
 ```csharp
 ImageLoader.LoadSprite(imageURL) // Attempt to load a sprite
-    .ThenSet(image) // If successful, set the sprite to the Image component
+    .Consume(image) // If successful, set the sprite to the Image component
     .Failed(exception => Debug.LogException(exception)) // If an error occurs, log the exception
     .Forget(); // Forget the task to avoid compilation warning
 
 ImageLoader.LoadSprite(imageURL) // Attempt to load a sprite
-    .ThenSet(image) // If successful, set the sprite to the Image component
+    .Consume(image) // If successful, set the sprite to the Image component
     .Then(sprite => image.gameObject.SetActive(true)) // If successful, activate the GameObject
     .Failed(exception => image.gameObject.SetActive(false)) // If an error occurs, deactivate the GameObject
     .Forget(); // Forget the task to avoid compilation warning
@@ -208,12 +213,32 @@ ImageLoader.LoadSprite(imageURL) // Attempt to load a sprite
 await ImageLoader.LoadSprite(imageURL);
 
 // Load image, set image and wait
-await ImageLoader.LoadSprite(imageURL).ThenSet(image);
+await ImageLoader.LoadSprite(imageURL).Consume(image);
 
 // Skip waiting for completion.
 // To do that we can simply remove 'await' from the start.
 // To avoid compilation warning need to add '.Forget()'.
-ImageLoader.LoadSprite(imageURL).ThenSet(image).Forget();
+ImageLoader.LoadSprite(imageURL).Consume(image).Forget();
+```
+
+## Placeholder
+
+While the target image is loading it would be a good idea to set placeholder image. Also, it works well for setting image if loading fails.
+
+> [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SamplePlaceholder.cs)
+
+```csharp
+ImageLoader.LoadSprite(imageURL)
+    // set placeholder in all conditions
+    .SetPlaceholder(placeholderAny)
+
+    // set placeholder in a specific conditions
+    .SetPlaceholder(placeholderLoadingFromSource, PlaceholderTrigger.LoadingFromSource)
+    .SetPlaceholder(placeholderFailedToLoad, PlaceholderTrigger.FailedToLoad)
+
+    // set consumer
+    .Consume(image)
+    .Forget();
 ```
 
 ## Cancellation
@@ -226,7 +251,7 @@ Cancellation is helpful if target image consumer doesn't exist anymore. For exam
 
 ```csharp
 ImageLoader.LoadSprite(imageURL)
-    .ThenSet(image)
+    .Consume(image)
     .CancelOnEnable(this)   // cancel on OnEnable event of current MonoBehaviour
     .CancelOnDisable(this)  // cancel on OnDisable event of current MonoBehaviour
     .CancelOnDestroy(this); // cancel on OnDestroy event of current MonoBehaviour
@@ -235,7 +260,7 @@ ImageLoader.LoadSprite(imageURL)
 ### Explicit cancellation
 
 ```csharp
-var future = ImageLoader.LoadSprite(imageURL).ThenSet(image);
+var future = ImageLoader.LoadSprite(imageURL).Consume(image);
 future.Cancel();
 ```
 
@@ -246,7 +271,7 @@ var cancellationTokenSource = new CancellationTokenSource();
 
 // loading with attached cancellation token
 ImageLoader.LoadSprite(imageURL, cancellationToken: cancellationTokenSource.Token)
-    .ThenSet(image)
+    .Consume(image)
     .Forget();
 
 cancellationTokenSource.Cancel(); // canceling
@@ -256,7 +281,7 @@ cancellationTokenSource.Cancel(); // canceling
 var cancellationTokenSource = new CancellationTokenSource();
 
 ImageLoader.LoadSprite(imageURL)
-    .ThenSet(image)
+    .Consume(image)
     .Register(cancellationTokenSource.Token) // registering cancellation token
     .Forget();
 
@@ -266,7 +291,7 @@ cancellationTokenSource.Cancel(); // canceling
 ### Cancellation by `using`
 
 ```csharp
-using (var future = ImageLoader.LoadSprite(imageURL).ThenSet(image))
+using (var future = ImageLoader.LoadSprite(imageURL).Consume(image))
 {
     // future would be canceled and disposed outside of the brackets
 }
@@ -274,18 +299,18 @@ using (var future = ImageLoader.LoadSprite(imageURL).ThenSet(image))
 
 ```csharp
 ImageLoader.LoadSprite(imageURL) // load sprite
-    .ThenSet(image) // if success set sprite into image
+    .Consume(image) // if success set sprite into image
     .CancelOnDestroy(this) // cancel OnDestroy event of current gameObject
     .Forget();
 
 ImageLoader.LoadSprite(imageURL) // load sprite
-    .ThenSet(image) // if success set sprite into image
+    .Consume(image) // if success set sprite into image
     .Failed(exception => Debug.LogException(exception)) // if fail print exception
     .CancelOnDestroy(this) // cancel OnDestroy event of current gameObject
     .Forget();
 
 ImageLoader.LoadSprite(imageURL) // load sprite
-    .ThenSet(image) // if success set sprite into image
+    .Consume(image) // if success set sprite into image
     .Then(sprite => image.gameObject.SetActive(true)) // if success activate gameObject
     .Failed(exception => image.gameObject.SetActive(false)) // if fail deactivate gameObject
     .Canceled(() => Debug.Log("ImageLoading canceled")) // if cancelled
@@ -309,7 +334,7 @@ Set timeout for a specific loading request (`IFuture<T>`):
 
 ```csharp
 ImageLoader.LoadSprite(imageURL) // load sprite
-    .ThenSet(image) // if success set sprite into image
+    .Consume(image) // if success set sprite into image
     .Timeout(TimeSpan.FromSeconds(10)) // set timeout duration 10 seconds
     .Forget();
 ```
@@ -430,11 +455,11 @@ reference = null;
 
 > [Full sample source code](https://github.com/IvanMurzak/Unity-ImageLoader/blob/master/Assets/_PackageRoot/Samples/SampleReferences.cs)
 
-`Reference<T>.ThenSet` has a unique feature to attach the reference to the target consumer if consumer is `UnityEngine.Component`. The reference would be disposed as only the consumer gets destroyed.
+`Future<Reference<T>>.Consume` has a unique feature to attach the reference to the target consumer if consumer is `UnityEngine.Component`. The reference would be disposed as only the consumer gets destroyed.
 
 ```csharp
 ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
-    .ThenSet(image) // if success set sprite into image, also creates binding to `image`
+    .Consume(image) // if success set sprite into image, also creates binding to `image`
     .Forget();
 ```
 

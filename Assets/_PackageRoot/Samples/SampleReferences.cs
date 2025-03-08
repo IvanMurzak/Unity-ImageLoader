@@ -10,12 +10,12 @@ public class SampleReferences : MonoBehaviour
     void Start()
     {
         ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
-            .ThenSet(image) // if success set sprite into image, also creates binding to `image`
+            .Consume(image) // if success set sprite into image, also creates binding to `image`
             .Forget();
 
         ImageLoader.LoadSpriteRef(imageURL) // load sprite using Reference
-            .Then(reference => reference.DisposeOnDestroy(this))
-            .Then(reference =>
+            .Loaded(reference => reference.DisposeOnDestroy(this))
+            .Loaded(reference =>
             {
                 var sprite = reference.Value;
                 // use sprite

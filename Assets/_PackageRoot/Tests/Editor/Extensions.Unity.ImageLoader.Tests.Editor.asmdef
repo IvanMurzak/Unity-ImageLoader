@@ -1,0 +1,23 @@
+{
+    "name": "Extensions.Unity.ImageLoader.Tests.Editor",
+    "references": [
+        "Extensions.Unity.ImageLoader.Tests",
+        "Extensions.Unity.ImageLoader",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "NSubstitute.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
