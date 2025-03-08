@@ -19,6 +19,16 @@ namespace Extensions.Unity.ImageLoader
                 return this;
             }
 
+            if (triggers == null || triggers.Length == 0)
+            {
+                if (LogLevel.IsActive(DebugLevel.Error))
+                    Debug.LogError($"[ImageLoader] Future[id={Id}] SetPlaceholder: triggers are not specified\n{Url}");
+                return this;
+            }
+
+            if (LogLevel.IsActive(DebugLevel.Trace))
+                Debug.Log($"[ImageLoader] Future[id={Id}] SetPlaceholder\n{Url}");
+
             foreach (var trigger in triggers)
             {
                 if (trigger.IsEqual(Status))
@@ -28,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
                         foreach (var setter in consumers)
                             Safe.Run(setter, placeholder, LogLevel);
                     }
-                    continue;
+                    // continue;
                 }
                 lock (placeholders)
                     placeholders[trigger.AsFutureStatus()] = placeholder;

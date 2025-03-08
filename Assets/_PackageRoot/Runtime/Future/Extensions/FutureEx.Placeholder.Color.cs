@@ -23,7 +23,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="color">hex color to fill solid color</param>
         /// <returns>Returns the Future instance</returns>
         public static IFuture<Texture2D> SetPlaceholder(this IFuture<Texture2D> future, Color color, params PlaceholderTrigger[] triggers)
-            => future.SetPlaceholder(ColorUtility.ToHtmlStringRGBA(color), triggers);
+            => future.SetPlaceholder(color.ToHexRGBA(), triggers);
 
         /// <summary>
         /// Set a placeholder in all conditions for this Future instance
@@ -42,7 +42,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="hexColor">hex color to fill solid color</param>
         /// <returns>Returns the Future instance</returns>
         public static IFuture<Sprite> SetPlaceholder(this IFuture<Sprite> future, Color color, params PlaceholderTrigger[] triggers)
-            => future.SetPlaceholder(ColorUtility.ToHtmlStringRGBA(color), triggers);
+            => future.SetPlaceholder(color.ToHexRGBA(), triggers);
 
         /// <summary>
         /// Set a placeholder in all conditions for this Future instance
@@ -61,7 +61,7 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="hexColor">hex color to fill solid color</param>
         /// <returns>Returns the Future instance</returns>
         public static IFuture<Reference<Texture2D>> SetPlaceholder(this IFuture<Reference<Texture2D>> future, Color color, params PlaceholderTrigger[] triggers)
-            => future.SetPlaceholder(ColorUtility.ToHtmlStringRGBA(color), triggers);
+            => future.SetPlaceholder(color.ToHexRGBA(), triggers);
 
         /// <summary>
         /// Set a placeholder in all conditions for this Future instance
@@ -80,6 +80,6 @@ namespace Extensions.Unity.ImageLoader
         /// <param name="hexColor">hex color to fill solid color</param>
         /// <returns>Returns the Future instance</returns>
         public static IFuture<Reference<Sprite>> SetPlaceholder(this IFuture<Reference<Sprite>> future, Color color, params PlaceholderTrigger[] triggers)
-            => future.SetPlaceholder(ColorUtility.ToHtmlStringRGBA(color), triggers);
+            => future.SetPlaceholder(color.ToHexRGBA(), triggers);
     }
 }

@@ -225,7 +225,11 @@ namespace Extensions.Unity.ImageLoader
             lock (consumers)
             {
                 foreach (var setter in consumers)
+                {
+                    if (LogLevel.IsActive(DebugLevel.Trace))
+                        Debug.Log($"[ImageLoader] Future[id={Id}] Feed consumer\n{Url}");
                     Safe.Run(setter, value, LogLevel);
+                }
             }
         }
 
