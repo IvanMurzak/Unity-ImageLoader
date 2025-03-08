@@ -3,10 +3,10 @@ name: 2023.2.20f1-Build
 on:
   pull_request:
     branches:
-      - master_disabled
+      - main_disabled
   push:
     branches:
-      - master_disabled
+      - main_disabled
 
 jobs:
   editor-tests:

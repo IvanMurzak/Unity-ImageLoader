@@ -3,10 +3,10 @@ name: 6000.0.37f1-Build
 on:
   pull_request:
     branches:
-      - master_disabled
+      - main_disabled
   push:
     branches:
-      - master_disabled
+      - main_disabled
 
 jobs:
   editor-tests:

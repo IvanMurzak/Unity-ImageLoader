@@ -3,10 +3,10 @@ name: 2023.2.20f1-Editor
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   editor-tests:

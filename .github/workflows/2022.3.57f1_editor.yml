@@ -3,10 +3,10 @@ name: 2022.3.57f1-Editor
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   editor-tests:

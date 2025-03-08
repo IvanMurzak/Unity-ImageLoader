@@ -3,10 +3,10 @@ name: 2022.3.57f1-Player
 on:
   pull_request:
     branches:
-      - master_disabled
+      - main_disabled
   push:
     branches:
-      - master_disabled
+      - main_disabled
 
 jobs:
   editor-tests:
