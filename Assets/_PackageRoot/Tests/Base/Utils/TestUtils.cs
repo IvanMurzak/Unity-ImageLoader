@@ -32,14 +32,21 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         {
             if (message != null)
                 Debug.Log(message.PadRight(50, '-'));
-            LogAssert.ignoreFailingMessages = true;
+// TODO: To find a way to use it a player build
+#if UNITY_EDITOR
+            LogAssert.ignoreFailingMessages = true; // compilation error in player build
+#endif
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
             ImageLoader.ClearSpriteRef();
             ImageLoader.ClearTextureRef();
             yield return ImageLoader.ClearCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
 
             WaitForGCFast();
-            LogAssert.ignoreFailingMessages = false;
+
+// TODO: To find a way to use it a player build
+#if UNITY_EDITOR
+            LogAssert.ignoreFailingMessages = false; // compilation error in player build
+#endif
         }
         public static void WaitForGCFast()
         {

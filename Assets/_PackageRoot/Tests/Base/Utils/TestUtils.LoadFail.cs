@@ -28,8 +28,12 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 futureListener.Assert_Events_Contains(expectedLoadingFrom.Value.ToEventName());
 
             var task1 = future.AsTask();
+
+// TODO: To find a way to use it a player build
+#if UNITY_EDITOR
             if (expectedLoadingFrom.HasValue && expectedLoadingFrom.Value == FutureLoadingFrom.Source) // exception should be thrown only if ONLY loading from Source
-                LogAssert.Expect(LogType.Error, $"[ImageLoader] Future[id={future.Id}] Timeout ({timeout}): {url}");
+                LogAssert.Expect(LogType.Error, $"[ImageLoader] Future[id={future.Id}] Timeout ({timeout}): {url}"); // compilation error in player build
+#endif
             yield return TestUtils.WaitWhile(() => future.IsInProgress, TimeSpan.FromSeconds(10));
             var task2 = future.AsTask();
 
