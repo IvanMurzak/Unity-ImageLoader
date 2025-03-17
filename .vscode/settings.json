@@ -58,6 +58,7 @@
         "editmode",
         "Finalizers",
         "imageloader",
+        "Lerp",
         "Mathf",
         "Murzak",
         "openupm",

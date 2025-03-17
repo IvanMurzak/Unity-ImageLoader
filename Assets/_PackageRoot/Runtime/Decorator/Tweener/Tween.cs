@@ -6,7 +6,7 @@ using System;
 
 namespace Extensions.Unity.ImageLoader
 {
-    public abstract class Tween : IDisposable
+    public abstract class Tween<C, T> : IDisposable
     {
         public enum TweenType
         {
@@ -21,9 +21,22 @@ namespace Extensions.Unity.ImageLoader
         protected float elapsedTime;
         protected bool isPlaying;
 
-        public Tween(float duration)
+        protected C context;
+        protected Func<C, T> getter;
+        protected Action<C, T> setter;
+        protected T startValue;
+        protected T targetValue;
+        protected TweenType tweenType;
+
+        public Tween(C context, Func<C, T> getter, Action<C, T> setter, T targetValue, float duration, TweenType tweenType = TweenType.Linear)
         {
+            this.context = context;
+            this.getter = getter;
+            this.setter = setter;
+            this.startValue = getter(context);
+            this.targetValue = targetValue;
             this.duration = duration;
+            this.tweenType = tweenType;
             this.elapsedTime = 0f;
             this.isPlaying = false;
         }
@@ -32,6 +45,7 @@ namespace Extensions.Unity.ImageLoader
 
         public void Play()
         {
+            startValue = getter(context); // Get the current value when starting the tween
             isPlaying = true;
             elapsedTime = 0f;
         }
@@ -73,6 +87,13 @@ namespace Extensions.Unity.ImageLoader
                 await Task.Yield();
             }
         }
-        public abstract void Dispose();
+
+        public virtual void Dispose()
+        {
+            Stop();
+            context = default;
+            getter = null;
+            setter = null;
+        }
     }
 }
