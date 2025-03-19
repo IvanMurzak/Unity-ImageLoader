@@ -31,10 +31,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         {
             if (message != null)
                 Debug.Log(message.PadRight(50, '-'));
-// TODO: To find a way to use it in a player build
-#if UNITY_EDITOR
+
             UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true; // compilation error in player build
-#endif
+
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
             ImageLoader.ClearSpriteRef();
             ImageLoader.ClearTextureRef();
@@ -42,10 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             WaitForGCFast();
 
-// TODO: To find a way to use it in a player build
-#if UNITY_EDITOR
             UnityEngine.TestTools.LogAssert.ignoreFailingMessages = false; // compilation error in player build
-#endif
         }
         public static void WaitForGCFast()
         {
