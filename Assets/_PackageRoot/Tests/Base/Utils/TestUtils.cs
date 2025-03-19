@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
@@ -32,7 +33,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             if (message != null)
                 Debug.Log(message.PadRight(50, '-'));
 
-            UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true; // compilation error in player build
+            LogAssert.ignoreFailingMessages = true; // compilation error in player build
 
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
             ImageLoader.ClearSpriteRef();
@@ -41,7 +42,7 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
 
             WaitForGCFast();
 
-            UnityEngine.TestTools.LogAssert.ignoreFailingMessages = false; // compilation error in player build
+            LogAssert.ignoreFailingMessages = false; // compilation error in player build
         }
         public static void WaitForGCFast()
         {
