@@ -3,10 +3,10 @@ using System.Linq;
 using System.Collections;
 using NUnit.Framework;
 using Cysharp.Threading.Tasks;
-using UnityEngine.TestTools;
 using UnityEngine;
 using System.Threading.Tasks;
 using Extensions.Unity.ImageLoader.Tests.Utils;
+using UnityEngine.TestTools;
 
 namespace Extensions.Unity.ImageLoader.Tests
 {
