@@ -1,12 +1,13 @@
 {
   "dependencies": {
     "com.unity.asset-store-tools": {
-      "version": "file:com.unity.asset-store-tools",
+      "version": "https://github.com/Unity-Technologies/com.unity.asset-store-tools.git?path=/com.unity.asset-store-tools",
       "depth": 0,
-      "source": "embedded",
+      "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
-      }
+      },
+      "hash": "944773fcec4d9e1551bc8058523e5ccb649ab87e"
     },
     "com.unity.ext.nunit": {
       "version": "1.0.6",

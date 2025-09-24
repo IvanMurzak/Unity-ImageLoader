@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.asset-store-tools": "https://github.com/Unity-Technologies/com.unity.asset-store-tools.git?path=/com.unity.asset-store-tools",
     "com.unity.test-framework": "1.1.33"
   },
   "scopedRegistries": [

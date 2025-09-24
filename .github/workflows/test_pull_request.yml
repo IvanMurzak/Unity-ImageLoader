@@ -23,7 +23,7 @@ jobs:
           echo "InstallerProjectPath=./Installer" >> $GITHUB_OUTPUT
           echo "InstallerFileName=Unity-ImageLoader-Installer" >> $GITHUB_OUTPUT
           echo "InstallerExportMethod=com.IvanMurzak.Unity.ImageLoader.Installer.PackageExporter.ExportPackage" >> $GITHUB_OUTPUT
-          echo "InstallerUnityVersion=2019.4.40f1" >> $GITHUB_OUTPUT
+          echo "InstallerUnityVersion=2021.3.45f1" >> $GITHUB_OUTPUT
 
   # --- EDIT MODE ---
 
