@@ -1,0 +1,98 @@
+name: test-unity-plugin
+
+##############################################################################
+# 1. Triggers
+##############################################################################
+on:
+  workflow_call:
+    inputs:
+      projectPath:    { required: true, type: string }
+      unityVersion:   { required: true, type: string }
+      testMode:       { required: true, type: string }
+    secrets:
+      UNITY_LICENSE:  { required: true }
+      UNITY_EMAIL:    { required: true }
+      UNITY_PASSWORD: { required: true }
+
+##############################################################################
+# 2. Job – runs only after a maintainer applies the `ci-ok` label
+##############################################################################
+jobs:
+  test:
+    if: |
+      github.event_name != 'pull_request_target' ||
+      contains(github.event.pull_request.labels.*.name,'ci-ok')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows
+            runs-on: [windows-latest]
+          - os: ubuntu
+            runs-on: [ubuntu-latest]
+
+    name: ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
+
+    # permissions: # minimize the default token
+    #   contents: write
+    #   pull-requests: write
+
+    steps:
+      # --------------------------------------------------------------------- #
+      # 2-a. (PR only) abort if the contributor also changed workflow files
+      # --------------------------------------------------------------------- #
+      - name: Abort if workflow files modified
+        if: ${{ github.event_name == 'pull_request_target' }}
+        run: |
+          git fetch --depth=1 origin "${{ github.base_ref }}"
+          if git diff --name-only HEAD origin/${{ github.base_ref }} | grep -q '^\.github/workflows/'; then
+            echo "::error::This PR edits workflow files – refusing to run with secrets"; exit 1;
+          fi
+
+      # --------------------------------------------------------------------- #
+      # 2-b. Checkout the contributor’s commit safely
+      # --------------------------------------------------------------------- #
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      # --------------------------------------------------------------------- #
+      # 2-c. Cache & run the Unity test-runner
+      # --------------------------------------------------------------------- #
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ inputs.projectPath }}/Library
+            ~/.cache/unity3d
+          key: Library-${{ inputs.unityVersion }}-${{ matrix.os }}
+
+      # --------------------------------------------------------------------- #
+      - name: Generate custom image name
+        id: custom_image
+        run: |
+          echo "image=unityci/editor:${{ matrix.os }}-${{ inputs.unityVersion }}-base-3" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath:    ${{ inputs.projectPath }}
+          unityVersion:   ${{ inputs.unityVersion }}
+          testMode:       ${{ inputs.testMode }}
+          customImage:    ${{ steps.custom_image.outputs.image }}
+          githubToken:    ${{ secrets.GITHUB_TOKEN }}
+          checkName:      ${{ inputs.unityVersion }} ${{ inputs.testMode }} ${{ matrix.os }} Test Results
+          artifactsPath:  artifacts-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.os }}
+          customParameters: -CI true -GITHUB_ACTIONS true
+
+      # --------------------------------------------------------------------- #
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results for ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.os }}
+          path: ${{ steps.tests.outputs.artifactsPath }}

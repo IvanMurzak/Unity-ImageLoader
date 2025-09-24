@@ -1,8 +1,16 @@
-# Unity Image Loader
+# [Unity Image Loader](https://github.com/IvanMurzak/Unity-ImageLoader)
 
-![npm](https://img.shields.io/npm/v/extensions.unity.imageloader) [![openupm](https://img.shields.io/npm/v/extensions.unity.imageloader?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/extensions.unity.imageloader/) ![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader) [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+[![OpenUPM](https://img.shields.io/npm/v/extensions.unity.imageloader?label=OpenUPM&registry_uri=https://package.openupm.com&labelColor=333A41 'OpenUPM package')](https://openupm.com/packages/extensions.unity.imageloader/)
+[![Unity Asset Store](https://img.shields.io/badge/Asset%20Store-View-blue?logo=unity&labelColor=333A41 'Asset Store')](https://u3d.as/3DTj)
+[![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Editor supported')](https://unity.com/releases/editor/archive)
+[![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
+[![r](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg 'Tests Passed')](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/release.yml)
 
-![2019.4.40f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2019.4.40f1_editor.yml?label=2019.4.40f1-Editor) ![2020.3.40f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2020.3.40f1_editor.yml?label=2020.3.40f1-Editor) ![2021.3.45f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2021.3.45f1_editor.yml?label=2021.3.45f1-Editor) ![2022.3.57f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2022.3.57f1_editor.yml?label=2022.3.57f1-Editor) ![2023.1.20f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2023.1.20f1_editor.yml?label=2023.1.20f1-Editor) ![2023.2.20f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/2023.2.20f1_editor.yml?label=2023.2.20f1-Editor) ![6000.0.37f1](https://img.shields.io/github/actions/workflow/status/IvanMurzak/Unity-ImageLoader/6000.0.37f1_editor.yml?label=6000.0.37f1-Editor)
+[![Stars](https://img.shields.io/github/stars/IvanMurzak/Unity-ImageLoader 'Stars')](https://github.com/IvanMurzak/Unity-ImageLoader/stargazers)
+[![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
+![Image Loader Animation](https://github.com/IvanMurza/Unity-ImageLoader/blob/main/docs/img/header.gif 'Image Loading Animation')
 
 Async image loader with two caching layers for Unity. It supports loading images from web or local paths and provides memory and disk caching to optimize performance. The package includes features for automatic image setting, cancellation handling, error handling, and lifecycle management.
 
@@ -37,19 +45,35 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 - ✔️ Set into RawImage `ImageLoader.LoadSprite(imageURL).Consume(rawImage);`
 - ✔️ Set into Material `ImageLoader.LoadSprite(imageURL).Consume("_MainTex", material);`
 - ✔️ Set into SpriteRenderer `ImageLoader.LoadSprite(imageURL).Consume(spriteRenderer);`
-- ✔️ [Set into anything](#cancellation)
+- ✔️ [Set into anything](#load-sprite-then-set-into-image)
 - ✔️ Cancellation `ImageLoader.LoadSprite(imageURL).Cancel();`
 - ✔️ Cancellation callback `ImageLoader.LoadSprite(imageURL).Cancelled(() => ...);`
 - ✔️ Error callback `ImageLoader.LoadSprite(imageURL).Failed(exception => ...);`
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
 - ✔️ Debug level per each task `ImageLoader.LoadSprite(imageURL).SetLogLevel(DebugLevel.Trace);`
 
+### Stability status
+
+| Unity Version | Editor test | Player test | Build test |
+|---------------|-------------|-------------|------------|
+| 2019.4.40f1   | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-editmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-playmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-standalone) |
+| 2020.3.40f1   | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-editmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-playmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-standalone) |
+| 2021.3.45f1   | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-editmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-playmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-standalone) |
+| 2022.3.57f1   | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-editmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-playmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-standalone) |
+| 2023.1.20f1   | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-editmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-playmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-standalone) |
+| 2023.2.20f1   | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-editmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-playmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-standalone) |
+| 6000.0.37f1   | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-editmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-playmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-standalone) |
+
 ## Content
 
 - [Unity Image Loader](#unity-image-loader)
   - [Features](#features)
+    - [Stability status](#stability-status)
   - [Content](#content)
   - [Installation](#installation)
+    - [Option 1 - Installer](#option-1---installer)
+    - [Option 2 - OpenUPM-CLI](#option-2---openupm-cli)
+    - [Option 3 - Asset Store](#option-3---asset-store)
 - [Usage](#usage)
   - [Events lifecycle](#events-lifecycle)
   - [Load `Sprite` then set into `Image`](#load-sprite-then-set-into-image)
@@ -100,6 +124,28 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 ``` CLI
 openupm add extensions.unity.imageloader
 ```
+
+### Option 1 - Installer
+
+- **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/4.1.3/ImageLoader-Installer.unitypackage)**
+- **📂 Import installer into Unity project**
+  > - You may use double click on the file - Unity will open it
+  > - OR: You may open Unity Editor first, then click on `Assets/Import Package/Custom Package`, then choose the file
+
+### Option 2 - OpenUPM-CLI
+
+- [⬇️ Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
+- 📟 Open command line in Unity project folder
+
+```bash
+openupm add extensions.unity.imageloader
+```
+
+### Option 3 - Asset Store
+
+- **[▶️ Open Asset Store](https://u3d.as/3DTj)**
+
+---
 
 # Usage
 
