@@ -117,14 +117,6 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 
 ## Installation
 
-- [Install OpenUPM-CLI](https://github.com/openupm/openupm-cli#installation)
-- Open command line in Unity project folder
-- Run the command
-
-``` CLI
-openupm add extensions.unity.imageloader
-```
-
 ### Option 1 - Installer
 
 - **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/4.1.3/ImageLoader-Installer.unitypackage)**

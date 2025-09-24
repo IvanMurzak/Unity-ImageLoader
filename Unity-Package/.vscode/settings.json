@@ -65,5 +65,5 @@
         "unitask",
         "WEBGL"
     ],
-    "dotnet.defaultSolution": "ImageLoader.sln"
+    "dotnet.defaultSolution": "Unity-Package.sln"
 }
