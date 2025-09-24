@@ -35,7 +35,8 @@ namespace com.IvanMurzak.Unity.ImageLoader.Installer
             "org.nuget.com.ivanmurzak",  // Ivan Murzak's NuGet packages
             "org.nuget.microsoft",       // Microsoft NuGet packages
             "org.nuget.system",          // Microsoft NuGet packages
-            "org.nuget.r3"               // R3 package NuGet package
+            "org.nuget.r3",              // R3 package NuGet package
+            "com.cysharp.unitask",       // Cysharp UniTask package
         };
 
         public static void AddScopedRegistryIfNeeded(string manifestPath, int indent = 2)
