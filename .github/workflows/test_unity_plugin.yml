@@ -16,6 +16,13 @@ on:
 
 ##############################################################################
 # 2. Jobs – runs only after a maintainer applies the `ci-ok` label
+#
+# Both the Linux ("base") and Windows ("windows-mono") build targets run on
+# ubuntu-latest using the matching unityci editor image. The previous
+# windows-latest matrix was dropped: Unity activation inside the Windows
+# container fails with exit -1073741515 (STATUS_DLL_NOT_FOUND) before any test
+# runs. "windows-mono" preserves Windows-target coverage without that broken
+# environment (same approach as the Animation extension).
 ##############################################################################
 jobs:
   test:
@@ -25,35 +32,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows
-            runs-on: [windows-latest]
-          - os: ubuntu
-            runs-on: [ubuntu-latest]
+        os: [ubuntu-latest]
+        platform: [base, windows-mono]
 
-    name: ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.runs-on }}
-
-    # permissions: # minimize the default token
-    #   contents: write
-    #   pull-requests: write
+    name: ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       # --------------------------------------------------------------------- #
-      # 2-a. Skip Unity 2019 on Windows early
-      # --------------------------------------------------------------------- #
-      - name: Skip Unity 2019 on Windows
-        if: ${{ startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows' }}
-        run: |
-          echo "::notice::Unity 2019 on Windows doesn't support Docker test running - skipping tests"
-          exit 0
-        shell: bash
-
-      # --------------------------------------------------------------------- #
-      # 2-b. (PR only) abort if the contributor also changed workflow files
+      # (PR only) abort if the contributor also changed workflow files
       # --------------------------------------------------------------------- #
       - name: Abort if workflow files modified
-        if: ${{ github.event_name == 'pull_request_target' && !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
+        if: ${{ github.event_name == 'pull_request_target' }}
         run: |
           git fetch --depth=1 origin "${{ github.base_ref }}"
           if git diff --name-only HEAD origin/${{ github.base_ref }} | grep -q '^\.github/workflows/'; then
@@ -61,34 +51,30 @@ jobs:
           fi
 
       # --------------------------------------------------------------------- #
-      # 2-c. Checkout the contributor's commit safely
+      # Checkout the contributor's commit safely
       # --------------------------------------------------------------------- #
       - uses: actions/checkout@v4
-        if: ${{ !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
         with:
           lfs: false
 
       # --------------------------------------------------------------------- #
-      # 2-c. Cache & run the Unity test-runner
+      # Cache & run the Unity test-runner
       # --------------------------------------------------------------------- #
       - uses: actions/cache@v4
-        if: ${{ !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
         with:
           path: |
             ${{ inputs.projectPath }}/Library
             ~/.cache/unity3d
-          key: Library-${{ inputs.unityVersion }}-${{ matrix.os }}
+          key: Library-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.platform }}
 
       # --------------------------------------------------------------------- #
       - name: Generate custom image name
-        if: ${{ !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
         id: custom_image
         run: |
-          echo "image=unityci/editor:${{ matrix.os }}-${{ inputs.unityVersion }}-base-3" >> $GITHUB_OUTPUT
+          echo "image=unityci/editor:ubuntu-${{ inputs.unityVersion }}-${{ matrix.platform }}-3" >> $GITHUB_OUTPUT
         shell: bash
 
       - uses: game-ci/unity-test-runner@v4
-        if: ${{ !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
         id: tests
         env:
           UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
@@ -100,13 +86,13 @@ jobs:
           testMode:       ${{ inputs.testMode }}
           customImage:    ${{ steps.custom_image.outputs.image }}
           githubToken:    ${{ secrets.GITHUB_TOKEN }}
-          checkName:      ${{ inputs.unityVersion }} ${{ inputs.testMode }} ${{ matrix.os }} Test Results
-          artifactsPath:  artifacts-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.os }}
+          checkName:      ${{ inputs.unityVersion }} ${{ inputs.testMode }} ${{ matrix.platform }} Test Results
+          artifactsPath:  artifacts-${{ inputs.unityVersion }}-${{ inputs.testMode }}-${{ matrix.platform }}
           customParameters: -CI true -GITHUB_ACTIONS true
 
       # --------------------------------------------------------------------- #
       - uses: actions/upload-artifact@v4
-        if: ${{ always() && !(startsWith(inputs.unityVersion, '2019.') && matrix.os == 'windows') }}
+        if: ${{ always() }}
         with:
-          name: Test results for ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.os }}
+          name: Test results for ${{ inputs.unityVersion }} ${{ inputs.testMode }} on ${{ matrix.platform }}
           path: ${{ steps.tests.outputs.artifactsPath }}
