@@ -54,9 +54,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             } // end of scope
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => Reference<Sprite>.Counter(url) == 0);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
@@ -78,9 +76,7 @@ namespace Extensions.Unity.ImageLoader.Tests
             futureRef = null;
             reference = null;
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => Reference<Sprite>.Counter(url) == 0);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
@@ -103,9 +99,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             }
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => TestUtils.ImageURLs.All(u => Reference<Sprite>.Counter(u) == 0));
 
             foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));

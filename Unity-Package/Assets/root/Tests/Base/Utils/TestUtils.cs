@@ -59,6 +59,20 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             WaitForGCFast();
             yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
         }
+        // Polls GC + finalizers until `condition` holds or the timeout elapses.
+        // Reference release is finalizer-driven and non-deterministic (especially on
+        // Mono), so a fixed number of WaitForGC calls is flaky — keep collecting until
+        // the expected state is reached, then let the caller assert.
+        public static IEnumerator WaitForGCUntil(Func<bool> condition, double timeoutSeconds = 10, int millisecondsDelay = 50)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+            WaitForGCFast();
+            while (!condition() && DateTime.UtcNow < deadline)
+            {
+                yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
+                WaitForGCFast();
+            }
+        }
         public static IEnumerator RunNoLogs(Func<IEnumerator> test)
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
