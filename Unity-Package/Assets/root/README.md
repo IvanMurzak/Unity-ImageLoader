@@ -7,7 +7,7 @@
 [![r](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg 'Tests Passed')](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/release.yml)
 
 [![Stars](https://img.shields.io/github/stars/IvanMurzak/Unity-ImageLoader 'Stars')](https://github.com/IvanMurzak/Unity-ImageLoader/stargazers)
-[![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License&labelColor=333A41)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ![Image Loader Animation](https://github.com/IvanMurza/Unity-ImageLoader/blob/main/docs/img/header.gif 'Image Loading Animation')
@@ -52,23 +52,10 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
 - ✔️ Debug level per each task `ImageLoader.LoadSprite(imageURL).SetLogLevel(DebugLevel.Trace);`
 
-### Stability status
-
-| Unity Version | Editor test | Player test | Build test |
-|---------------|-------------|-------------|------------|
-| 2019.4.40f1   | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-editmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-playmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-standalone) |
-| 2020.3.40f1   | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-editmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-playmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-standalone) |
-| 2021.3.45f1   | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-editmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-playmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-standalone) |
-| 2022.3.57f1   | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-editmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-playmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-standalone) |
-| 2023.1.20f1   | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-editmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-playmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-standalone) |
-| 2023.2.20f1   | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-editmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-playmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-standalone) |
-| 6000.0.37f1   | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-editmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-playmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-standalone) |
-
 ## Content
 
 - [Unity Image Loader](#unity-image-loader)
   - [Features](#features)
-    - [Stability status](#stability-status)
   - [Content](#content)
   - [Installation](#installation)
     - [Option 1 - Installer](#option-1---installer)
