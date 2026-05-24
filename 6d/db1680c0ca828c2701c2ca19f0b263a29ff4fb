@@ -1,0 +1,27 @@
+Unity-Package/Assets/root/Tests/Base/Utils/TestHttpServer.cs
+  s_e30159354ab104::t_e6b38c6daa8da0 22-29
+  s_e30159354ab104::t_d697790b201764 1-21,30-161
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequestProvider.cs
+  s_e30159354ab104::t_e3fa9221ec8d0c 1-16,25-46
+  s_e30159354ab104::t_d57314428de2fd 17-24
+Unity-Package/Assets/root/Tests/Base/Utils/TestHttpServer.cs.meta
+  s_e30159354ab104::t_91a1323698c3c2 1-11
+Unity-Package/Assets/root/Tests/Base/Utils/TestUtils.cs
+  s_e30159354ab104::t_2c76e5bc87ed48 85-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "6ddb1680c0ca828c2701c2ca19f0b263a29ff4fb",
+  "prompts": {},
+  "sessions": {
+    "s_e30159354ab104": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f53185a5-f95d-4b3d-91af-dff62c4c25e8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
