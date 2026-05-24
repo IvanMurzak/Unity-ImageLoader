@@ -73,6 +73,40 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 WaitForGCFast();
             }
         }
+        // Manual retry for coroutine tests. NUnit's [Retry] is a no-op on [UnityTest],
+        // so drive the body enumerator ourselves, catch a failed attempt, reset state
+        // and re-run. Used for finalizer/GC-driven tests whose failures are transient.
+        public static IEnumerator RunWithRetry(Func<IEnumerator> body, int attempts = 3)
+        {
+            for (var attempt = 1; attempt <= attempts; attempt++)
+            {
+                Exception failure = null;
+                var e = body();
+                while (true)
+                {
+                    object current;
+                    try
+                    {
+                        if (!e.MoveNext()) break;
+                        current = e.Current;
+                    }
+                    catch (Exception ex)
+                    {
+                        failure = ex;
+                        break;
+                    }
+                    yield return current;
+                }
+
+                if (failure == null)
+                    yield break;
+                if (attempt >= attempts)
+                    System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+
+                Debug.Log($"[Test] attempt {attempt}/{attempts} failed: {failure.GetType().Name} - {failure.Message}. Retrying after cleanup.");
+                yield return ClearEverything(null);
+            }
+        }
         public static IEnumerator RunNoLogs(Func<IEnumerator> test)
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
