@@ -36,6 +36,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             LogAssert.ignoreFailingMessages = true; // compilation error in player build
 
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
+
+            // Enable mock provider for tests
+            EnableMockProvider();
+
             ImageLoader.ClearSpriteRef();
             ImageLoader.ClearTextureRef();
             yield return ImageLoader.ClearCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
@@ -64,6 +68,53 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             test();
+        }
+
+        public static Texture2D CreateTestTexture(int width = 64, int height = 64, Color? color = null)
+        {
+            var testColor = color ?? Color.green;
+            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            var pixels = new Color[width * height];
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = testColor;
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return texture;
+        }
+
+        static readonly Color[] mockColors =
+        {
+            Color.green, Color.blue, Color.red, Color.cyan, Color.magenta, Color.yellow
+        };
+        static byte[][] mockPngCache;
+
+        public static void EnableMockProvider()
+        {
+            TestHttpServer.Instance.EnsureStarted();
+
+            if (mockPngCache == null)
+            {
+                mockPngCache = new byte[ImageURLs.Length][];
+                for (int i = 0; i < ImageURLs.Length; i++)
+                {
+                    var texture = CreateTestTexture(64, 64, mockColors[i % mockColors.Length]);
+                    mockPngCache[i] = texture.EncodeToPNG();
+                }
+            }
+
+            MockWebRequestProvider.Instance.Reset();
+            for (int i = 0; i < ImageURLs.Length; i++)
+            {
+                var id = i.ToString();
+                TestHttpServer.Instance.RegisterImage(id, mockPngCache[i]);
+                MockWebRequestProvider.Instance.RegisterSuccess(ImageURLs[i], id);
+            }
+            ImageLoader.settings.webRequestProvider = MockWebRequestProvider.Instance;
+        }
+
+        public static void DisableMockProvider()
+        {
+            ImageLoader.settings.webRequestProvider = new DefaultWebRequestProvider();
         }
     }
 }
