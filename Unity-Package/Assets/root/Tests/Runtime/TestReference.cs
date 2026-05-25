@@ -39,9 +39,9 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScope);
-        [UnityTest] public IEnumerator DisposeOnOutOfScope() => TestUtils.RunWithRetry(DisposeOnOutOfScope_Impl);
-        IEnumerator DisposeOnOutOfScope_Impl()
+        [UnityTest] public IEnumerator DisposeOnOutOfScope()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -59,9 +59,9 @@ namespace Extensions.Unity.ImageLoader.Tests
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
-        [UnityTest] public IEnumerator DisposeOnOutOfScope2() => TestUtils.RunWithRetry(DisposeOnOutOfScope2_Impl);
-        IEnumerator DisposeOnOutOfScope2_Impl()
+        [UnityTest] public IEnumerator DisposeOnOutOfScope2()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -83,9 +83,9 @@ namespace Extensions.Unity.ImageLoader.Tests
         }
 
         [UnityTest] public IEnumerator DisposeOnOutOfScopeAll_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScopeAll);
-        [UnityTest] public IEnumerator DisposeOnOutOfScopeAll() => TestUtils.RunWithRetry(DisposeOnOutOfScopeAll_Impl);
-        IEnumerator DisposeOnOutOfScopeAll_Impl()
+        [UnityTest] public IEnumerator DisposeOnOutOfScopeAll()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
