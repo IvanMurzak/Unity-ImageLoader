@@ -284,12 +284,12 @@ jobs:
       testMode: 'editmode'
     secrets: inherit
 
-  test-unity-2020-3-40f1-editmode:
+  test-unity-2020-3-48f1-editmode:
     needs: [setup, build-unity-installer]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
       projectPath: ${{ needs.setup.outputs.UnityProjectPath }}
-      unityVersion: '2020.3.40f1'
+      unityVersion: '2020.3.48f1'
       testMode: 'editmode'
     secrets: inherit
 
@@ -349,12 +349,12 @@ jobs:
       testMode: 'playmode'
     secrets: inherit
 
-  test-unity-2020-3-40f1-playmode:
+  test-unity-2020-3-48f1-playmode:
     needs: [setup, build-unity-installer]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
       projectPath: ${{ needs.setup.outputs.UnityProjectPath }}
-      unityVersion: '2020.3.40f1'
+      unityVersion: '2020.3.48f1'
       testMode: 'playmode'
     secrets: inherit
 
@@ -414,12 +414,12 @@ jobs:
       testMode: 'standalone'
     secrets: inherit
 
-  test-unity-2020-3-40f1-standalone:
+  test-unity-2020-3-48f1-standalone:
     needs: [setup, build-unity-installer]
     uses: ./.github/workflows/test_unity_plugin.yml
     with:
       projectPath: ${{ needs.setup.outputs.UnityProjectPath }}
-      unityVersion: '2020.3.40f1'
+      unityVersion: '2020.3.48f1'
       testMode: 'standalone'
     secrets: inherit
 
@@ -486,9 +486,9 @@ jobs:
       test-unity-2019-4-40f1-editmode,
       test-unity-2019-4-40f1-playmode,
       test-unity-2019-4-40f1-standalone,
-      test-unity-2020-3-40f1-editmode,
-      test-unity-2020-3-40f1-playmode,
-      test-unity-2020-3-40f1-standalone,
+      test-unity-2020-3-48f1-editmode,
+      test-unity-2020-3-48f1-playmode,
+      test-unity-2020-3-48f1-standalone,
       test-unity-2021-3-45f1-editmode,
       test-unity-2021-3-45f1-playmode,
       test-unity-2021-3-45f1-standalone,
