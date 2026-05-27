@@ -107,7 +107,7 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 
 ### Option 1 - Installer
 
-- **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/4.1.3/ImageLoader-Installer.unitypackage)**
+- **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/latest/download/ImageLoader-Installer.unitypackage)**
 - **📂 Import installer into Unity project**
   > - You may use double click on the file - Unity will open it
   > - OR: You may open Unity Editor first, then click on `Assets/Import Package/Custom Package`, then choose the file

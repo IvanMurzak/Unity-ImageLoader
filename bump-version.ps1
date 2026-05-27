@@ -33,18 +33,6 @@ $ErrorActionPreference = "Stop"
 # Version file locations (relative to script root)
 $VersionFiles = @(
     @{
-        Path        = "README.md"
-        Pattern     = "https://github\.com/IvanMurzak/Unity-ImageLoader/releases/download/[\d\.]+/ImageLoader-Installer\.unitypackage"
-        Replace     = "https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/{VERSION}/ImageLoader-Installer.unitypackage"
-        Description = "Root README download URL"
-    },
-    @{
-        Path        = "Unity-Package/Assets/root/README.md"
-        Pattern     = "https://github\.com/IvanMurzak/Unity-ImageLoader/releases/download/[\d\.]+/ImageLoader-Installer\.unitypackage"
-        Replace     = "https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/{VERSION}/ImageLoader-Installer.unitypackage"
-        Description = "Plugin README download URL"
-    },
-    @{
         Path        = "Installer/Assets/com.IvanMurzak/Image Loader Installer/Installer.cs"
         Pattern     = 'public const string Version = "[\d\.]+";'
         Replace     = 'public const string Version = "{VERSION}";'
