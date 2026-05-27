@@ -1,7 +1,6 @@
 # [Unity Image Loader](https://github.com/IvanMurzak/Unity-ImageLoader)
 
 [![OpenUPM](https://img.shields.io/npm/v/extensions.unity.imageloader?label=OpenUPM&registry_uri=https://package.openupm.com&labelColor=333A41 'OpenUPM package')](https://openupm.com/packages/extensions.unity.imageloader/)
-[![Unity Asset Store](https://img.shields.io/badge/Asset%20Store-View-blue?logo=unity&labelColor=333A41 'Asset Store')](https://u3d.as/3DTj)
 [![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Editor supported')](https://unity.com/releases/editor/archive)
 [![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
 [![r](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg 'Tests Passed')](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/release.yml)
