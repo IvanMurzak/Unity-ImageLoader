@@ -1,10 +1,11 @@
 # [Unity Image Loader](https://github.com/IvanMurzak/Unity-ImageLoader)
 
 [![OpenUPM](https://img.shields.io/npm/v/extensions.unity.imageloader?label=OpenUPM&registry_uri=https://package.openupm.com&labelColor=333A41 'OpenUPM package')](https://openupm.com/packages/extensions.unity.imageloader/)
-[![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Editor supported')](https://unity.com/releases/editor/archive)
-[![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
+[![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=2A2A2A 'Unity Editor supported')](https://unity.com/releases/editor/archive)
+[![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=2A2A2A 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
 [![r](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg 'Tests Passed')](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/release.yml)
 
+[![Downloads](https://img.shields.io/badge/dynamic/json?labelColor=333A41&label=Downloads&query=%24.downloads&suffix=%2Fmonth&url=https%3A%2F%2Fpackage.openupm.com%2Fdownloads%2Fpoint%2Flast-month%2Fextensions.unity.imageloader)](https://openupm.com/packages/extensions.unity.imageloader/)
 [![Stars](https://img.shields.io/github/stars/IvanMurzak/Unity-ImageLoader 'Stars')](https://github.com/IvanMurzak/Unity-ImageLoader/stargazers)
 [![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License&labelColor=333A41)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
