@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License&labelColor=333A41)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-![Image Loader Animation](https://github.com/IvanMurza/Unity-ImageLoader/blob/main/docs/img/header.gif 'Image Loading Animation')
+![Image Loader Animation](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/docs/img/header.gif?raw=true 'Image Loading Animation')
 
 Async image loader with two caching layers for Unity. It supports loading images from web or local paths and provides memory and disk caching to optimize performance. The package includes features for automatic image setting, cancellation handling, error handling, and lifecycle management.
 
