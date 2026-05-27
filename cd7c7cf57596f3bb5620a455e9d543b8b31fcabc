@@ -1,0 +1,29 @@
+Unity-Package/Assets/root/Tests/Runtime/TestReference.cs
+  s_e30159354ab104::t_45c01a90ad0381 41,85
+  s_e30159354ab104::t_251d0f20990182 62-63
+  s_e30159354ab104::t_ba4656dce11b74 86-87
+  s_e30159354ab104::t_8a63bc86ee4418 42-43
+Unity-Package/Assets/root/Tests/Editor/TestReference.cs
+  s_e30159354ab104::t_b6fa55ba5a0e5c 42-43
+  s_e30159354ab104::t_e69d66f1b30be8 86-87
+  s_e30159354ab104::t_a19381ea842353 62-63
+  s_e30159354ab104::t_2e6e463b2037ce 41,85
+Unity-Package/Assets/root/Tests/Base/Utils/TestUtils.cs
+  s_e30159354ab104::t_aa71a9d8a70458 76-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "cd7c7cf57596f3bb5620a455e9d543b8b31fcabc",
+  "prompts": {},
+  "sessions": {
+    "s_e30159354ab104": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f53185a5-f95d-4b3d-91af-dff62c4c25e8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
