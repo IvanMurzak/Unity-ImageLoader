@@ -15,7 +15,7 @@ namespace com.IvanMurzak.Unity.ImageLoader.Installer
     public static partial class Installer
     {
         public const string PackageId = "extensions.unity.imageloader";
-        public const string Version = "7.0.3";
+        public const string Version = "7.0.4";
 
         static Installer()
         {
