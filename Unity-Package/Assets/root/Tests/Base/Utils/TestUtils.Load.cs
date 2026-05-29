@@ -19,8 +19,26 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         // missing — a timing flake (seen on fast CI runners). Creating the future
         // un-started, attaching the listener, registering the placeholders, and only then
         // calling StartLoading() makes the loading-placeholder consume deterministic.
+        //
+        // cancelAtLoadingFrom makes "cancel-while-loading-from-disk-cache" deterministic.
+        // The disk read is a local File.ReadAllBytes dispatched to a TaskFactory; on a
+        // fast machine that Task can complete (and the awaiting continuation resume
+        // inline) entirely inside StartLoading(), so the future reaches
+        // LoadedFromDiskCache before the test's post-StartLoading Cancel() runs — the
+        // test then sees a successful load instead of the cancel (observed once on a
+        // windows-mono standalone leg). To cancel reliably *while in the loading state*
+        // we hook the cancel to the last synchronous loading-state callback so the
+        // event order is preserved exactly:
+        //   - usePlaceholder == false: cancel from the LoadingFrom... event (no consume
+        //     happens), yielding LoadingFrom..., Canceled, Completed.
+        //   - usePlaceholder == true: cancel from the loading-placeholder Consume, which
+        //     runs after the listener has recorded the loading event and its Consume,
+        //     yielding LoadingFrom..., Consumed, Canceled, Consumed, Completed.
+        // The runtime re-checks IsCancelled after the disk read (Future.Loading.cs), so a
+        // cancel raised here reliably wins over the read result.
         static FutureListener<UnityEngine.Sprite> StartLoadSpriteWithPlaceholders(
-            string url, bool usePlaceholder, bool ignoreLoadingWhenLoaded, out FutureSprite future)
+            string url, bool usePlaceholder, bool ignoreLoadingWhenLoaded, out FutureSprite future,
+            FutureLoadingFrom? cancelAtLoadingFrom = null)
         {
             future = new FutureSprite(url);
             var listener = future.ToFutureListener(ignoreLoadingWhenLoaded: ignoreLoadingWhenLoaded, ignorePlaceholder: !usePlaceholder);
@@ -31,6 +49,42 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
                 future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.LoadingFromSource], PlaceholderTrigger.LoadingFromSource);
                 future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.FailedToLoad], PlaceholderTrigger.FailedToLoad);
                 future.SetPlaceholder(placeholderSprites[PlaceholderTrigger.Canceled], PlaceholderTrigger.Canceled);
+            }
+
+            if (cancelAtLoadingFrom.HasValue)
+            {
+                var self = future;
+                var loadingPlaceholderStatus = cancelAtLoadingFrom.Value == FutureLoadingFrom.Source
+                    ? FutureStatus.LoadingFromSource
+                    : FutureStatus.LoadingFromDiskCache;
+                var armed = true;
+                if (usePlaceholder)
+                {
+                    // Cancel from the loading-placeholder consume (runs after the loading
+                    // event + its consume have been recorded, while still in the loading
+                    // state) so the consume/cancel order matches the expected sequence.
+                    future.Consume(value =>
+                    {
+                        if (armed && self.Status == loadingPlaceholderStatus)
+                        {
+                            armed = false;
+                            self.Cancel();
+                        }
+                    });
+                }
+                else
+                {
+                    void CancelOnce()
+                    {
+                        if (!armed) return;
+                        armed = false;
+                        self.Cancel();
+                    }
+                    if (cancelAtLoadingFrom.Value == FutureLoadingFrom.Source)
+                        future.LoadingFromSource(CancelOnce);
+                    else
+                        future.LoadingFromDiskCache(CancelOnce);
+                }
             }
 
             future.StartLoading();
@@ -153,7 +207,16 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         }
         public static IEnumerator LoadAndCancel(string url, FutureLoadingFrom? expectedLoadingFrom, bool useGC, bool usePlaceholder = false)
         {
-            var futureListener = StartLoadSpriteWithPlaceholders(url, usePlaceholder, ignoreLoadingWhenLoaded: false, out var future);
+            // For a load from disk cache the read can complete synchronously inside
+            // StartLoading() and beat the explicit Cancel() below, so cancel at the
+            // loading transition instead (see StartLoadSpriteWithPlaceholders). The
+            // explicit Cancel() further down then becomes a harmless no-op. Source loads
+            // go through UnityWebRequest (never synchronous) and memory-cache loads are
+            // not a cancel-while-loading scenario, so neither needs this.
+            var cancelAtLoadingFrom = expectedLoadingFrom.HasValue && expectedLoadingFrom.Value == FutureLoadingFrom.DiskCache
+                ? expectedLoadingFrom
+                : null;
+            var futureListener = StartLoadSpriteWithPlaceholders(url, usePlaceholder, ignoreLoadingWhenLoaded: false, out var future, cancelAtLoadingFrom);
             var shouldLoadFromMemoryCache = !expectedLoadingFrom.HasValue;
 
             futureListener.Assert_Events_Contains(expectedLoadingFrom.HasValue
