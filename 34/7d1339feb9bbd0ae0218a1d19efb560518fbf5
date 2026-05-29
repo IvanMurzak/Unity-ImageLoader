@@ -1,0 +1,21 @@
+Unity-Package/Assets/root/Tests/Base/Utils/TestUtils.Load.cs
+  s_3a6741ccefd0b1::t_3de5bafbcd61c4 23-38,40-41,54-87
+  s_3a6741ccefd0b1::t_4ebc56b30d27dd 210-219
+  s_3a6741ccefd0b1::t_fb8b1e978c7826 22,88-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "347d1339feb9bbd0ae0218a1d19efb560518fbf5",
+  "prompts": {},
+  "sessions": {
+    "s_3a6741ccefd0b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e328eeab-366c-4232-8c94-bc1448657629",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
