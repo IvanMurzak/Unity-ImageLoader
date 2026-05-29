@@ -24,10 +24,29 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         }
 
         readonly Dictionary<string, string> successUrlToImageId = new Dictionary<string, string>();
+        // URLs routed to the deterministically held route. The request reaches the
+        // server and stays in-flight until the test releases the matching id, which is
+        // what makes "cancel-while-loading" scenarios deterministic.
+        readonly Dictionary<string, string> heldUrlToImageId = new Dictionary<string, string>();
 
-        public void Reset() => successUrlToImageId.Clear();
+        public void Reset()
+        {
+            successUrlToImageId.Clear();
+            heldUrlToImageId.Clear();
+        }
 
         public void RegisterSuccess(string url, string imageId) => successUrlToImageId[url] = imageId;
+
+        /// <summary>
+        /// Routes <paramref name="url"/> to the server's held route (<c>/hold/{imageId}</c>).
+        /// The server must have the id armed via <see cref="TestHttpServer.HoldImage"/> and
+        /// the test must release it via <see cref="TestHttpServer.ReleaseHeld"/>. While held,
+        /// a load of this URL stays in the LoadingFromSource state. Call <see cref="UnregisterHeld"/>
+        /// (or <see cref="Reset"/>) to restore the normal fast/slow routing.
+        /// </summary>
+        public void RegisterHeld(string url, string imageId) => heldUrlToImageId[url] = imageId;
+
+        public void UnregisterHeld(string url) => heldUrlToImageId.Remove(url);
 
         public UnityWebRequest CreateTextureRequest(string url)
             => UnityWebRequestTexture.GetTexture(ResolveUrl(url));
@@ -38,6 +57,8 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         string ResolveUrl(string url)
         {
             var baseUrl = TestHttpServer.Instance.BaseUrl;
+            if (heldUrlToImageId.TryGetValue(url, out var heldId))
+                return $"{baseUrl}/hold/{heldId}";
             return successUrlToImageId.TryGetValue(url, out var id)
                 ? $"{baseUrl}/img/{id}"
                 : $"{baseUrl}/slow";

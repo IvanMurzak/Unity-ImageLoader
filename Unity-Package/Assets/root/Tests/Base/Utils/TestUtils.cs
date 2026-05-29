@@ -116,6 +116,9 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static void EnableMockProvider()
         {
             TestHttpServer.Instance.EnsureStarted();
+            // Safety net: release any gate left armed by a previous (possibly failed)
+            // test so no server worker stays parked across tests.
+            TestHttpServer.Instance.ReleaseAllHeld();
 
             if (mockPngCache == null)
             {
@@ -140,6 +143,43 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static void DisableMockProvider()
         {
             ImageLoader.settings.webRequestProvider = new DefaultWebRequestProvider();
+        }
+
+        // Maps a registered image URL to its server-side image id (the index used by
+        // EnableMockProvider). Mirrors the registration in EnableMockProvider.
+        static string ImageIdForUrl(string url)
+        {
+            for (int i = 0; i < ImageURLs.Length; i++)
+                if (ImageURLs[i] == url)
+                    return i.ToString();
+            throw new ArgumentException($"URL is not a registered test image: {url}", nameof(url));
+        }
+
+        /// <summary>
+        /// Makes loading <paramref name="url"/> deterministically *hold* in-flight: the
+        /// request reaches the in-process server and parks there, so any Future loading
+        /// this URL stays in the LoadingFromSource state until <see cref="ReleaseHeld"/>
+        /// is called. This replaces racing the clock to catch a fast local load while it
+        /// is still running. Must be paired with <see cref="ReleaseHeld"/>.
+        /// </summary>
+        public static void BeginHold(string url)
+        {
+            var id = ImageIdForUrl(url);
+            TestHttpServer.Instance.EnsureStarted();
+            TestHttpServer.Instance.HoldImage(id);
+            MockWebRequestProvider.Instance.RegisterHeld(url, id);
+        }
+
+        /// <summary>
+        /// Releases a hold started by <see cref="BeginHold"/>: the parked server response
+        /// is sent and the URL is routed back to the normal fast route. Safe to call even
+        /// if nothing is held.
+        /// </summary>
+        public static void ReleaseHeld(string url)
+        {
+            var id = ImageIdForUrl(url);
+            TestHttpServer.Instance.ReleaseHeld(id);
+            MockWebRequestProvider.Instance.UnregisterHeld(url);
         }
     }
 }
