@@ -1,0 +1,41 @@
+Unity-Package/Assets/Resources.meta
+  s_390d331493c150::t_5cc525e7686831 1-8
+Unity-Package/Assets/Resources/Unity-MCP-ConnectionConfig.json
+  s_390d331493c150::t_6dca7ea3c7af57 1-7
+Unity-Package/Assets/Resources/Unity-MCP-ConnectionConfig.json.meta
+  s_390d331493c150::t_674e1eb0ca6f9b 1-7
+Unity-Package/Assets/root/Runtime/Utils/DefaultWebRequestProvider.cs
+  s_390d331493c150::t_217a1b3d738a33 1-21
+Unity-Package/Assets/root/Runtime/Utils/DefaultWebRequestProvider.cs.meta
+  s_390d331493c150::t_b05a292ddc3f6b 1-11
+Unity-Package/Assets/root/Runtime/Utils/IWebRequestProvider.cs
+  s_390d331493c150::t_afad3ceed3909e 1-25
+Unity-Package/Assets/root/Runtime/Utils/IWebRequestProvider.cs.meta
+  s_390d331493c150::t_749de980a385e4 1-11
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequest.cs
+  s_390d331493c150::t_6924e71ee78b4d 1-202
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequest.cs.meta
+  s_390d331493c150::t_becea4a1e87ed5 1-11
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequestProvider.cs
+  s_390d331493c150::t_53e62a3ed31ae7 1-101
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequestProvider.cs.meta
+  s_390d331493c150::t_b3df08851017e3 1-11
+Unity-Package/ProjectSettings/SceneTemplateSettings.json
+  s_390d331493c150::t_3d3004fa79ed6e 1-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1d79a05767917a9388a3d346662cf5597e9a52d4",
+  "prompts": {},
+  "sessions": {
+    "s_390d331493c150": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-afb1442401a3cd8f8",
+        "model": "unknown"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
