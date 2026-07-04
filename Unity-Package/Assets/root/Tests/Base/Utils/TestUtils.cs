@@ -12,13 +12,21 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
     {
         public static readonly string[] ImageURLs =
         {
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/docs/img/test/ImageA.jpg",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/docs/img/test/ImageB.png",
-            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/docs/img/test/ImageC.png"
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/Test%20Images/ImageA.jpg",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/Test%20Images/ImageB.png",
+            "https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/Test%20Images/ImageC.png"
         };
         public static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
         public static IEnumerable<string> IncorrectImageURLs(int count = 3) => Enumerable.Range(0, count).Select(_ => IncorrectImageURL);
         public static readonly byte[] CorruptedTextureBytes = new byte[] { 0 };
+
+        // Mock URLs for testing - these don't require network access
+        public static readonly string[] MockImageURLs =
+        {
+            "mock://test-image-a.jpg",
+            "mock://test-image-b.png",
+            "mock://test-image-c.png"
+        };
 
         public static readonly Dictionary<PlaceholderTrigger, Sprite> placeholderSprites = new Dictionary<PlaceholderTrigger, Sprite>
         {
@@ -36,6 +44,10 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             LogAssert.ignoreFailingMessages = true; // compilation error in player build
 
             UniTaskScheduler.UnobservedExceptionWriteLogType = LogType.Exception;
+
+            // Enable mock provider for tests
+            EnableMockProvider();
+
             ImageLoader.ClearSpriteRef();
             ImageLoader.ClearTextureRef();
             yield return ImageLoader.ClearCacheAll().TimeoutCoroutine(TimeSpan.FromSeconds(10));
@@ -64,6 +76,39 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
             test();
+        }
+
+        public static Texture2D CreateTestTexture(int width = 64, int height = 64, Color? color = null)
+        {
+            var testColor = color ?? Color.green;
+            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            var pixels = new Color[width * height];
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = testColor;
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return texture;
+        }
+
+        public static void EnableMockProvider()
+        {
+            MockWebRequestProvider.Instance.Reset();
+            ImageLoader.settings.webRequestProvider = MockWebRequestProvider.Instance;
+        }
+
+        public static void DisableMockProvider()
+        {
+            ImageLoader.settings.webRequestProvider = new DefaultWebRequestProvider();
+        }
+
+        public static void SetupMockResponse(string url, MockResponse response)
+        {
+            MockWebRequestProvider.Instance.SetResponse(url, response);
+        }
+
+        public static void SetupDefaultMockResponse(MockResponse response)
+        {
+            MockWebRequestProvider.Instance.SetDefaultResponse(response);
         }
     }
 }

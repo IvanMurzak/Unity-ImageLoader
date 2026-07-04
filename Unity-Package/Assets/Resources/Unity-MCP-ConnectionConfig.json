@@ -1,0 +1,7 @@
+{
+  "Host": "http://localhost:8080",
+  "Port": 8080,
+  "KeepConnected": false,
+  "LogLevel": 3,
+  "TimeoutMs": 10000
+}

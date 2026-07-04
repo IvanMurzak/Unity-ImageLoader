@@ -40,6 +40,12 @@ namespace Extensions.Unity.ImageLoader
         /// Default value is 30 seconds
         /// </summary>
         public TimeSpan timeout = TimeSpan.FromSeconds(30);
+
+        /// <summary>
+        /// Web request provider for dependency injection
+        /// Allows for mocking during tests
+        /// </summary>
+        public IWebRequestProvider webRequestProvider { get; set; } = new DefaultWebRequestProvider();
     }
 
     public enum DebugLevel
