@@ -41,6 +41,7 @@ namespace Extensions.Unity.ImageLoader.Tests
         [UnityTest] public IEnumerator DisposeOnOutOfScope_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScope);
         [UnityTest] public IEnumerator DisposeOnOutOfScope()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -54,14 +55,13 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             } // end of scope
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => Reference<Sprite>.Counter(url) == 0);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator DisposeOnOutOfScope2()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -78,15 +78,14 @@ namespace Extensions.Unity.ImageLoader.Tests
             futureRef = null;
             reference = null;
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => Reference<Sprite>.Counter(url) == 0);
             Assert.AreEqual(0, Reference<Sprite>.Counter(url));
         }
 
         [UnityTest] public IEnumerator DisposeOnOutOfScopeAll_NoLogs() => TestUtils.RunNoLogs(DisposeOnOutOfScopeAll);
         [UnityTest] public IEnumerator DisposeOnOutOfScopeAll()
         {
+            TestUtils.SkipIfHeadless();
             ImageLoader.settings.useDiskCache = true;
             ImageLoader.settings.useMemoryCache = true;
 
@@ -103,9 +102,7 @@ namespace Extensions.Unity.ImageLoader.Tests
                 Assert.AreEqual(1, Reference<Sprite>.Counter(url));
             }
 
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
-            yield return TestUtils.WaitForGC();
+            yield return TestUtils.WaitForGCUntil(() => TestUtils.ImageURLs.All(u => Reference<Sprite>.Counter(u) == 0));
 
             foreach (var url in TestUtils.ImageURLs)
                 Assert.AreEqual(0, Reference<Sprite>.Counter(url));

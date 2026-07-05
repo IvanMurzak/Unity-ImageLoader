@@ -23,8 +23,16 @@ namespace Extensions.Unity.ImageLoader.Tests
 
             foreach (var url in TestUtils.ImageURLs)
             {
+                // Hold the source load in-flight so the outer future stays in the
+                // LoadingFromSource state for the whole LoadAndCancel sequence. Without
+                // this, the fast in-process load can complete and populate the memory
+                // cache before the inner future is cancelled, so the inner future would
+                // observe LoadedFromMemoryCache instead of the LoadingFromSource cancel
+                // path under test — the source of the historical flake.
+                TestUtils.BeginHold(url);
                 var future = ImageLoader.LoadSprite(url);
                 yield return TestUtils.LoadAndCancel(url, FutureLoadingFrom.Source);
+                TestUtils.ReleaseHeld(url);
                 future.Dispose();
             }
 

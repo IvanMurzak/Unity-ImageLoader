@@ -1,16 +1,16 @@
 # [Unity Image Loader](https://github.com/IvanMurzak/Unity-ImageLoader)
 
 [![OpenUPM](https://img.shields.io/npm/v/extensions.unity.imageloader?label=OpenUPM&registry_uri=https://package.openupm.com&labelColor=333A41 'OpenUPM package')](https://openupm.com/packages/extensions.unity.imageloader/)
-[![Unity Asset Store](https://img.shields.io/badge/Asset%20Store-View-blue?logo=unity&labelColor=333A41 'Asset Store')](https://u3d.as/3DTj)
-[![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Editor supported')](https://unity.com/releases/editor/archive)
-[![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=49BC5C 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
+[![Unity Editor](https://img.shields.io/badge/Editor-X?style=flat&logo=unity&labelColor=333A41&color=2A2A2A 'Unity Editor supported')](https://unity.com/releases/editor/archive)
+[![Unity Runtime](https://img.shields.io/badge/Runtime-X?style=flat&logo=unity&labelColor=333A41&color=2A2A2A 'Unity Runtime supported')](https://unity.com/releases/editor/archive)
 [![r](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg 'Tests Passed')](https://github.com/IvanMurzak/Unity-ImageLoader/actions/workflows/release.yml)
 
+[![Downloads](https://img.shields.io/badge/dynamic/json?labelColor=333A41&label=Downloads&query=%24.downloads&suffix=%2Fmonth&url=https%3A%2F%2Fpackage.openupm.com%2Fdownloads%2Fpoint%2Flast-month%2Fextensions.unity.imageloader)](https://openupm.com/packages/extensions.unity.imageloader/)
 [![Stars](https://img.shields.io/github/stars/IvanMurzak/Unity-ImageLoader 'Stars')](https://github.com/IvanMurzak/Unity-ImageLoader/stargazers)
-[![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/IvanMurzak/Unity-ImageLoader?label=License&labelColor=333A41)](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/LICENSE)
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-![Image Loader Animation](https://github.com/IvanMurzak/Unity-ImageLoader/raw/main/docs/img/header.gif 'Image Loading Animation')
+![Image Loader Animation](https://github.com/IvanMurzak/Unity-ImageLoader/blob/main/docs/img/header.gif?raw=true 'Image Loading Animation')
 
 Async image loader with two caching layers for Unity. It supports loading images from web or local paths and provides memory and disk caching to optimize performance. The package includes features for automatic image setting, cancellation handling, error handling, and lifecycle management.
 
@@ -52,23 +52,10 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 - ✔️ Debug level for logging `ImageLoader.settings.debugLevel = DebugLevel.Error;`
 - ✔️ Debug level per each task `ImageLoader.LoadSprite(imageURL).SetLogLevel(DebugLevel.Trace);`
 
-### Stability status
-
-| Unity Version | Editor test | Player test | Build test |
-|---------------|-------------|-------------|------------|
-| 2019.4.40f1   | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-editmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-playmode) | ![2019.4.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2019-4-40f1-standalone) |
-| 2020.3.40f1   | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-editmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-playmode) | ![2020.3.40f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2020-3-40f1-standalone) |
-| 2021.3.45f1   | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-editmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-playmode) | ![2021.3.45f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2021-3-45f1-standalone) |
-| 2022.3.57f1   | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-editmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-playmode) | ![2022.3.57f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2022-3-57f1-standalone) |
-| 2023.1.20f1   | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-editmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-playmode) | ![2023.1.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-1-20f1-standalone) |
-| 2023.2.20f1   | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-editmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-playmode) | ![2023.2.20f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-2023-2-20f1-standalone) |
-| 6000.0.37f1   | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-editmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-playmode) | ![6000.0.37f1](https://github.com/IvanMurzak/Unity-ImageLoader/workflows/release/badge.svg?job=test-unity-6000-0-37f1-standalone) |
-
 ## Content
 
 - [Unity Image Loader](#unity-image-loader)
   - [Features](#features)
-    - [Stability status](#stability-status)
   - [Content](#content)
   - [Installation](#installation)
     - [Option 1 - Installer](#option-1---installer)
@@ -119,7 +106,7 @@ await ImageLoader.LoadSprite(imageURL).Consume(image);
 
 ### Option 1 - Installer
 
-- **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/download/4.1.3/ImageLoader-Installer.unitypackage)**
+- **[⬇️ Download Installer](https://github.com/IvanMurzak/Unity-ImageLoader/releases/latest/download/ImageLoader-Installer.unitypackage)**
 - **📂 Import installer into Unity project**
   > - You may use double click on the file - Unity will open it
   > - OR: You may open Unity Editor first, then click on `Assets/Import Package/Custom Package`, then choose the file

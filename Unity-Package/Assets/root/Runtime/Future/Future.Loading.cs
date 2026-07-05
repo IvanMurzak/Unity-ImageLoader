@@ -201,7 +201,11 @@ namespace Extensions.Unity.ImageLoader
             if (UseDiskCache)
                 await SaveDiskAsync(WebRequest.downloadHandler.data);
 
-            if (IsCancelled || Status == FutureStatus.FailedToLoad)
+            // The Future can be disposed concurrently during the awaits above (e.g. a
+            // sibling future loading the same URL is cancelled), which nulls WebRequest.
+            // Guard against parsing a disposed request — otherwise DownloadHandler*.GetContent
+            // throws "Cannot get content from a null UnityWebRequest object". Treat it as cancelled.
+            if (IsCancelled || Status == FutureStatus.FailedToLoad || WebRequest == null)
             {
                 RemoveLoading(); // LOADING REMOVED
                 return;

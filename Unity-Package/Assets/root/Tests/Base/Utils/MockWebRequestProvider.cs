@@ -1,101 +1,67 @@
-using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
     /// <summary>
-    /// Mock implementation of IWebRequestProvider for testing
-    /// Provides controllable responses without actual network requests
+    /// Test <see cref="IWebRequestProvider"/> that routes every request to the
+    /// in-process <see cref="TestHttpServer"/> on 127.0.0.1 instead of the public
+    /// internet. Registered URLs resolve to a fast, deterministic local image; any
+    /// other URL (e.g. the random doesntexist.com URLs used by failing tests)
+    /// resolves to the server's slow route so the client-side Future timeout fires
+    /// predictably.
     /// </summary>
     public class MockWebRequestProvider : IWebRequestProvider
     {
-        private static MockWebRequestProvider instance;
-        public static MockWebRequestProvider Instance => instance ??= new MockWebRequestProvider();
+        static MockWebRequestProvider instance;
+        public static MockWebRequestProvider Instance
+        {
+            get
+            {
+                if (instance == null) instance = new MockWebRequestProvider();
+                return instance;
+            }
+        }
 
-        private readonly Dictionary<string, MockResponse> responses = new Dictionary<string, MockResponse>();
-        private MockResponse defaultResponse = MockResponse.CreateSuccess(TestUtils.CreateTestTexture());
+        readonly Dictionary<string, string> successUrlToImageId = new Dictionary<string, string>();
+        // URLs routed to the deterministically held route. The request reaches the
+        // server and stays in-flight until the test releases the matching id, which is
+        // what makes "cancel-while-loading" scenarios deterministic.
+        readonly Dictionary<string, string> heldUrlToImageId = new Dictionary<string, string>();
 
         public void Reset()
         {
-            responses.Clear();
-            defaultResponse = MockResponse.CreateSuccess(TestUtils.CreateTestTexture());
+            successUrlToImageId.Clear();
+            heldUrlToImageId.Clear();
         }
 
-        public void SetDefaultResponse(MockResponse response)
-        {
-            defaultResponse = response;
-        }
+        public void RegisterSuccess(string url, string imageId) => successUrlToImageId[url] = imageId;
 
-        public void SetResponse(string url, MockResponse response)
-        {
-            responses[url] = response;
-        }
+        /// <summary>
+        /// Routes <paramref name="url"/> to the server's held route (<c>/hold/{imageId}</c>).
+        /// The server must have the id armed via <see cref="TestHttpServer.HoldImage"/> and
+        /// the test must release it via <see cref="TestHttpServer.ReleaseHeld"/>. While held,
+        /// a load of this URL stays in the LoadingFromSource state. Call <see cref="UnregisterHeld"/>
+        /// (or <see cref="Reset"/>) to restore the normal fast/slow routing.
+        /// </summary>
+        public void RegisterHeld(string url, string imageId) => heldUrlToImageId[url] = imageId;
+
+        public void UnregisterHeld(string url) => heldUrlToImageId.Remove(url);
 
         public UnityWebRequest CreateTextureRequest(string url)
-        {
-            var response = responses.ContainsKey(url) ? responses[url] : defaultResponse;
-            return new MockWebRequest(url, response, MockWebRequest.RequestType.Texture);
-        }
+            => UnityWebRequestTexture.GetTexture(ResolveUrl(url));
 
         public UnityWebRequest CreateDataRequest(string url)
-        {
-            var response = responses.ContainsKey(url) ? responses[url] : defaultResponse;
-            return new MockWebRequest(url, response, MockWebRequest.RequestType.Data);
-        }
-    }
+            => UnityWebRequest.Get(ResolveUrl(url));
 
-    /// <summary>
-    /// Represents a mock response configuration
-    /// </summary>
-    public class MockResponse
-    {
-        public bool IsSuccess { get; set; }
-        public string Error { get; set; }
-        public byte[] Data { get; set; }
-        public Texture2D Texture { get; set; }
-        public float DelaySeconds { get; set; }
-        public bool ShouldTimeout { get; set; }
-
-        public static MockResponse CreateSuccess(Texture2D texture, float delaySeconds = 0f)
+        string ResolveUrl(string url)
         {
-            return new MockResponse
-            {
-                IsSuccess = true,
-                Texture = texture,
-                Data = texture?.EncodeToPNG() ?? new byte[0],
-                DelaySeconds = delaySeconds
-            };
-        }
-
-        public static MockResponse CreateSuccess(byte[] data, float delaySeconds = 0f)
-        {
-            return new MockResponse
-            {
-                IsSuccess = true,
-                Data = data,
-                DelaySeconds = delaySeconds
-            };
-        }
-
-        public static MockResponse CreateError(string error = "Mock network error", float delaySeconds = 0f)
-        {
-            return new MockResponse
-            {
-                IsSuccess = false,
-                Error = error,
-                DelaySeconds = delaySeconds
-            };
-        }
-
-        public static MockResponse CreateTimeout()
-        {
-            return new MockResponse
-            {
-                ShouldTimeout = true,
-                DelaySeconds = float.MaxValue
-            };
+            var baseUrl = TestHttpServer.Instance.BaseUrl;
+            if (heldUrlToImageId.TryGetValue(url, out var heldId))
+                return $"{baseUrl}/hold/{heldId}";
+            return successUrlToImageId.TryGetValue(url, out var id)
+                ? $"{baseUrl}/img/{id}"
+                : $"{baseUrl}/slow";
         }
     }
 }

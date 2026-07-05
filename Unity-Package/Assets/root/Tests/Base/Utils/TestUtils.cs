@@ -5,6 +5,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
+using NUnit.Framework;
 
 namespace Extensions.Unity.ImageLoader.Tests.Utils
 {
@@ -19,14 +20,6 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
         public static string IncorrectImageURL => $"https://doesntexist.com/{Guid.NewGuid()}.png";
         public static IEnumerable<string> IncorrectImageURLs(int count = 3) => Enumerable.Range(0, count).Select(_ => IncorrectImageURL);
         public static readonly byte[] CorruptedTextureBytes = new byte[] { 0 };
-
-        // Mock URLs for testing - these don't require network access
-        public static readonly string[] MockImageURLs =
-        {
-            "mock://test-image-a.jpg",
-            "mock://test-image-b.png",
-            "mock://test-image-c.png"
-        };
 
         public static readonly Dictionary<PlaceholderTrigger, Sprite> placeholderSprites = new Dictionary<PlaceholderTrigger, Sprite>
         {
@@ -67,6 +60,30 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             WaitForGCFast();
             yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
         }
+        // Polls GC + finalizers until `condition` holds or the timeout elapses.
+        // Reference release is finalizer-driven and non-deterministic (especially on
+        // Mono), so a fixed number of WaitForGC calls is flaky — keep collecting until
+        // the expected state is reached, then let the caller assert.
+        public static IEnumerator WaitForGCUntil(Func<bool> condition, double timeoutSeconds = 10, int millisecondsDelay = 50)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+            WaitForGCFast();
+            while (!condition() && DateTime.UtcNow < deadline)
+            {
+                yield return Wait(TimeSpan.FromMilliseconds(millisecondsDelay));
+                WaitForGCFast();
+            }
+        }
+        // Skips a test when running headless (Unity -batchmode, i.e. CI). Used by tests
+        // that assert finalizer/GC-driven cleanup: reference auto-release on out-of-scope
+        // depends on the GC finalizer, which is non-deterministic under Unity's
+        // conservative (Boehm) collector in headless CI (stale stack/register slots act
+        // as false roots). These still run in the interactive Editor Test Runner.
+        public static void SkipIfHeadless()
+        {
+            if (Application.isBatchMode)
+                Assert.Ignore("Skipped in headless CI: finalizer/GC-driven reference cleanup is non-deterministic under Unity's conservative collector. Runs interactively in the Editor Test Runner.");
+        }
         public static IEnumerator RunNoLogs(Func<IEnumerator> test)
         {
             ImageLoader.settings.debugLevel = DebugLevel.Error;
@@ -90,9 +107,36 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             return texture;
         }
 
+        static readonly Color[] mockColors =
+        {
+            Color.green, Color.blue, Color.red, Color.cyan, Color.magenta, Color.yellow
+        };
+        static byte[][] mockPngCache;
+
         public static void EnableMockProvider()
         {
+            TestHttpServer.Instance.EnsureStarted();
+            // Safety net: release any gate left armed by a previous (possibly failed)
+            // test so no server worker stays parked across tests.
+            TestHttpServer.Instance.ReleaseAllHeld();
+
+            if (mockPngCache == null)
+            {
+                mockPngCache = new byte[ImageURLs.Length][];
+                for (int i = 0; i < ImageURLs.Length; i++)
+                {
+                    var texture = CreateTestTexture(64, 64, mockColors[i % mockColors.Length]);
+                    mockPngCache[i] = texture.EncodeToPNG();
+                }
+            }
+
             MockWebRequestProvider.Instance.Reset();
+            for (int i = 0; i < ImageURLs.Length; i++)
+            {
+                var id = i.ToString();
+                TestHttpServer.Instance.RegisterImage(id, mockPngCache[i]);
+                MockWebRequestProvider.Instance.RegisterSuccess(ImageURLs[i], id);
+            }
             ImageLoader.settings.webRequestProvider = MockWebRequestProvider.Instance;
         }
 
@@ -101,14 +145,41 @@ namespace Extensions.Unity.ImageLoader.Tests.Utils
             ImageLoader.settings.webRequestProvider = new DefaultWebRequestProvider();
         }
 
-        public static void SetupMockResponse(string url, MockResponse response)
+        // Maps a registered image URL to its server-side image id (the index used by
+        // EnableMockProvider). Mirrors the registration in EnableMockProvider.
+        static string ImageIdForUrl(string url)
         {
-            MockWebRequestProvider.Instance.SetResponse(url, response);
+            for (int i = 0; i < ImageURLs.Length; i++)
+                if (ImageURLs[i] == url)
+                    return i.ToString();
+            throw new ArgumentException($"URL is not a registered test image: {url}", nameof(url));
         }
 
-        public static void SetupDefaultMockResponse(MockResponse response)
+        /// <summary>
+        /// Makes loading <paramref name="url"/> deterministically *hold* in-flight: the
+        /// request reaches the in-process server and parks there, so any Future loading
+        /// this URL stays in the LoadingFromSource state until <see cref="ReleaseHeld"/>
+        /// is called. This replaces racing the clock to catch a fast local load while it
+        /// is still running. Must be paired with <see cref="ReleaseHeld"/>.
+        /// </summary>
+        public static void BeginHold(string url)
         {
-            MockWebRequestProvider.Instance.SetDefaultResponse(response);
+            var id = ImageIdForUrl(url);
+            TestHttpServer.Instance.EnsureStarted();
+            TestHttpServer.Instance.HoldImage(id);
+            MockWebRequestProvider.Instance.RegisterHeld(url, id);
+        }
+
+        /// <summary>
+        /// Releases a hold started by <see cref="BeginHold"/>: the parked server response
+        /// is sent and the URL is routed back to the normal fast route. Safe to call even
+        /// if nothing is held.
+        /// </summary>
+        public static void ReleaseHeld(string url)
+        {
+            var id = ImageIdForUrl(url);
+            TestHttpServer.Instance.ReleaseHeld(id);
+            MockWebRequestProvider.Instance.UnregisterHeld(url);
         }
     }
 }

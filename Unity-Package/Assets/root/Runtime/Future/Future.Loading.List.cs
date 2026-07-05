@@ -38,7 +38,7 @@ namespace Extensions.Unity.ImageLoader
                 else
                 {
                     if (ImageLoader.settings.debugLevel.IsActive(DebugLevel.Warning))
-                        Debug.LogWarning($"[ImageLoader] Future[id={future.Id}] Wasn't able to remove loading registration, not found in loading tasks\n{url}");
+                        Debug.LogWarning($"[ImageLoader] Future[id={future?.Id}] Wasn't able to remove loading registration, not found in loading tasks\n{url}");
                 }
             }
         }

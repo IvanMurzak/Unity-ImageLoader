@@ -26,7 +26,8 @@
         "org.nuget.com.ivanmurzak",
         "org.nuget.microsoft",
         "org.nuget.system",
-        "org.nuget.r3"
+        "org.nuget.r3",
+        "com.cysharp.unitask"
       ]
     }
   ]
