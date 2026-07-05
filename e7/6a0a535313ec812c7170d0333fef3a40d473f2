@@ -1,0 +1,21 @@
+Unity-Package/Packages/manifest.json
+  s_5abc4528ecc9d5::t_82b41be7dbdc67 16,24,28
+Unity-Package/ProjectSettings/PackageManagerSettings.asset
+  s_5abc4528ecc9d5::t_6fcc6dea49336d 23,34-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e76a0a535313ec812c7170d0333fef3a40d473f2",
+  "prompts": {},
+  "sessions": {
+    "s_5abc4528ecc9d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55a32f52-1a00-43d2-88a5-c0e8ec8662cb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
