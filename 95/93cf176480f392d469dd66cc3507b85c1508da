@@ -1,0 +1,58 @@
+Unity-Package/Assets/root/Tests/Base/Utils/TestHttpServer.cs.meta
+  s_5abc4528ecc9d5::t_45f6c113cadf0d 1-11
+Unity-Package/Assets/root/README.md
+  s_5abc4528ecc9d5::t_45f6c113cadf0d 5-6
+  s_5abc4528ecc9d5::t_1d005404ba2d55 9,11,14,110
+Unity-Package/Assets/root/Tests/Base/Utils/TestUtils.cs
+  s_5abc4528ecc9d5::t_45f6c113cadf0d 8,63-83,86,111,124,131,135,139,151,156
+  s_5abc4528ecc9d5::t_32285e12a415e7 84-85,110,112-115,118-123,125-130,132,134,136-138,148-150,152-155,157-165,167-170,173-178,180-182
+README.md
+  s_5abc4528ecc9d5::t_45f6c113cadf0d 4-5
+  s_5abc4528ecc9d5::t_3263f44a43482d 8,10,13,109
+Unity-Package/Assets/root/Tests/Base/Utils/MockWebRequestProvider.cs
+  s_5abc4528ecc9d5::t_bb74df6d3018c1 7-12,16-17,19-23,26-30,32,34-35,38,40-47,49,51-52,54-55,57,59-64,67
+.github/workflows/release.yml
+  s_5abc4528ecc9d5::t_4e8651c12c3144 58-207,250,263-265,287,292,352,357,417,422,473-477,481,483,485,489-491,512-513,515-516,518-522,524-528,530-537,539,544,547-550,554-555,557-558,560-561,564-565,567-568,570-572,574,577,579
+.github/workflows/test_pull_request.yml
+  s_5abc4528ecc9d5::t_4c9fe59317bef6 39,44,104,109,169,174
+.github/workflows/test_unity_plugin.yml
+  s_5abc4528ecc9d5::t_ab077cdc3963c0 19-25,35-36,38-39,43,46,54,61,68,74,89-90,95,97-98
+"Installer/Assets/com.IvanMurzak/Image Loader Installer/Installer.cs"
+  s_5abc4528ecc9d5::t_382688ef29ccda 18
+"Installer/Assets/com.IvanMurzak/Image Loader Installer/Tests/Files/Correct/correct_manifest.json"
+  s_5abc4528ecc9d5::t_2b0ab3628869af 29-30
+Unity-Package/Assets/root/Runtime/Future/Future.Loading.List.cs
+  s_5abc4528ecc9d5::t_3e2b42e7b89f9c 41
+Unity-Package/Assets/root/Runtime/Future/Future.Loading.cs
+  s_5abc4528ecc9d5::t_427383561f9533 204-208
+Unity-Package/Assets/root/Tests/Base/Utils/TestHttpServer.cs
+  s_5abc4528ecc9d5::t_0a990cba608323 2-6,11-27,29,31-32,34-38,41-49,51-52,54-63,65-71,73-89,91-94,98-102,104-123,125-128,130-136,138-142,146,148-154,156-158,160-166,168,170-190,194,196-204,207,209-210,213,215-217,219-221,223,226-248,252-253,255-263,265,268,272-273,275-280,282-284,286,289
+Unity-Package/Assets/root/Tests/Base/Utils/TestUtils.Load.cs
+  s_5abc4528ecc9d5::t_8962bb8727b5e8 11-41,43-44,54-98,149,210-219
+Unity-Package/Assets/root/Tests/Editor/TestFutureWaitingAnotherFuture.Load.AndCancel.cs
+  s_5abc4528ecc9d5::t_1243dcc08a9124 26-32,35
+Unity-Package/Assets/root/Tests/Editor/TestReference.cs
+  s_5abc4528ecc9d5::t_aa6bc0e822c720 44,58,64,81,88,105
+Unity-Package/Assets/root/Tests/Runtime/TestFutureWaitingAnotherFuture.Load.AndCancel.cs
+  s_5abc4528ecc9d5::t_2ce4b23eb23e0d 26-32,35
+Unity-Package/Assets/root/Tests/Runtime/TestReference.cs
+  s_5abc4528ecc9d5::t_28ada2347d9ca4 44,58,64,81,88,105
+Unity-Package/Assets/root/package.json
+  s_5abc4528ecc9d5::t_b40ba2603c7ab8 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "9593cf176480f392d469dd66cc3507b85c1508da",
+  "prompts": {},
+  "sessions": {
+    "s_5abc4528ecc9d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55a32f52-1a00-43d2-88a5-c0e8ec8662cb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ivan Murzak <Ivan.D.Murzak@gmail.com>"
+    }
+  }
+}
