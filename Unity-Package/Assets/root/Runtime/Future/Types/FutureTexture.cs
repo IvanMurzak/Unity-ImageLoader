@@ -46,7 +46,8 @@ namespace Extensions.Unity.ImageLoader
                 UnityEngine.Object.DestroyImmediate(obj);
                 return;
             }
-            if (obj.IsNull())
+            // Unity's == (used by IsNull) throws off the main thread, e.g. from a Reference finalizer
+            if (ReferenceEquals(obj, null))
                 return;
 
             UniTask.Post(() =>
