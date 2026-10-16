@@ -87,8 +87,8 @@ namespace Extensions.Unity.ImageLoader
             }
 
             // 'sprite.texture' could be called only from main thread
-            // checking sprite.IsNull is enough until we are in main thread
-            if (sprite.IsNull())
+            // Unity's == (used by IsNull) throws off the main thread, e.g. from a Reference finalizer
+            if (ReferenceEquals(sprite, null))
                 return;
 
             UniTask.Post(() =>
